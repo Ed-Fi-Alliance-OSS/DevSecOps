@@ -2,6 +2,8 @@
 
 Ed-Fi organizational tools for supporting code analysis, DevSecOps, etc.
 
+* [.NET Tools](dotnet/README.md)
+
 ## Legal Information
 
 Copyright (c) 2022 Ed-Fi Alliance, LLC and contributors.
