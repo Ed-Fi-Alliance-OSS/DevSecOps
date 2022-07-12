@@ -1,5 +1,11 @@
 # Dotnet DevSecOps tools
 
+## Common
+
+These tools are appropriate in all .NET repositories.
+
+* [Directory.Build.props](common/Directory.Build.props)
+
 ## Open Source
 
 These tools are appropriate only in open source repositories.
