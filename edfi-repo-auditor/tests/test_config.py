@@ -5,16 +5,17 @@
 
 import pytest
 
-from edfi_repo_auditor.config import Configuration, load_configuration
+from edfi_repo_auditor.config import Configuration, load_configuration, DEFAULT_LOG_LEVEL
 
 ORGANIZATION_1 = "Ed-Fi-Alliance-OSS"
 REPOSITORY_1 = "Analytics-Middle-Tier"
 PERSONAL_ACCESS_TOKEN_1 = "asdfasdfasdfasdfasdfas"
+LOG_LEVEL_1 = "error"
 
 ORGANIZATION_2 = "__Ed-Fi-Alliance-OSS"
 REPOSITORY_2 = "__Analytics-Middle-Tier"
 PERSONAL_ACCESS_TOKEN_2 = "__asdfasdfasdfasdfasdfas"
-
+LOG_LEVEL_2 = "debug"
 
 def assert_no_error_reported(capsys):
     out, err = capsys.readouterr()
@@ -50,7 +51,9 @@ def describe_when_loading_configuration() -> None:
                 "-p",
                 PERSONAL_ACCESS_TOKEN_1,
                 "-r",
-                REPOSITORY_1
+                REPOSITORY_1,
+                "-l",
+                LOG_LEVEL_1
             ]
 
             return load_configuration(args_in)
@@ -63,6 +66,9 @@ def describe_when_loading_configuration() -> None:
 
         def config_should_include_the_repository(clear_env, result: Configuration) -> None:
             assert result.repository == REPOSITORY_1
+
+        def config_should_include_the_log_level(clear_env, result: Configuration) -> None:
+            assert result.log_level == LOG_LEVEL_1
 
         def it_should_not_report_any_errors(clear_env, capsys, result: Configuration) -> None:
             assert_no_error_reported(capsys)
@@ -88,6 +94,9 @@ def describe_when_loading_configuration() -> None:
         def config_should_not_include_a_repository(clear_env, result: Configuration) -> None:
             assert result.repository is None
 
+        def config_should_use_the_default_log_level(clear_env, result: Configuration) -> None:
+            assert result.log_level == DEFAULT_LOG_LEVEL
+
         def it_should_not_report_any_errors(clear_env, capsys, result: Configuration) -> None:
             assert_no_error_reported(capsys)
 
@@ -98,6 +107,7 @@ def describe_when_loading_configuration() -> None:
             monkeypatch.setenv("AUDIT_ORGANIZATION", ORGANIZATION_1)
             monkeypatch.setenv("AUDIT_ACCESS_TOKEN", PERSONAL_ACCESS_TOKEN_1)
             monkeypatch.setenv("AUDIT_REPOSITORY", REPOSITORY_1)
+            monkeypatch.setenv("AUDIT_LOG_LEVEL", LOG_LEVEL_1)
 
             return load_configuration([])
 
@@ -109,6 +119,9 @@ def describe_when_loading_configuration() -> None:
 
         def config_should_include_the_repository(clear_env, result: Configuration) -> None:
             assert result.repository == REPOSITORY_1
+
+        def config_should_include_the_log_level(clear_env, result: Configuration) -> None:
+            assert result.log_level == LOG_LEVEL_1
 
         def it_should_not_report_any_errors(clear_env, capsys, result: Configuration) -> None:
             assert_no_error_reported(capsys)
@@ -131,6 +144,9 @@ def describe_when_loading_configuration() -> None:
         def config_should_not_include_a_repository(clear_env, result: Configuration) -> None:
             assert result.repository is None
 
+        def config_should_use_the_default_log_level(clear_env, result: Configuration) -> None:
+            assert result.log_level == DEFAULT_LOG_LEVEL
+
         def it_should_not_report_any_errors(clear_env, capsys, result: Configuration) -> None:
             assert_no_error_reported(capsys)
 
@@ -140,6 +156,7 @@ def describe_when_loading_configuration() -> None:
             monkeypatch.setenv("AUDIT_ORGANIZATION", ORGANIZATION_2)
             monkeypatch.setenv("AUDIT_ACCESS_TOKEN", PERSONAL_ACCESS_TOKEN_2)
             monkeypatch.setenv("AUDIT_REPOSITORY", REPOSITORY_2)
+            monkeypatch.setenv("AUDIT_LOG_LEVEL", LOG_LEVEL_2)
 
             args_in = [
                 "-o",
@@ -147,7 +164,9 @@ def describe_when_loading_configuration() -> None:
                 "-p",
                 PERSONAL_ACCESS_TOKEN_1,
                 "-r",
-                REPOSITORY_1
+                REPOSITORY_1,
+                "-l",
+                LOG_LEVEL_1
             ]
 
             return load_configuration(args_in)
@@ -160,6 +179,9 @@ def describe_when_loading_configuration() -> None:
 
         def config_should_include_the_repository_from_cli(clear_env, result: Configuration) -> None:
             assert result.repository == REPOSITORY_1
+
+        def config_should_include_the_log_level_from_cli(clear_env, result: Configuration) -> None:
+            assert result.log_level == LOG_LEVEL_1
 
         def it_should_not_report_any_errors(clear_env, capsys, result: Configuration) -> None:
             assert_no_error_reported(capsys)

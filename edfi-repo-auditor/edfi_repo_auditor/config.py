@@ -10,6 +10,9 @@ from dotenv import load_dotenv
 from configargparse import ArgParser
 
 
+DEFAULT_LOG_LEVEL = "info"
+
+
 @dataclass
 class Configuration:
     """
@@ -19,6 +22,7 @@ class Configuration:
     organization: str
     personal_access_token: str
     repository: Optional[str]
+    log_level: str
 
 
 def load_configuration(args_in: List[str]) -> Configuration:
@@ -53,10 +57,21 @@ def load_configuration(args_in: List[str]) -> Configuration:
         env_var="AUDIT_REPOSITORY"
     )
 
+    parser.add(  # type: ignore
+        "-l",
+        "--log_level",
+        required=False,
+        default=DEFAULT_LOG_LEVEL,
+        type=str,
+        env_var="AUDIT_LOG_LEVEL",
+        choices=["error", "warning", "info", "debug"]
+    )
+
     parsed = parser.parse_args(args_in)
 
     return Configuration (
         parsed.organization,
         parsed.access_token,
-        parsed.repository
+        parsed.repository,
+        parsed.log_level
     )
