@@ -1,4 +1,4 @@
-# SPDX-License-Identifier: Apache-2.0
+ # SPDX-License-Identifier: Apache-2.0
 # Licensed to the Ed-Fi Alliance under one or more agreements.
 # The Ed-Fi Alliance licenses this file to you under the Apache License, Version 2.0.
 # See the LICENSE and NOTICES files in the project root for more information.
@@ -7,9 +7,9 @@ import pytest
 
 from edfi_repo_auditor.config import Configuration, load_configuration, DEFAULT_LOG_LEVEL
 
-ORGANIZATION_1 = "Ed-Fi-Alliance-OSS"
-REPOSITORY_1 = "Analytics-Middle-Tier"
-PERSONAL_ACCESS_TOKEN_1 = "asdfasdfasdfasdfasdfas"
+ORGANIZATION_1 = "$$Ed-Fi-Alliance-OSS"
+REPOSITORY_1 = "$$Analytics-Middle-Tier"
+PERSONAL_ACCESS_TOKEN_1 = "$$asdfasdfasdfasdfasdfas"
 LOG_LEVEL_1 = "error"
 
 ORGANIZATION_2 = "__Ed-Fi-Alliance-OSS"
@@ -65,7 +65,8 @@ def describe_when_loading_configuration() -> None:
             assert result.personal_access_token == PERSONAL_ACCESS_TOKEN_1
 
         def config_should_include_the_repository(clear_env, result: Configuration) -> None:
-            assert result.repository == REPOSITORY_1
+            assert len(result.repositories) == 1
+            assert result.repositories[0] == REPOSITORY_1
 
         def config_should_include_the_log_level(clear_env, result: Configuration) -> None:
             assert result.log_level == LOG_LEVEL_1
@@ -92,7 +93,7 @@ def describe_when_loading_configuration() -> None:
             assert result.personal_access_token == PERSONAL_ACCESS_TOKEN_1
 
         def config_should_not_include_a_repository(clear_env, result: Configuration) -> None:
-            assert result.repository is None
+            assert len(result.repositories) == 0
 
         def config_should_use_the_default_log_level(clear_env, result: Configuration) -> None:
             assert result.log_level == DEFAULT_LOG_LEVEL
@@ -106,7 +107,7 @@ def describe_when_loading_configuration() -> None:
         def result(monkeypatch) -> Configuration:
             monkeypatch.setenv("AUDIT_ORGANIZATION", ORGANIZATION_1)
             monkeypatch.setenv("AUDIT_ACCESS_TOKEN", PERSONAL_ACCESS_TOKEN_1)
-            monkeypatch.setenv("AUDIT_REPOSITORY", REPOSITORY_1)
+            monkeypatch.setenv("AUDIT_REPOSITORIES", f"[{REPOSITORY_1}]")
             monkeypatch.setenv("AUDIT_LOG_LEVEL", LOG_LEVEL_1)
 
             return load_configuration([])
@@ -118,7 +119,8 @@ def describe_when_loading_configuration() -> None:
             assert result.personal_access_token == PERSONAL_ACCESS_TOKEN_1
 
         def config_should_include_the_repository(clear_env, result: Configuration) -> None:
-            assert result.repository == REPOSITORY_1
+            assert len(result.repositories) == 1
+            assert result.repositories[0] == REPOSITORY_1
 
         def config_should_include_the_log_level(clear_env, result: Configuration) -> None:
             assert result.log_level == LOG_LEVEL_1
@@ -142,7 +144,7 @@ def describe_when_loading_configuration() -> None:
             assert result.personal_access_token == PERSONAL_ACCESS_TOKEN_1
 
         def config_should_not_include_a_repository(clear_env, result: Configuration) -> None:
-            assert result.repository is None
+            assert len(result.repositories) == 0
 
         def config_should_use_the_default_log_level(clear_env, result: Configuration) -> None:
             assert result.log_level == DEFAULT_LOG_LEVEL
@@ -178,7 +180,8 @@ def describe_when_loading_configuration() -> None:
             assert result.personal_access_token == PERSONAL_ACCESS_TOKEN_1
 
         def config_should_include_the_repository_from_cli(clear_env, result: Configuration) -> None:
-            assert result.repository == REPOSITORY_1
+            assert len(result.repositories) == 1
+            assert result.repositories[0] == REPOSITORY_1
 
         def config_should_include_the_log_level_from_cli(clear_env, result: Configuration) -> None:
             assert result.log_level == LOG_LEVEL_1

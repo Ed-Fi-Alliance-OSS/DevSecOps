@@ -4,9 +4,8 @@
 # See the LICENSE and NOTICES files in the project root for more information.
 
 from dataclasses import dataclass
-from typing import Optional, List
+from typing import List
 
-from dotenv import load_dotenv
 from configargparse import ArgParser
 
 
@@ -21,13 +20,11 @@ class Configuration:
 
     organization: str
     personal_access_token: str
-    repository: Optional[str]
+    repositories: List[str]
     log_level: str
 
 
 def load_configuration(args_in: List[str]) -> Configuration:
-
-    load_dotenv()
 
     parser = ArgParser()
     parser.add(  # type: ignore
@@ -50,17 +47,20 @@ def load_configuration(args_in: List[str]) -> Configuration:
 
     parser.add(  # type: ignore
         "-r",
-        "--repository",
+        "--repositories",
         required=False,
-        help="Specific repository to audit",
+        help="Specific repositories to audit",
+        default=[],
         type=str,
-        env_var="AUDIT_REPOSITORY"
+        nargs="+",
+        env_var="AUDIT_REPOSITORIES"
     )
 
     parser.add(  # type: ignore
         "-l",
         "--log_level",
         required=False,
+        help="Log level (default: info)",
         default=DEFAULT_LOG_LEVEL,
         type=str,
         env_var="AUDIT_LOG_LEVEL",
@@ -72,6 +72,6 @@ def load_configuration(args_in: List[str]) -> Configuration:
     return Configuration (
         parsed.organization,
         parsed.access_token,
-        parsed.repository,
+        parsed.repositories,
         parsed.log_level
     )
