@@ -9,7 +9,7 @@ from typing import List
 from configargparse import ArgParser
 
 
-DEFAULT_LOG_LEVEL = "info"
+DEFAULT_LOG_LEVEL = "INFO"
 
 
 @dataclass
@@ -33,7 +33,7 @@ def load_configuration(args_in: List[str]) -> Configuration:
         required=True,
         help="GitHub organization name",
         type=str,
-        env_var="AUDIT_ORGANIZATION"
+        env_var="AUDIT_ORGANIZATION",
     )
 
     parser.add(  # type: ignore
@@ -42,7 +42,7 @@ def load_configuration(args_in: List[str]) -> Configuration:
         required=True,
         help="GitHub personal access token (PAT) with repo read permission",
         type=str,
-        env_var="AUDIT_ACCESS_TOKEN"
+        env_var="AUDIT_ACCESS_TOKEN",
     )
 
     parser.add(  # type: ignore
@@ -53,7 +53,7 @@ def load_configuration(args_in: List[str]) -> Configuration:
         default=[],
         type=str,
         nargs="+",
-        env_var="AUDIT_REPOSITORIES"
+        env_var="AUDIT_REPOSITORIES",
     )
 
     parser.add(  # type: ignore
@@ -64,14 +64,11 @@ def load_configuration(args_in: List[str]) -> Configuration:
         default=DEFAULT_LOG_LEVEL,
         type=str,
         env_var="AUDIT_LOG_LEVEL",
-        choices=["error", "warning", "info", "debug"]
+        choices=["ERROR", "WARNING", "INFO", "DEBUG"],
     )
 
     parsed = parser.parse_args(args_in)
 
-    return Configuration (
-        parsed.organization,
-        parsed.access_token,
-        parsed.repositories,
-        parsed.log_level
+    return Configuration(
+        parsed.organization, parsed.access_token, parsed.repositories, parsed.log_level
     )
