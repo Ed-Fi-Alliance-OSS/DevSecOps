@@ -24,7 +24,7 @@ ORG_TOKEN = "[OWNER]"
 DEPENDABOT_ALERTS_TEMPLATE = """
 {
   repository(name: "[REPOSITORY]", owner: "[OWNER]") {
-    vulnerabilityAlerts(first: 100) {
+    vulnerabilityAlerts(first: 100, states: [OPEN]) {
       nodes {
         createdAt
         dismissedAt
@@ -112,6 +112,7 @@ class GitHubClient:
         query = DEPENDABOT_ALERTS_TEMPLATE.replace(ORG_TOKEN, owner).replace(
             REPO_TOKEN, repository
         )
+
         body = self._execute_graphql(
             f"dependabot alerts for {owner}/{repository}", query
         )
