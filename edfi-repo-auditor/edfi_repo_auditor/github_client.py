@@ -7,6 +7,7 @@ import logging
 from typing import List
 from json import dumps
 
+import base64
 import pandas as pd
 import requests
 from requests import Response
@@ -127,19 +128,28 @@ class GitHubClient:
 
         return len(body["data"]["repository"]["vulnerabilityAlerts"]["nodes"])
 
-    def get_actions(self, owner: str, repository: str):
+    def get_actions(self, owner: str, repository: str) -> dict:
         if len(owner.strip()) == 0:
             raise ValueError("owner cannot be blank")
         if len(repository.strip()) == 0:
             raise ValueError("repository cannot be blank")
 
-        body = self._execute_api_call(
+        actions = self._execute_api_call(
             f"Getting actions for {owner}/{repository}", "GET", f"{API_URL}/repos/{owner}/{repository}/actions/workflows"
         )
 
-        total_actions = body['total_count']
+        return actions
 
-        return total_actions
+    def get_file_content(self, owner: str, repository: str, path: str) -> str:
+        if len(owner.strip()) == 0:
+            raise ValueError("owner cannot be blank")
+        if len(repository.strip()) == 0:
+            raise ValueError("repository cannot be blank")
+        if len(path.strip()) == 0:
+            raise ValueError("path cannot be blank")
 
-
-
+        file_result = self._execute_api_call(
+            f"Getting actions for {owner}/{repository}", "GET", f"{API_URL}/repos/{owner}/{repository}/contents/{path}"
+        )
+        content = base64.b64decode(file_result["content"]).decode('UTF-8')
+        return content
