@@ -13,8 +13,8 @@ from requests import Response
 
 from edfi_repo_auditor.log_helper import http_error
 
-
-GRAPHQL_ENDPOINT = "https://api.github.com/graphql"
+API_URL = "https://api.github.com"
+GRAPHQL_ENDPOINT = f"{API_URL}/graphql"
 
 REPO_TOKEN = "[REPOSITORY]"
 ORG_TOKEN = "[OWNER]"
@@ -67,17 +67,16 @@ class GitHubClient:
             raise ValueError("access_token cannot be blank")
         self.access_token = access_token
 
-    def _execute_graphql(self, description: str, query: str) -> dict:
-        payload = dumps({"query": query, "variables": {}})
-
+    def _execute_api_call(self, description: str, method: str, url: str, payload: str = None) -> dict:
         headers = {
             "Authorization": f"bearer {self.access_token}",
             "Content-Type": "application/json",
         }
 
-        logger.info(f"Querying for {description}")
+        logger.info(f"{description}")
+
         response: Response = requests.request(
-            "POST", GRAPHQL_ENDPOINT, headers=headers, data=payload
+            method, url, headers=headers, data=payload
         )
 
         if response.status_code == requests.codes.ok:
@@ -90,8 +89,17 @@ class GitHubClient:
 
             return body
         else:
-            msg = f"Query for {description}."
+            msg = f"Executing {description}."
             raise http_error(msg, response)
+
+    def _execute_graphql(self, description: str, query: str) -> dict:
+        payload = dumps({"query": query, "variables": {}})
+
+        body = self._execute_api_call(
+            f"Querying for {description}", "POST", f"{GRAPHQL_ENDPOINT}", payload
+        )
+
+        return body
 
     def get_repositories(self, owner: str) -> List[str]:
         if len(owner.strip()) == 0:
@@ -118,3 +126,20 @@ class GitHubClient:
         )
 
         return len(body["data"]["repository"]["vulnerabilityAlerts"]["nodes"])
+
+    def get_actions(self, owner: str, repository: str):
+        if len(owner.strip()) == 0:
+            raise ValueError("owner cannot be blank")
+        if len(repository.strip()) == 0:
+            raise ValueError("repository cannot be blank")
+
+        body = self._execute_api_call(
+            f"Getting actions for {owner}/{repository}", "GET", f"{API_URL}/repos/{owner}/{repository}/actions/workflows"
+        )
+
+        total_actions = body['total_count']
+
+        logger.info(f"{owner}/{repository} has {total_actions} actions")
+
+
+
