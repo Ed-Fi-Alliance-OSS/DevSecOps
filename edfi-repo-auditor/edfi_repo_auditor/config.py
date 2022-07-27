@@ -22,6 +22,7 @@ class Configuration:
     personal_access_token: str
     repositories: List[str]
     log_level: str
+    save_results: bool
 
 
 def load_configuration(args_in: List[str]) -> Configuration:
@@ -67,8 +68,18 @@ def load_configuration(args_in: List[str]) -> Configuration:
         choices=["ERROR", "WARNING", "INFO", "DEBUG"],
     )
 
+    parser.add(  # type: ignore
+        "-s",
+        "--save_results",
+        required=False,
+        help="Save results into file",
+        default=False,
+        type=bool,
+        env_var="AUDIT_FILE_PATH",
+    )
+
     parsed = parser.parse_args(args_in)
 
     return Configuration(
-        parsed.organization, parsed.access_token, parsed.repositories, parsed.log_level
+        parsed.organization, parsed.access_token, parsed.repositories, parsed.log_level, parsed.save_results
     )
