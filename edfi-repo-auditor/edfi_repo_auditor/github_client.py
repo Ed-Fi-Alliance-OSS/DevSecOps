@@ -139,7 +139,7 @@ class GitHubClient:
 
         total_actions = body['total_count']
 
-        logger.info(f"{owner}/{repository} has {total_actions} actions")
+        return total_actions
 
 
 

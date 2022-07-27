@@ -17,8 +17,14 @@ def run_audit(config: Configuration) -> None:
 
     repositories = config.repositories if config.repositories != [] else client.get_repositories(config.organization)
 
+    report = []
     for repo in repositories:
-            alert_count = client.get_dependabot_alert_count(config.organization, repo)
-            logger.info(f"There are {alert_count} Dependabot alerts")
 
-            client.get_actions(config.organization, repo)
+            alert_count = client.get_dependabot_alert_count(config.organization, repo)
+
+            action_count = client.get_actions(config.organization, repo)
+
+            report.append({'repository': repo, 'dependabot alerts': alert_count, 'actions': action_count})
+
+    logger.info(report)
+
