@@ -15,11 +15,10 @@ logger: logging.Logger = logging.getLogger(__name__)
 def run_audit(config: Configuration) -> None:
     client = GitHubClient(config.personal_access_token)
 
-    repositories = client.get_repositories(config.organization)
+    repositories = config.repositories if config.repositories != [] else client.get_repositories(config.organization)
 
     for repo in repositories:
+            alert_count = client.get_dependabot_alert_count(config.organization, repo)
+            logger.info(f"There are {alert_count} Dependabot alerts")
 
-        alert_count = client.get_dependabot_alert_count(config.organization, repo)
-
-        # Temporary
-        logger.info(f"There are {alert_count} Dependabot alerts")
+            client.get_actions(config.organization, repo)
