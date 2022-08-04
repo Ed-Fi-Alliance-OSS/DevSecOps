@@ -90,7 +90,7 @@ class GitHubClient:
 
             return body
         else:
-            msg = f"Executing {description}."
+            msg = f"Query for {description}."
             raise http_error(msg, response)
 
     def _execute_graphql(self, description: str, query: str) -> dict:
@@ -148,8 +148,12 @@ class GitHubClient:
         if len(path.strip()) == 0:
             raise ValueError("path cannot be blank")
 
-        file_result = self._execute_api_call(
-            f"Getting actions for {owner}/{repository}", "GET", f"{API_URL}/repos/{owner}/{repository}/contents/{path}"
-        )
-        content = base64.b64decode(file_result["content"]).decode('UTF-8')
-        return content
+        file_result = None
+        try:
+            file_result = self._execute_api_call(
+                f"Getting actions for {owner}/{repository}", "GET", f"{API_URL}/repos/{owner}/{repository}/contents/{path}"
+            )
+        except RuntimeError:
+            logger.info(f"Unable to get file {path}. Verify that file is available. Skipping")
+
+        return base64.b64decode(file_result["content"]).decode('UTF-8') if file_result else None

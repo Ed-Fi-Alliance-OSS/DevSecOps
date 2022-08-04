@@ -21,28 +21,41 @@ def run_audit(config: Configuration) -> None:
     report = {}
     for repo in repositories:
         alert_count = client.get_dependabot_alert_count(config.organization, repo)
+        logger.debug(f"Got {alert_count} dependabot alerts")
         actions = audit_actions(client, repo, config)
+        logger.debug(f"Actions {actions}")
 
         report[repo] = {'dependabot alerts': alert_count, 'has_actions': actions['has_actions'], 'has_codeql': actions['has_codeql']}
-
-    logger.info(report)
 
     if config.save_results == True:
         json_report = json.dumps(report, indent=4)
 
         with open(f"reports/audit-result.json", "w") as outfile:
             outfile.write(json_report)
+    else:
+        print(report)
 
 def audit_actions(client: GitHubClient, repository: str, config: Configuration) -> dict:
     actions = client.get_actions(config.organization, repository)
 
+    logger.debug(f"Got {actions['total_count']} workflow files")
+
+    results = { 'has_actions': actions['total_count'] > 0 }
     workflow_paths = [actions['workflows']['path'] for actions['workflows'] in actions['workflows']]
+
     found_codeql = False
-    for file_path in workflow_paths:
+    for file_path in workflow_paths[0:1]:
+        logger.debug(f"Getting file content for file: {file_path}")
         file_content = client.get_file_content(config.organization, repository, file_path)
+        if not file_content:
+            break
+
         found_codeql = "uses: github/codeql-action/analyze" in file_content
+
         if found_codeql:
             break
 
-    return { 'has_actions': actions['total_count'] > 0, 'has_codeql': found_codeql }
+    results['has_codeql'] = found_codeql
+
+    return results
 
