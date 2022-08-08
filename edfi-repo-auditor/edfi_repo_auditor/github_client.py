@@ -74,7 +74,7 @@ class GitHubClient:
             "Content-Type": "application/json",
         }
 
-        logger.info(f"{description}")
+        logger.debug(f"{description}")
 
         response: Response = requests.request(
             method, url, headers=headers, data=payload
@@ -151,9 +151,9 @@ class GitHubClient:
         file_result = None
         try:
             file_result = self._execute_api_call(
-                f"Getting actions for {owner}/{repository}", "GET", f"{API_URL}/repos/{owner}/{repository}/contents/{path}"
+                f"Getting file {path} for {owner}/{repository}", "GET", f"{API_URL}/repos/{owner}/{repository}/contents/{path}"
             )
         except RuntimeError:
-            logger.info(f"Unable to get file {path}. Verify that file is available. Skipping")
+            logger.warn(f"Unable to get file {path}. Verify that the file is available. Skipping")
 
         return base64.b64decode(file_result["content"]).decode('UTF-8') if file_result else None
