@@ -59,6 +59,22 @@ REPOSITORIES_TEMPLATE = """
 }
 """.strip()
 
+PROTECTION_RULES_TEMPLATE = """
+{
+  repository(name: "[REPOSITORY]", owner: "[OWNER]") {
+    branchProtectionRules(first: 10) {
+      nodes {
+        pattern
+        requiresCommitSignatures
+        isAdminEnforced
+        requiresApprovingReviews
+      }
+    }
+	}
+}
+
+""".strip()
+
 logger: logging.Logger = logging.getLogger(__name__)
 
 
@@ -139,6 +155,22 @@ class GitHubClient:
         )
 
         return actions
+
+    def get_protection_rules(self, owner: str, repository: str) -> dict:
+        if len(owner.strip()) == 0:
+            raise ValueError("owner cannot be blank")
+        if len(repository.strip()) == 0:
+            raise ValueError("repository cannot be blank")
+
+        query = PROTECTION_RULES_TEMPLATE.replace(ORG_TOKEN, owner).replace(
+            REPO_TOKEN, repository
+        )
+
+        body = self._execute_graphql(
+            f"protection rules for {owner}/{repository}", query
+        )
+
+        return body["data"]["repository"]["branchProtectionRules"]["nodes"]
 
     def get_file_content(self, owner: str, repository: str, path: str) -> str:
         if len(owner.strip()) == 0:
