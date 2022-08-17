@@ -6,7 +6,6 @@
 import json
 import logging
 import time
-import pandas as pd
 
 from edfi_repo_auditor.config import Configuration
 from edfi_repo_auditor.github_client import GitHubClient
@@ -32,11 +31,13 @@ def run_audit(config: Configuration) -> None:
         logger.debug(f"Branch protection {branch_protection}")
         actions = audit_actions(client, repo, config.organization)
         logger.debug(f"Actions {actions}")
+        file_review = review_files(client, repo, config.organization)
+        logger.debug(f"Files: {file_review}")
 
         if actions:
             actions['Dependabot alerts'] = alert_count
 
-        report[repo] = actions | branch_protection
+        report[repo] = actions | branch_protection | file_review
 
     if config.save_results == True:
         json_report = json.dumps(report, indent=4)
@@ -102,4 +103,17 @@ def get_branch_protection_info(client: GitHubClient, repository: str, organizati
         "Requires PR": (rules["requiresApprovingReviews"] and rules["isAdminEnforced"]) if rules else False
     }
 
+def review_files(client: GitHubClient, repository: str, organization: str) -> dict:
+    files = {
+        "README.md": False,
+        "CONTRIBUTORS.md": False,
+        "NOTICES.md": False,
+        "LICENSE": False
+    }
 
+    for file in files:
+        file_content = client.get_file_content(organization, repository, file)
+        if file_content:
+            files[file] = True
+
+    return files
