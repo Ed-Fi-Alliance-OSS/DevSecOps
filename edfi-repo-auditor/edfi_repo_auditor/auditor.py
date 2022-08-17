@@ -23,18 +23,12 @@ def run_audit(config: Configuration) -> None:
 
     report = {}
     for repo in repositories:
-        # Currently,this is only checking if there are alerts, which does not differentiates if dependabot is enabled or not
-        alert_count = get_dependabot_alerts(client, repo, config.organization)
-        logger.debug(f"Got {alert_count} dependabot alerts")
         repo_config = get_repo_configuration(client, repo, config.organization)
         logger.debug(f"Repo configuration: {repo_config}")
         actions = audit_actions(client, repo, config.organization)
         logger.debug(f"Actions {actions}")
         file_review = review_files(client, repo, config.organization)
         logger.debug(f"Files: {file_review}")
-
-        if actions:
-            actions['Dependabot alerts'] = alert_count
 
         report[repo] = actions | file_review | repo_config
 
@@ -48,19 +42,6 @@ def run_audit(config: Configuration) -> None:
         print(report)
 
     logger.info(f"Finished auditing repositories for {config.organization} in {'{:.2f}'.format(time.time() - start)} seconds")
-
-
-def get_dependabot_alerts(client: GitHubClient, repository: str, organization: str):
-    all_alerts = client.get_dependabot_alerts(organization, repository)
-
-    max_date = (datetime.now() - timedelta(3 * 7)).isoformat()
-    vulnerabilities = ['CRITICAL', 'HIGH']
-
-    alerts = [all_alerts for all_alerts in all_alerts
-              if (all_alerts["createdAt"] < max_date and
-                  all_alerts["securityVulnerability"]["advisory"]["severity"] in vulnerabilities)]
-
-    return len(alerts)
 
 
 def audit_actions(client: GitHubClient, repository: str, organization: str) -> dict:
@@ -95,8 +76,12 @@ def audit_actions(client: GitHubClient, repository: str, organization: str) -> d
 def get_repo_configuration(client: GitHubClient, repository: str, organization: str) -> dict:
     configuration = client.get_repository_configuration(organization, repository)
 
-    allRules = configuration["branchProtectionRules"]["nodes"]
-    rulesForMain = [allRules for allRules in allRules if allRules["pattern"] == "main"]
+    # Currently,this is only checking if there are alerts, which does not differentiates if dependabot is enabled or not
+    vulnerabilities = [alerts for alerts in configuration["vulnerabilityAlerts"]["nodes"]
+                       if (alerts["createdAt"] < (datetime.now() - timedelta(3 * 7)).isoformat() and
+                       alerts["securityVulnerability"]["advisory"]["severity"] in ['CRITICAL', 'HIGH'])]
+
+    rulesForMain = [rules for rules in configuration["branchProtectionRules"]["nodes"] if rules["pattern"] == "main"]
     rules = rulesForMain[0] if rulesForMain else None
 
     logger.debug(f"Repository configuration: {configuration}")
@@ -111,7 +96,8 @@ def get_repo_configuration(client: GitHubClient, repository: str, organization: 
         "Has Discussions": configuration["discussions"]["totalCount"] > 0,
         "Deletes head branch": configuration["deleteBranchOnMerge"],
         "Uses Squash Merge": configuration["squashMergeAllowed"],
-        "Has License Information": configuration["licenseInfo"] is not None
+        "Has License Information": configuration["licenseInfo"] is not None,
+        'Dependabot alerts': len(vulnerabilities)
     }
 
 

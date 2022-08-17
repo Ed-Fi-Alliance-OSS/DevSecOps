@@ -21,8 +21,23 @@ REPO_TOKEN = "[REPOSITORY]"
 ORG_TOKEN = "[OWNER]"
 
 # Note that this doesn't handle paging and thus will not be sufficient if there
+# are more than 100 repositories.
+REPOSITORIES_TEMPLATE = """
+{
+  organization(login: "[OWNER]") {
+    id
+    repositories(first: 100) {
+      nodes {
+        name
+      }
+    }
+  }
+}
+""".strip()
+
+# Note that this doesn't handle paging and thus will not be sufficient if there
 # are more than 100 alerts.
-DEPENDABOT_ALERTS_TEMPLATE = """
+REPOSITORY_CONFIGURATION_TEMPLATE = """
 {
   repository(name: "[REPOSITORY]", owner: "[OWNER]") {
     vulnerabilityAlerts(first: 100, states: [OPEN]) {
@@ -38,28 +53,6 @@ DEPENDABOT_ALERTS_TEMPLATE = """
         }
       }
     }
-  }
-}
-""".strip()
-
-# Note that this doesn't handle paging and thus will not be sufficient if there
-# are more than 100 repositories.
-REPOSITORIES_TEMPLATE = """
-{
-  organization(login: "[OWNER]") {
-    id
-    repositories(first: 100) {
-      nodes {
-        name
-      }
-    }
-  }
-}
-""".strip()
-
-REPOSITORY_CONFIGURATION_TEMPLATE = """
-{
-  repository(name: "[REPOSITORY]", owner: "[OWNER]") {
     branchProtectionRules(first: 10) {
       nodes {
         pattern
@@ -135,22 +128,6 @@ class GitHubClient:
 
         df = pd.DataFrame(body["data"]["organization"]["repositories"]["nodes"])
         return df["name"].to_list()
-
-    def get_dependabot_alerts(self, owner: str, repository: str) -> dict:
-        if len(owner.strip()) == 0:
-            raise ValueError("owner cannot be blank")
-        if len(repository.strip()) == 0:
-            raise ValueError("repository cannot be blank")
-
-        query = DEPENDABOT_ALERTS_TEMPLATE.replace(ORG_TOKEN, owner).replace(
-            REPO_TOKEN, repository
-        )
-
-        body = self._execute_graphql(
-            f"dependabot alerts for {owner}/{repository}", query
-        )
-
-        return body["data"]["repository"]["vulnerabilityAlerts"]["nodes"]
 
     def get_actions(self, owner: str, repository: str) -> dict:
         if len(owner.strip()) == 0:
