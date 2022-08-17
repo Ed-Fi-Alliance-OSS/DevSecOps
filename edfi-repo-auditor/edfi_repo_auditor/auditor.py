@@ -39,27 +39,30 @@ def run_audit(config: Configuration) -> None:
 
         report[repo] = actions | branch_protection | file_review
 
-    if config.save_results == True:
+    if config.save_results is True:
         json_report = json.dumps(report, indent=4)
 
-        with open(f"reports/audit-result.json", "w") as outfile:
+        with open("reports/audit-result.json", "w") as outfile:
             outfile.write(json_report)
     else:
-        #Using print instead of logger to get result in JSON format
+        # Using print instead of logger to get result in JSON format
         print(report)
 
     logger.info(f"Finished auditing repositories for {config.organization} in {'{:.2f}'.format(time.time() - start)} seconds")
 
+
 def get_dependabot_alerts(client: GitHubClient, repository: str, organization: str):
     all_alerts = client.get_dependabot_alerts(organization, repository)
 
-    max_date = datetime.now() - timedelta(3 * 7)
+    max_date = (datetime.now() - timedelta(3 * 7)).isoformat()
+    vulnerabilities = ['CRITICAL', 'HIGH']
 
     alerts = [all_alerts for all_alerts in all_alerts
-            if (all_alerts["createdAt"] < max_date.isoformat() and
-                all_alerts["securityVulnerability"]["advisory"]["severity"] in ('CRITICAL', 'HIGH')) ]
+              if (all_alerts["createdAt"] < max_date and
+                  all_alerts["securityVulnerability"]["advisory"]["severity"] in vulnerabilities)]
 
     return len(alerts)
+
 
 def audit_actions(client: GitHubClient, repository: str, organization: str) -> dict:
     audit_results = {
@@ -89,6 +92,7 @@ def audit_actions(client: GitHubClient, repository: str, organization: str) -> d
 
     return audit_results
 
+
 def get_branch_protection_info(client: GitHubClient, repository: str, organization: str) -> dict:
     allRules = client.get_protection_rules(organization, repository)
 
@@ -102,6 +106,7 @@ def get_branch_protection_info(client: GitHubClient, repository: str, organizati
         "Requires Code review": rules["requiresApprovingReviews"] if rules else False,
         "Requires PR": (rules["requiresApprovingReviews"] and rules["isAdminEnforced"]) if rules else False
     }
+
 
 def review_files(client: GitHubClient, repository: str, organization: str) -> dict:
     files = {

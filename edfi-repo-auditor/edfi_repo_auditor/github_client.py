@@ -68,7 +68,7 @@ PROTECTION_RULES_TEMPLATE = """
         requiresApprovingReviews
       }
     }
-	}
+  }
 }
 
 """.strip()

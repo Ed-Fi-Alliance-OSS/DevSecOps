@@ -67,5 +67,7 @@
             "css", "json", "xml", "config", "plaintext", "markdown", "batch"
         ]
     },
-    "python.formatting.provider": "black"
+    "python.formatting.provider": "black",
+    "python.linting.flake8Enabled": true,
+    "python.linting.enabled": true
 }
