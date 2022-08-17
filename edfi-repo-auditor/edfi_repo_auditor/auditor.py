@@ -6,9 +6,11 @@
 import json
 import logging
 import time
+import pandas as pd
 
 from edfi_repo_auditor.config import Configuration
 from edfi_repo_auditor.github_client import GitHubClient
+from datetime import datetime, timedelta
 
 
 logger: logging.Logger = logging.getLogger(__name__)
@@ -22,11 +24,13 @@ def run_audit(config: Configuration) -> None:
 
     report = {}
     for repo in repositories:
-        alert_count = client.get_dependabot_alert_count(config.organization, repo)
+        # Currently,this is only checking if there are alerts, which does not differentiates if dependabot is enabled or not
+        alert_count = get_dependabot_alerts(client, repo, config.organization)
         logger.debug(f"Got {alert_count} dependabot alerts")
-        branch_protection = get_branch_protection_info(client, repo, config)
+
+        branch_protection = get_branch_protection_info(client, repo, config.organization)
         logger.debug(f"Branch protection {branch_protection}")
-        actions = audit_actions(client, repo, config)
+        actions = audit_actions(client, repo, config.organization)
         logger.debug(f"Actions {actions}")
 
         if actions:
@@ -45,36 +49,47 @@ def run_audit(config: Configuration) -> None:
 
     logger.info(f"Finished auditing repositories for {config.organization} in {'{:.2f}'.format(time.time() - start)} seconds")
 
-def audit_actions(client: GitHubClient, repository: str, config: Configuration) -> dict:
+def get_dependabot_alerts(client: GitHubClient, repository: str, organization: str):
+    all_alerts = client.get_dependabot_alerts(organization, repository)
+
+    max_date = datetime.now() - timedelta(3 * 7)
+
+    alerts = [all_alerts for all_alerts in all_alerts
+            if (all_alerts["createdAt"] < max_date.isoformat() and
+                all_alerts["securityVulnerability"]["advisory"]["severity"] in ('CRITICAL', 'HIGH')) ]
+
+    return len(alerts)
+
+def audit_actions(client: GitHubClient, repository: str, organization: str) -> dict:
     audit_results = {
-        'Actions': False,
-        'CodeQL': False,
-        'Allowed list': False
+        'Has Actions': False,
+        'Uses CodeQL': False,
+        'Uses Allowed list': False
     }
 
-    actions = client.get_actions(config.organization, repository)
+    actions = client.get_actions(organization, repository)
 
     logger.debug(f"Got {actions['total_count']} workflow files")
 
-    audit_results['Actions'] = actions['total_count'] > 0
+    audit_results['Has Actions'] = actions['total_count'] > 0
 
     workflow_paths = [actions['workflows']['path'] for actions['workflows'] in actions['workflows']]
     for file_path in workflow_paths:
-        file_content = client.get_file_content(config.organization, repository, file_path)
+        file_content = client.get_file_content(organization, repository, file_path)
         if not file_content:
             logger.debug("File not found")
             continue
 
-        if not audit_results['CodeQL']:
-            audit_results['CodeQL'] = "uses: github/codeql-action/analyze" in file_content
+        if not audit_results['Uses CodeQL']:
+            audit_results['Uses CodeQL'] = "uses: github/codeql-action/analyze" in file_content
 
-        if not audit_results['Allowed list']:
-            audit_results['Allowed list'] = "uses: ed-fi-alliance-oss/ed-fi-actions/.github/workflows/repository-scanner.yml" in file_content
+        if not audit_results['Uses Allowed list']:
+            audit_results['Uses Allowed list'] = "uses: ed-fi-alliance-oss/ed-fi-actions/.github/workflows/repository-scanner.yml" in file_content
 
     return audit_results
 
-def get_branch_protection_info(client: GitHubClient, repository: str, config: Configuration) -> dict:
-    allRules = client.get_protection_rules(config.organization, repository)
+def get_branch_protection_info(client: GitHubClient, repository: str, organization: str) -> dict:
+    allRules = client.get_protection_rules(organization, repository)
 
     rulesForMain = [allRules for allRules in allRules if allRules["pattern"] == "main"]
     rules = rulesForMain[0] if rulesForMain else None
@@ -82,8 +97,8 @@ def get_branch_protection_info(client: GitHubClient, repository: str, config: Co
     logger.debug(f"Rules for main: {rules}")
 
     return {
-        "Signed commits": rules["requiresCommitSignatures"] if rules else False,
-        "Code review": rules["requiresApprovingReviews"] if rules else False,
+        "Requires Signed commits": rules["requiresCommitSignatures"] if rules else False,
+        "Requires Code review": rules["requiresApprovingReviews"] if rules else False,
         "Requires PR": (rules["requiresApprovingReviews"] and rules["isAdminEnforced"]) if rules else False
     }
 

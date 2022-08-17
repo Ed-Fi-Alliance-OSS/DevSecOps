@@ -28,13 +28,11 @@ DEPENDABOT_ALERTS_TEMPLATE = """
     vulnerabilityAlerts(first: 100, states: [OPEN]) {
       nodes {
         createdAt
-        dismissedAt
         securityVulnerability {
           package {
             name
           }
           advisory {
-            description
             severity
           }
         }
@@ -128,7 +126,7 @@ class GitHubClient:
         df = pd.DataFrame(body["data"]["organization"]["repositories"]["nodes"])
         return df["name"].to_list()
 
-    def get_dependabot_alert_count(self, owner: str, repository: str) -> int:
+    def get_dependabot_alerts(self, owner: str, repository: str) -> dict:
         if len(owner.strip()) == 0:
             raise ValueError("owner cannot be blank")
         if len(repository.strip()) == 0:
@@ -142,7 +140,7 @@ class GitHubClient:
             f"dependabot alerts for {owner}/{repository}", query
         )
 
-        return len(body["data"]["repository"]["vulnerabilityAlerts"]["nodes"])
+        return body["data"]["repository"]["vulnerabilityAlerts"]["nodes"]
 
     def get_actions(self, owner: str, repository: str) -> dict:
         if len(owner.strip()) == 0:
