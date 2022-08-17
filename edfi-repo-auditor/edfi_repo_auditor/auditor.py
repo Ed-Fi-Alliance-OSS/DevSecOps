@@ -3,6 +3,7 @@
 # The Ed-Fi Alliance licenses this file to you under the Apache License, Version 2.0.
 # See the LICENSE and NOTICES files in the project root for more information.
 
+import ast
 import json
 import logging
 import time
@@ -30,7 +31,16 @@ def run_audit(config: Configuration) -> None:
         file_review = review_files(client, repo, config.organization)
         logger.debug(f"Files: {file_review}")
 
-        report[repo] = actions | file_review | repo_config
+        checklist = actions | file_review | repo_config
+        auditing_rules = get_file()
+        score = get_result(checklist, auditing_rules["rules"])
+        logger.debug(f"Rules to follow: {auditing_rules}")
+
+        report[repo] = {
+            "score": score,
+            "result": "OK" if score > auditing_rules["threshold"] else "Action required",
+            "description": checklist
+        }
 
     if config.save_results is True:
         json_report = json.dumps(report, indent=4)
@@ -97,7 +107,7 @@ def get_repo_configuration(client: GitHubClient, repository: str, organization: 
         "Deletes head branch": configuration["deleteBranchOnMerge"],
         "Uses Squash Merge": configuration["squashMergeAllowed"],
         "Has License Information": configuration["licenseInfo"] is not None,
-        'Dependabot alerts': len(vulnerabilities)
+        'Has Dependabot alerts': len(vulnerabilities) > 0
     }
 
 
@@ -115,3 +125,20 @@ def review_files(client: GitHubClient, repository: str, organization: str) -> di
             files[file] = True
 
     return files
+
+
+def get_result(checklist: dict, rules: dict) -> int:
+    score = 0
+    for property in rules:
+        try:
+            if (checklist[property] is True):
+                score += rules[property]
+        except KeyError:
+            logger.error(f"Unable to read property {property} in results")
+
+    return score
+
+
+def get_file() -> dict:
+    with open("scoring.json", "r") as file:
+        return ast.literal_eval(file.read())

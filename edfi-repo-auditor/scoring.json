@@ -1,0 +1,23 @@
+{
+    "threshold": 20,
+    "rules": {
+        "Has Actions": 5,
+        "Uses CodeQL": 5,
+        "Uses Allowed list": 5,
+        "README.md": 3,
+        "CONTRIBUTORS.md": 1,
+        "NOTICES.md": 1,
+        "LICENSE": 1,
+        "Requires Signed commits": 3,
+        "Requires Code review": 3,
+        "Requires PR": 3,
+        "Has Wiki Enabled": -1,
+        "Has Issues Enabled": -1,
+        "Has Projects Enabled": -1,
+        "Has Discussions": -1,
+        "Deletes head branch": 1,
+        "Uses Squash Merge": 1,
+        "Has License Information": 3,
+        "Has Dependabot alerts": -5
+    }
+}
