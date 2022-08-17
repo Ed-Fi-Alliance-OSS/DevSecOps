@@ -26,9 +26,8 @@ def run_audit(config: Configuration) -> None:
         # Currently,this is only checking if there are alerts, which does not differentiates if dependabot is enabled or not
         alert_count = get_dependabot_alerts(client, repo, config.organization)
         logger.debug(f"Got {alert_count} dependabot alerts")
-
-        branch_protection = get_branch_protection_info(client, repo, config.organization)
-        logger.debug(f"Branch protection {branch_protection}")
+        repo_config = get_repo_configuration(client, repo, config.organization)
+        logger.debug(f"Repo configuration: {repo_config}")
         actions = audit_actions(client, repo, config.organization)
         logger.debug(f"Actions {actions}")
         file_review = review_files(client, repo, config.organization)
@@ -37,7 +36,7 @@ def run_audit(config: Configuration) -> None:
         if actions:
             actions['Dependabot alerts'] = alert_count
 
-        report[repo] = actions | branch_protection | file_review
+        report[repo] = actions | file_review | repo_config
 
     if config.save_results is True:
         json_report = json.dumps(report, indent=4)
@@ -93,18 +92,26 @@ def audit_actions(client: GitHubClient, repository: str, organization: str) -> d
     return audit_results
 
 
-def get_branch_protection_info(client: GitHubClient, repository: str, organization: str) -> dict:
-    allRules = client.get_protection_rules(organization, repository)
+def get_repo_configuration(client: GitHubClient, repository: str, organization: str) -> dict:
+    configuration = client.get_repository_configuration(organization, repository)
 
+    allRules = configuration["branchProtectionRules"]["nodes"]
     rulesForMain = [allRules for allRules in allRules if allRules["pattern"] == "main"]
     rules = rulesForMain[0] if rulesForMain else None
 
-    logger.debug(f"Rules for main: {rules}")
+    logger.debug(f"Repository configuration: {configuration}")
 
     return {
         "Requires Signed commits": rules["requiresCommitSignatures"] if rules else False,
         "Requires Code review": rules["requiresApprovingReviews"] if rules else False,
-        "Requires PR": (rules["requiresApprovingReviews"] and rules["isAdminEnforced"]) if rules else False
+        "Requires PR": (rules["requiresApprovingReviews"] and rules["isAdminEnforced"]) if rules else False,
+        "Has Wiki Enabled": configuration["hasWikiEnabled"],
+        "Has Issues Enabled": configuration["hasIssuesEnabled"],
+        "Has Projects Enabled": configuration["hasProjectsEnabled"],
+        "Has Discussions": configuration["discussions"]["totalCount"] > 0,
+        "Deletes head branch": configuration["deleteBranchOnMerge"],
+        "Uses Squash Merge": configuration["squashMergeAllowed"],
+        "Has License Information": configuration["licenseInfo"] is not None
     }
 
 

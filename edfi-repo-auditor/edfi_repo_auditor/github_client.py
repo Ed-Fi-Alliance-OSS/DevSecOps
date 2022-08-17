@@ -57,7 +57,7 @@ REPOSITORIES_TEMPLATE = """
 }
 """.strip()
 
-PROTECTION_RULES_TEMPLATE = """
+REPOSITORY_CONFIGURATION_TEMPLATE = """
 {
   repository(name: "[REPOSITORY]", owner: "[OWNER]") {
     branchProtectionRules(first: 10) {
@@ -68,9 +68,19 @@ PROTECTION_RULES_TEMPLATE = """
         requiresApprovingReviews
       }
     }
+    hasWikiEnabled
+    hasIssuesEnabled
+    hasProjectsEnabled
+    discussions {
+      totalCount
+    }
+    deleteBranchOnMerge
+    squashMergeAllowed
+    licenseInfo {
+      key
+    }
   }
 }
-
 """.strip()
 
 logger: logging.Logger = logging.getLogger(__name__)
@@ -151,16 +161,15 @@ class GitHubClient:
         actions = self._execute_api_call(
             f"Getting actions for {owner}/{repository}", "GET", f"{API_URL}/repos/{owner}/{repository}/actions/workflows"
         )
-
         return actions
 
-    def get_protection_rules(self, owner: str, repository: str) -> dict:
+    def get_repository_configuration(self, owner: str, repository: str) -> dict:
         if len(owner.strip()) == 0:
             raise ValueError("owner cannot be blank")
         if len(repository.strip()) == 0:
             raise ValueError("repository cannot be blank")
 
-        query = PROTECTION_RULES_TEMPLATE.replace(ORG_TOKEN, owner).replace(
+        query = REPOSITORY_CONFIGURATION_TEMPLATE.replace(ORG_TOKEN, owner).replace(
             REPO_TOKEN, repository
         )
 
@@ -168,7 +177,7 @@ class GitHubClient:
             f"protection rules for {owner}/{repository}", query
         )
 
-        return body["data"]["repository"]["branchProtectionRules"]["nodes"]
+        return body["data"]["repository"]
 
     def get_file_content(self, owner: str, repository: str, path: str) -> str:
         if len(owner.strip()) == 0:
