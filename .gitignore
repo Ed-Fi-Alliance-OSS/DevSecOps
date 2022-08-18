@@ -1,1 +1,6 @@
 edfi-repo-auditor/.env
+
+/**/__pycache__/
+/**/.pyc
+
+edfi-repo-auditor/reports/*.json
