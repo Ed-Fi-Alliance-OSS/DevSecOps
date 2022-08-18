@@ -24,7 +24,7 @@ def run_audit(config: Configuration) -> None:
 
     report = {}
     for repo in repositories:
-        repo_config = get_repo_configuration(client, repo, config.organization)
+        repo_config = get_repo_information(client, repo, config.organization)
         logger.debug(f"Repo configuration: {repo_config}")
         actions = audit_actions(client, repo, config.organization)
         logger.debug(f"Actions {actions}")
@@ -83,30 +83,30 @@ def audit_actions(client: GitHubClient, repository: str, organization: str) -> d
     return audit_results
 
 
-def get_repo_configuration(client: GitHubClient, repository: str, organization: str) -> dict:
-    configuration = client.get_repository_configuration(organization, repository)
+def get_repo_information(client: GitHubClient, repository: str, organization: str) -> dict:
+    information = client.get_repository_information(organization, repository)
 
     # Currently,this is only checking if there are alerts, which does not differentiates if dependabot is enabled or not
-    vulnerabilities = [alerts for alerts in configuration["vulnerabilityAlerts"]["nodes"]
+    vulnerabilities = [alerts for alerts in information["vulnerabilityAlerts"]["nodes"]
                        if (alerts["createdAt"] < (datetime.now() - timedelta(3 * 7)).isoformat() and
                        alerts["securityVulnerability"]["advisory"]["severity"] in ['CRITICAL', 'HIGH'])]
 
-    rulesForMain = [rules for rules in configuration["branchProtectionRules"]["nodes"] if rules["pattern"] == "main"]
+    rulesForMain = [rules for rules in information["branchProtectionRules"]["nodes"] if rules["pattern"] == "main"]
     rules = rulesForMain[0] if rulesForMain else None
 
-    logger.debug(f"Repository configuration: {configuration}")
+    logger.debug(f"Repository information: {information}")
 
     return {
         "Requires Signed commits": rules["requiresCommitSignatures"] if rules else False,
         "Requires Code review": rules["requiresApprovingReviews"] if rules else False,
         "Requires PR": (rules["requiresApprovingReviews"] and rules["isAdminEnforced"]) if rules else False,
-        "Has Wiki Enabled": configuration["hasWikiEnabled"],
-        "Has Issues Enabled": configuration["hasIssuesEnabled"],
-        "Has Projects Enabled": configuration["hasProjectsEnabled"],
-        "Has Discussions": configuration["discussions"]["totalCount"] > 0,
-        "Deletes head branch": configuration["deleteBranchOnMerge"],
-        "Uses Squash Merge": configuration["squashMergeAllowed"],
-        "Has License Information": configuration["licenseInfo"] is not None,
+        "Has Wiki Enabled": information["hasWikiEnabled"],
+        "Has Issues Enabled": information["hasIssuesEnabled"],
+        "Has Projects Enabled": information["hasProjectsEnabled"],
+        "Has Discussions": information["discussions"]["totalCount"] > 0,
+        "Deletes head branch": information["deleteBranchOnMerge"],
+        "Uses Squash Merge": information["squashMergeAllowed"],
+        "Has License Information": information["licenseInfo"] is not None,
         'Has Dependabot alerts': len(vulnerabilities) > 0
     }
 

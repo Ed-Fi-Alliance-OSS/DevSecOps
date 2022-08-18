@@ -37,7 +37,7 @@ REPOSITORIES_TEMPLATE = """
 
 # Note that this doesn't handle paging and thus will not be sufficient if there
 # are more than 100 alerts.
-REPOSITORY_CONFIGURATION_TEMPLATE = """
+REPOSITORY_INFORMATION_TEMPLATE = """
 {
   repository(name: "[REPOSITORY]", owner: "[OWNER]") {
     vulnerabilityAlerts(first: 100, states: [OPEN]) {
@@ -140,13 +140,13 @@ class GitHubClient:
         )
         return actions
 
-    def get_repository_configuration(self, owner: str, repository: str) -> dict:
+    def get_repository_information(self, owner: str, repository: str) -> dict:
         if len(owner.strip()) == 0:
             raise ValueError("owner cannot be blank")
         if len(repository.strip()) == 0:
             raise ValueError("repository cannot be blank")
 
-        query = REPOSITORY_CONFIGURATION_TEMPLATE.replace(ORG_TOKEN, owner).replace(
+        query = REPOSITORY_INFORMATION_TEMPLATE.replace(ORG_TOKEN, owner).replace(
             REPO_TOKEN, repository
         )
 
