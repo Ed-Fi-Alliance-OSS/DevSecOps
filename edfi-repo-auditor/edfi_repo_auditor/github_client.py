@@ -27,6 +27,7 @@ REPOSITORIES_TEMPLATE = """
   organization(login: "[OWNER]") {
     id
     repositories(first: 100) {
+      totalCount
       nodes {
         name
       }
@@ -125,6 +126,10 @@ class GitHubClient:
 
         query = REPOSITORIES_TEMPLATE.replace(ORG_TOKEN, owner)
         body = self._execute_graphql(f"repositories for {owner}", query)
+
+        total_repos = body["data"]["organization"]["repositories"]["totalCount"]
+        if total_repos > 100:
+            logger.warning(f"There are over 100 repos in {owner}. Update the query to handle pagination")
 
         df = pd.DataFrame(body["data"]["organization"]["repositories"]["nodes"])
         return df["name"].to_list()
