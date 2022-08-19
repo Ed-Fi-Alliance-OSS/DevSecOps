@@ -3,7 +3,6 @@
 # The Ed-Fi Alliance licenses this file to you under the Apache License, Version 2.0.
 # See the LICENSE and NOTICES files in the project root for more information.
 
-import ast
 import json
 import logging
 import time
@@ -11,18 +10,23 @@ import time
 from edfi_repo_auditor.config import Configuration
 from edfi_repo_auditor.github_client import GitHubClient
 from datetime import datetime, timedelta
+from pprint import pformat
 
 
 logger: logging.Logger = logging.getLogger(__name__)
+
+# Parameters to evaluate dependabot alerts
+ALERTS_INCLUDED_SEVERITIES = ['CRITICAL', 'HIGH']
+ALERTS_WEEKS_SINCE_CREATED = 3
 
 
 def run_audit(config: Configuration) -> None:
     start = time.time()
     client = GitHubClient(config.personal_access_token)
 
-    repositories = config.repositories if config.repositories != [] else client.get_repositories(config.organization)
+    repositories = config.repositories if len(config.repositories) > 0 else client.get_repositories(config.organization)
 
-    report = {}
+    report: dict = {}
     for repo in repositories:
         repo_config = get_repo_information(client, repo, config.organization)
         logger.debug(f"Repo configuration: {repo_config}")
@@ -43,13 +47,13 @@ def run_audit(config: Configuration) -> None:
         }
 
     if config.save_results is True:
+        logger.info("Saving report to reports/audit-result.json")
         json_report = json.dumps(report, indent=4)
 
         with open("reports/audit-result.json", "w") as outfile:
             outfile.write(json_report)
     else:
-        # Using print instead of logger to get result in JSON format
-        print(report)
+        logger.info(pformat(report))
 
     logger.info(f"Finished auditing repositories for {config.organization} in {'{:.2f}'.format(time.time() - start)} seconds")
 
@@ -88,8 +92,8 @@ def get_repo_information(client: GitHubClient, repository: str, organization: st
 
     # Currently,this is only checking if there are alerts, which does not differentiates if dependabot is enabled or not
     vulnerabilities = [alerts for alerts in information["vulnerabilityAlerts"]["nodes"]
-                       if (alerts["createdAt"] < (datetime.now() - timedelta(3 * 7)).isoformat() and
-                       alerts["securityVulnerability"]["advisory"]["severity"] in ['CRITICAL', 'HIGH'])]
+                       if (alerts["createdAt"] < (datetime.now() - timedelta(ALERTS_WEEKS_SINCE_CREATED * 7)).isoformat() and
+                       alerts["securityVulnerability"]["advisory"]["severity"] in ALERTS_INCLUDED_SEVERITIES)]
 
     rulesForMain = [rules for rules in information["branchProtectionRules"]["nodes"] if rules["pattern"] == "main"]
     rules = rulesForMain[0] if rulesForMain else None
@@ -141,4 +145,4 @@ def get_result(checklist: dict, rules: dict) -> int:
 
 def get_file() -> dict:
     with open("scoring.json", "r") as file:
-        return ast.literal_eval(file.read())
+        return json.loads(file.read())
