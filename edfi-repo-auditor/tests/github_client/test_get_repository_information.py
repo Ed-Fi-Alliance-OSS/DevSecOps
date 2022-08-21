@@ -4,7 +4,6 @@
 # See the LICENSE and NOTICES files in the project root for more information.
 
 from http import HTTPStatus
-from typing import List
 import pytest
 import requests_mock
 
