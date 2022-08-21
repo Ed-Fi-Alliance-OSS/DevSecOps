@@ -28,6 +28,7 @@ def describe_when_getting_repositories() -> None:
     "organization": {
       "id": "MDEyOk9yZ2FuaXphdGlvbjYyNzIyMzIw",
       "repositories": {
+        "totalCount": 2,
         "nodes": [
           {
             "name": "Ed-Fi-Standard"
