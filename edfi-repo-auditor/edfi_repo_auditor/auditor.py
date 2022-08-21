@@ -28,11 +28,11 @@ def run_audit(config: Configuration) -> None:
 
     report: dict = {}
     for repo in repositories:
-        repo_config = get_repo_information(client, repo, config.organization)
+        repo_config = get_repo_information(client, config.organization, repo)
         logger.debug(f"Repo configuration: {repo_config}")
-        actions = audit_actions(client, repo, config.organization)
+        actions = audit_actions(client, config.organization, repo)
         logger.debug(f"Actions {actions}")
-        file_review = review_files(client, repo, config.organization)
+        file_review = review_files(client, config.organization, repo)
         logger.debug(f"Files: {file_review}")
 
         checklist = actions | file_review | repo_config
@@ -58,7 +58,7 @@ def run_audit(config: Configuration) -> None:
     logger.info(f"Finished auditing repositories for {config.organization} in {'{:.2f}'.format(time.time() - start)} seconds")
 
 
-def audit_actions(client: GitHubClient, repository: str, organization: str) -> dict:
+def audit_actions(client: GitHubClient, organization: str, repository: str) -> dict:
     audit_results = {
         'Has Actions': False,
         'Uses CodeQL': False,
@@ -87,7 +87,7 @@ def audit_actions(client: GitHubClient, repository: str, organization: str) -> d
     return audit_results
 
 
-def get_repo_information(client: GitHubClient, repository: str, organization: str) -> dict:
+def get_repo_information(client: GitHubClient, organization: str, repository: str) -> dict:
     information = client.get_repository_information(organization, repository)
 
     # Currently,this is only checking if there are alerts, which does not differentiates if dependabot is enabled or not
@@ -115,7 +115,7 @@ def get_repo_information(client: GitHubClient, repository: str, organization: st
     }
 
 
-def review_files(client: GitHubClient, repository: str, organization: str) -> dict:
+def review_files(client: GitHubClient, organization: str, repository: str) -> dict:
     files = {
         "README.md": False,
         "CONTRIBUTORS.md": False,
