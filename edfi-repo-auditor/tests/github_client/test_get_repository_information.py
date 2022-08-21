@@ -10,6 +10,8 @@ import requests_mock
 from edfi_repo_auditor.github_client import GitHubClient, GRAPHQL_ENDPOINT
 
 ACCESS_TOKEN = "asd09uasdfu09asdfj;iolkasdfklj"
+OWNER = "Ed-Fi-Alliance-OSS"
+REPO = "Ed-Fi-ODS"
 
 
 def describe_when_getting_repository_information() -> None:
@@ -21,7 +23,7 @@ def describe_when_getting_repository_information() -> None:
     def describe_given_blank_repository() -> None:
         def it_raises_an_a_ValueError() -> None:
             with pytest.raises(ValueError):
-                GitHubClient(ACCESS_TOKEN).get_repository_information("Ed-Fi-Alliance-OSS", "")
+                GitHubClient(ACCESS_TOKEN).get_repository_information(OWNER, "")
 
     def describe_given_valid_information() -> None:
         def describe_given_valid_query() -> None:
@@ -80,8 +82,8 @@ def describe_when_getting_repository_information() -> None:
                         text=REPOSITORY_INFORMATION_RESULT,
                     )
                     return GitHubClient(ACCESS_TOKEN).get_repository_information(
-                        "Ed-Fi-Alliance-OSS",
-                        "Ed_Fi_ODS"
+                        OWNER,
+                        REPO
                     )
 
             def it_returns_the_branch_protection_rules(results: dict) -> None:
@@ -131,6 +133,6 @@ def describe_when_getting_repository_information() -> None:
 
                     with pytest.raises(RuntimeError):
                         GitHubClient(ACCESS_TOKEN).get_repository_information(
-                            "Ed-Fi-Alliance-OSS",
-                            "Ed_Fi_ODS"
+                            OWNER,
+                            REPO
                         )

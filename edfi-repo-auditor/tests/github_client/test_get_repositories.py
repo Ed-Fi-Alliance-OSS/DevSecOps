@@ -11,6 +11,7 @@ import requests_mock
 from edfi_repo_auditor.github_client import GitHubClient, GRAPHQL_ENDPOINT
 
 ACCESS_TOKEN = "asd09uasdfu09asdfj;iolkasdfklj"
+OWNER = "Ed-Fi-Alliance-OSS"
 
 
 def describe_when_getting_repositories() -> None:
@@ -50,9 +51,7 @@ def describe_when_getting_repositories() -> None:
                         status_code=HTTPStatus.OK,
                         text=REPOSITORIES_RESULT,
                     )
-                    return GitHubClient(ACCESS_TOKEN).get_repositories(
-                        "Ed-Fi-Alliance-OSS"
-                    )
+                    return GitHubClient(ACCESS_TOKEN).get_repositories(OWNER)
 
             def it_returns_two_repositories(results: List[str]) -> None:
                 assert len(results) == 2
@@ -97,6 +96,4 @@ def describe_when_getting_repositories() -> None:
                     )
 
                     with pytest.raises(RuntimeError):
-                        GitHubClient(ACCESS_TOKEN).get_repositories(
-                            "Ed-Fi-Alliance-OSS"
-                        )
+                        GitHubClient(ACCESS_TOKEN).get_repositories(OWNER)

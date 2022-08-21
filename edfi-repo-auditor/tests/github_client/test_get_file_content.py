@@ -10,7 +10,9 @@ import requests_mock
 from edfi_repo_auditor.github_client import GitHubClient, API_URL
 
 ACCESS_TOKEN = "asd09uasdfu09asdfj;iolkasdfklj"
-FILES_URL = f"{API_URL}/repos/Ed-Fi-Alliance-OSS/Ed_Fi_ODS/contents"
+OWNER = "Ed-Fi-Alliance-OSS"
+REPO = "Ed-Fi-ODS"
+FILES_URL = f"{API_URL}/repos/{OWNER}/{REPO}/contents"
 
 
 def describe_when_getting_file() -> None:
@@ -22,12 +24,12 @@ def describe_when_getting_file() -> None:
     def describe_given_blank_repository() -> None:
         def it_raises_an_a_ValueError() -> None:
             with pytest.raises(ValueError):
-                GitHubClient(ACCESS_TOKEN).get_file_content("Ed-Fi-Alliance-OSS", "", "")
+                GitHubClient(ACCESS_TOKEN).get_file_content(OWNER, "", "")
 
     def describe_given_blank_path() -> None:
         def it_raises_an_a_ValueError() -> None:
             with pytest.raises(ValueError):
-                GitHubClient(ACCESS_TOKEN).get_file_content("Ed-Fi-Alliance-OSS", "Ed-Fi-ODS", "")
+                GitHubClient(ACCESS_TOKEN).get_file_content(OWNER, REPO, "")
 
     def describe_given_valid_information() -> None:
         def describe_getting_file() -> None:
@@ -51,8 +53,8 @@ def describe_when_getting_file() -> None:
                         text=FILE_RESULT,
                     )
                     return GitHubClient(ACCESS_TOKEN).get_file_content(
-                        "Ed-Fi-Alliance-OSS",
-                        "Ed_Fi_ODS",
+                        OWNER,
+                        REPO,
                         "README.md"
                     )
 
@@ -81,7 +83,7 @@ def describe_when_getting_file() -> None:
                     )
                     with pytest.raises(RuntimeError):
                         GitHubClient(ACCESS_TOKEN).get_file_content(
-                            "Ed-Fi-Alliance-OSS",
-                            "Ed_Fi_ODS",
+                            OWNER,
+                            REPO,
                             "README.md"
                         )

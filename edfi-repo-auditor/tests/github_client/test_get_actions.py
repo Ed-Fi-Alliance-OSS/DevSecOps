@@ -11,7 +11,9 @@ import requests_mock
 from edfi_repo_auditor.github_client import GitHubClient, API_URL
 
 ACCESS_TOKEN = "asd09uasdfu09asdfj;iolkasdfklj"
-ACTIONS_URL = f"{API_URL}/repos/Ed-Fi-Alliance-OSS/Ed_Fi_ODS/actions/workflows"
+OWNER = "Ed-Fi-Alliance-OSS"
+REPO = "Ed-Fi-ODS"
+ACTIONS_URL = f"{API_URL}/repos/{OWNER}/{REPO}/actions/workflows"
 
 
 def describe_when_getting_actions() -> None:
@@ -23,7 +25,7 @@ def describe_when_getting_actions() -> None:
     def describe_given_blank_repository() -> None:
         def it_raises_an_a_ValueError() -> None:
             with pytest.raises(ValueError):
-                GitHubClient(ACCESS_TOKEN).get_actions("Ed-Fi-Alliance-OSS", "")
+                GitHubClient(ACCESS_TOKEN).get_actions(OWNER, "")
 
     def describe_given_valid_information() -> None:
         def describe_getting_actions() -> None:
@@ -54,8 +56,8 @@ def describe_when_getting_actions() -> None:
                         text=ACTIONS_RESULT,
                     )
                     return GitHubClient(ACCESS_TOKEN).get_actions(
-                        "Ed-Fi-Alliance-OSS",
-                        "Ed_Fi_ODS"
+                        OWNER,
+                        REPO
                     )
 
             def it_returns_one_action(results: List[str]) -> None:
@@ -96,6 +98,6 @@ def describe_when_getting_actions() -> None:
 
                     with pytest.raises(RuntimeError):
                         GitHubClient(ACCESS_TOKEN).get_actions(
-                            "Ed-Fi-Alliance-OSS",
-                            "Ed_Fi_ODS"
+                            OWNER,
+                            REPO
                         )
