@@ -5,6 +5,7 @@
 
 import json
 import logging
+import re
 import time
 
 from edfi_repo_auditor.config import Configuration
@@ -63,7 +64,8 @@ def audit_actions(client: GitHubClient, organization: str, repository: str) -> d
         "Has Actions": False,
         "Uses CodeQL": False,
         "Uses Allowed list": False,
-        "Uses Test Reporter": False
+        "Uses Test Reporter": False,
+        "Has Unit Tests": False
     }
 
     actions = client.get_actions(organization, repository)
@@ -87,6 +89,10 @@ def audit_actions(client: GitHubClient, organization: str, repository: str) -> d
 
         if not audit_results["Uses Test Reporter"]:
             audit_results["Uses Test Reporter"] = "uses: dorny/test-reporter" in file_content
+
+        if not audit_results["Has Unit Tests"]:
+            pattern = re.compile(r"unit.{0,2}test(s)?", flags=re.IGNORECASE)
+            audit_results["Has Unit Tests"] = True if pattern.search(file_content) else False
 
     return audit_results
 
