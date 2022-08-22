@@ -62,7 +62,8 @@ def audit_actions(client: GitHubClient, organization: str, repository: str) -> d
     audit_results = {
         "Has Actions": False,
         "Uses CodeQL": False,
-        "Uses Allowed list": False
+        "Uses Allowed list": False,
+        "Uses Test Reporter": False
     }
 
     actions = client.get_actions(organization, repository)
@@ -83,6 +84,9 @@ def audit_actions(client: GitHubClient, organization: str, repository: str) -> d
 
         if not audit_results["Uses Allowed list"]:
             audit_results["Uses Allowed list"] = "uses: ed-fi-alliance-oss/ed-fi-actions/.github/workflows/repository-scanner.yml" in file_content
+
+        if not audit_results["Uses Test Reporter"]:
+            audit_results["Uses Test Reporter"] = "uses: dorny/test-reporter" in file_content
 
     return audit_results
 

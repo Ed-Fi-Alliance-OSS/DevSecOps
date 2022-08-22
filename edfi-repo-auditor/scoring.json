@@ -4,6 +4,7 @@
         "Has Actions": 5,
         "Uses CodeQL": 5,
         "Uses Allowed list": 5,
+        "Uses Test Reporter": 3,
         "README.md": 3,
         "CONTRIBUTORS.md": 1,
         "NOTICES.md": 1,
