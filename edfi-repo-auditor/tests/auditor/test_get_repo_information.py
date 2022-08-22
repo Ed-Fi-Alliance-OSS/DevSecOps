@@ -17,196 +17,295 @@ CLIENT = GitHubClient(ACCESS_TOKEN)
 
 
 def describe_when_getting_repo_info() -> None:
-    def describe_given_there_are_no_alerts() -> None:
-        RESPONSE = {
-            "vulnerabilityAlerts": {
-                "nodes": []
-            },
-            "branchProtectionRules": {
-                "nodes": []
-            },
-            "hasWikiEnabled": False,
-            "hasIssuesEnabled": False,
-            "hasProjectsEnabled": False,
-            "discussions": {
-                "totalCount": 0
-            },
-            "deleteBranchOnMerge": False,
-            "squashMergeAllowed": True,
-            "licenseInfo": {}
-        }
+    def describe_dependabot_alerts() -> None:
+        def describe_given_there_are_no_alerts() -> None:
+            RESPONSE = {
+                "vulnerabilityAlerts": {
+                    "nodes": []
+                },
+                "branchProtectionRules": {
+                    "nodes": []
+                },
+                "hasWikiEnabled": False,
+                "hasIssuesEnabled": False,
+                "hasProjectsEnabled": False,
+                "discussions": {
+                    "totalCount": 0
+                },
+                "deleteBranchOnMerge": False,
+                "squashMergeAllowed": True,
+                "licenseInfo": {}
+            }
 
-        @pytest.fixture
-        def results() -> dict:
-            CLIENT.get_repository_information = MagicMock(return_value=RESPONSE)
-            return get_repo_information(CLIENT, OWNER, REPO)
+            @pytest.fixture
+            def results() -> dict:
+                CLIENT.get_repository_information = MagicMock(return_value=RESPONSE)
+                return get_repo_information(CLIENT, OWNER, REPO)
 
-        def it_returns_no_alerts(results: dict) -> None:
-            assert results["Has Dependabot alerts"] is False
+            def it_returns_no_alerts(results: dict) -> None:
+                assert results["Has Dependabot alerts"] is False
 
-    def describe_given_there_are_alerts_not_old() -> None:
-        RESPONSE = {
-            "vulnerabilityAlerts": {
-                "nodes": [
-                    {
-                        "createdAt": (datetime.now() - timedelta((ALERTS_WEEKS_SINCE_CREATED - 1) * 7)).isoformat(),
-                        "securityVulnerability": {
-                            "package": {
-                                "name": "minimist"
-                            },
-                            "advisory": {
-                                "severity": "CRITICAL"
+        def describe_given_there_are_alerts_not_old() -> None:
+            RESPONSE = {
+                "vulnerabilityAlerts": {
+                    "nodes": [
+                        {
+                            "createdAt": (datetime.now() - timedelta((ALERTS_WEEKS_SINCE_CREATED - 1) * 7)).isoformat(),
+                            "securityVulnerability": {
+                                "package": {
+                                    "name": "minimist"
+                                },
+                                "advisory": {
+                                    "severity": "CRITICAL"
+                                }
                             }
                         }
-                    }
-                ]
-            },
-            "branchProtectionRules": {
-                "nodes": []
-            },
-            "hasWikiEnabled": False,
-            "hasIssuesEnabled": False,
-            "hasProjectsEnabled": False,
-            "discussions": {
-                "totalCount": 0
-            },
-            "deleteBranchOnMerge": False,
-            "squashMergeAllowed": True,
-            "licenseInfo": {}
-        }
+                    ]
+                },
+                "branchProtectionRules": {
+                    "nodes": []
+                },
+                "hasWikiEnabled": False,
+                "hasIssuesEnabled": False,
+                "hasProjectsEnabled": False,
+                "discussions": {
+                    "totalCount": 0
+                },
+                "deleteBranchOnMerge": False,
+                "squashMergeAllowed": True,
+                "licenseInfo": {}
+            }
 
-        @pytest.fixture
-        def results() -> dict:
-            CLIENT.get_repository_information = MagicMock(return_value=RESPONSE)
-            return get_repo_information(CLIENT, OWNER, REPO)
+            @pytest.fixture
+            def results() -> dict:
+                CLIENT.get_repository_information = MagicMock(return_value=RESPONSE)
+                return get_repo_information(CLIENT, OWNER, REPO)
 
-        def it_returns_no_alerts(results: dict) -> None:
-            assert results["Has Dependabot alerts"] is False
+            def it_returns_no_alerts(results: dict) -> None:
+                assert results["Has Dependabot alerts"] is False
 
-    def describe_given_there_are_old_alerts_not_severe() -> None:
-        RESPONSE = {
-            "vulnerabilityAlerts": {
-                "nodes": [
-                    {
-                        "createdAt": (datetime.now() - timedelta((ALERTS_WEEKS_SINCE_CREATED + 1) * 7)).isoformat(),
-                        "securityVulnerability": {
-                            "package": {
-                                "name": "minimist"
-                            },
-                            "advisory": {
-                                "severity": "WARNING"
+        def describe_given_there_are_old_alerts_not_severe() -> None:
+            RESPONSE = {
+                "vulnerabilityAlerts": {
+                    "nodes": [
+                        {
+                            "createdAt": (datetime.now() - timedelta((ALERTS_WEEKS_SINCE_CREATED + 1) * 7)).isoformat(),
+                            "securityVulnerability": {
+                                "package": {
+                                    "name": "minimist"
+                                },
+                                "advisory": {
+                                    "severity": "WARNING"
+                                }
+                            }
+                        },
+                        {
+                            "createdAt": (datetime.now() - timedelta((ALERTS_WEEKS_SINCE_CREATED - 1) * 7)).isoformat(),
+                            "securityVulnerability": {
+                                "package": {
+                                    "name": "minimist"
+                                },
+                                "advisory": {
+                                    "severity": "HIGH"
+                                }
                             }
                         }
-                    },
-                    {
-                        "createdAt": (datetime.now() - timedelta((ALERTS_WEEKS_SINCE_CREATED - 1) * 7)).isoformat(),
-                        "securityVulnerability": {
-                            "package": {
-                                "name": "minimist"
-                            },
-                            "advisory": {
-                                "severity": "HIGH"
+                    ]
+                },
+                "branchProtectionRules": {
+                    "nodes": []
+                },
+                "hasWikiEnabled": False,
+                "hasIssuesEnabled": False,
+                "hasProjectsEnabled": False,
+                "discussions": {
+                    "totalCount": 0
+                },
+                "deleteBranchOnMerge": False,
+                "squashMergeAllowed": True,
+                "licenseInfo": {}
+            }
+
+            @pytest.fixture
+            def results() -> dict:
+                CLIENT.get_repository_information = MagicMock(return_value=RESPONSE)
+                return get_repo_information(CLIENT, OWNER, REPO)
+
+            def it_returns_no_alerts(results: dict) -> None:
+                assert results["Has Dependabot alerts"] is False
+
+        def describe_given_there_are_old_critical_risk_alerts() -> None:
+            RESPONSE = {
+                "vulnerabilityAlerts": {
+                    "nodes": [
+                        {
+                            "createdAt": (datetime.now() - timedelta((ALERTS_WEEKS_SINCE_CREATED + 1) * 7)).isoformat(),
+                            "securityVulnerability": {
+                                "package": {
+                                    "name": "minimist"
+                                },
+                                "advisory": {
+                                    "severity": "CRITICAL"
+                                }
                             }
                         }
-                    }
-                ]
-            },
-            "branchProtectionRules": {
-                "nodes": []
-            },
-            "hasWikiEnabled": False,
-            "hasIssuesEnabled": False,
-            "hasProjectsEnabled": False,
-            "discussions": {
-                "totalCount": 0
-            },
-            "deleteBranchOnMerge": False,
-            "squashMergeAllowed": True,
-            "licenseInfo": {}
-        }
+                    ]
+                },
+                "branchProtectionRules": {
+                    "nodes": []
+                },
+                "hasWikiEnabled": False,
+                "hasIssuesEnabled": False,
+                "hasProjectsEnabled": False,
+                "discussions": {
+                    "totalCount": 0
+                },
+                "deleteBranchOnMerge": False,
+                "squashMergeAllowed": True,
+                "licenseInfo": {}
+            }
 
-        @pytest.fixture
-        def results() -> dict:
-            CLIENT.get_repository_information = MagicMock(return_value=RESPONSE)
-            return get_repo_information(CLIENT, OWNER, REPO)
+            @pytest.fixture
+            def results() -> dict:
+                CLIENT.get_repository_information = MagicMock(return_value=RESPONSE)
+                return get_repo_information(CLIENT, OWNER, REPO)
 
-        def it_returns_no_alerts(results: dict) -> None:
-            assert results["Has Dependabot alerts"] is False
+            def it_returns_no_alerts(results: dict) -> None:
+                assert results["Has Dependabot alerts"] is True
 
-    def describe_given_there_are_old_critical_risk_alerts() -> None:
-        RESPONSE = {
-            "vulnerabilityAlerts": {
-                "nodes": [
-                    {
-                        "createdAt": (datetime.now() - timedelta((ALERTS_WEEKS_SINCE_CREATED + 1) * 7)).isoformat(),
-                        "securityVulnerability": {
-                            "package": {
-                                "name": "minimist"
-                            },
-                            "advisory": {
-                                "severity": "CRITICAL"
+        def describe_given_there_are_old_high_risk_alerts() -> None:
+            RESPONSE = {
+                "vulnerabilityAlerts": {
+                    "nodes": [
+                        {
+                            "createdAt": (datetime.now() - timedelta((ALERTS_WEEKS_SINCE_CREATED + 1) * 7)).isoformat(),
+                            "securityVulnerability": {
+                                "package": {
+                                    "name": "minimist"
+                                },
+                                "advisory": {
+                                    "severity": "HIGH"
+                                }
                             }
                         }
-                    }
-                ]
-            },
-            "branchProtectionRules": {
-                "nodes": []
-            },
-            "hasWikiEnabled": False,
-            "hasIssuesEnabled": False,
-            "hasProjectsEnabled": False,
-            "discussions": {
-                "totalCount": 0
-            },
-            "deleteBranchOnMerge": False,
-            "squashMergeAllowed": True,
-            "licenseInfo": {}
-        }
+                    ]
+                },
+                "branchProtectionRules": {
+                    "nodes": []
+                },
+                "hasWikiEnabled": False,
+                "hasIssuesEnabled": False,
+                "hasProjectsEnabled": False,
+                "discussions": {
+                    "totalCount": 0
+                },
+                "deleteBranchOnMerge": False,
+                "squashMergeAllowed": True,
+                "licenseInfo": {}
+            }
 
-        @pytest.fixture
-        def results() -> dict:
-            CLIENT.get_repository_information = MagicMock(return_value=RESPONSE)
-            return get_repo_information(CLIENT, OWNER, REPO)
+            @pytest.fixture
+            def results() -> dict:
+                CLIENT.get_repository_information = MagicMock(return_value=RESPONSE)
+                return get_repo_information(CLIENT, OWNER, REPO)
 
-        def it_returns_no_alerts(results: dict) -> None:
-            assert results["Has Dependabot alerts"] is True
+            def it_returns_no_alerts(results: dict) -> None:
+                assert results["Has Dependabot alerts"] is True
 
-    def describe_given_there_are_old_high_risk_alerts() -> None:
-        RESPONSE = {
-            "vulnerabilityAlerts": {
-                "nodes": [
-                    {
-                        "createdAt": (datetime.now() - timedelta((ALERTS_WEEKS_SINCE_CREATED + 1) * 7)).isoformat(),
-                        "securityVulnerability": {
-                            "package": {
-                                "name": "minimist"
-                            },
-                            "advisory": {
-                                "severity": "HIGH"
-                            }
-                        }
-                    }
-                ]
-            },
-            "branchProtectionRules": {
-                "nodes": []
-            },
-            "hasWikiEnabled": False,
-            "hasIssuesEnabled": False,
-            "hasProjectsEnabled": False,
-            "discussions": {
-                "totalCount": 0
-            },
-            "deleteBranchOnMerge": False,
-            "squashMergeAllowed": True,
-            "licenseInfo": {}
-        }
+    def describe_branch_protection() -> None:
+        def describe_given_there_are_no_protection_rules() -> None:
+            RESPONSE = {
+                "vulnerabilityAlerts": {
+                    "nodes": []
+                },
+                "branchProtectionRules": {
+                    "nodes": []
+                },
+                "hasWikiEnabled": False,
+                "hasIssuesEnabled": False,
+                "hasProjectsEnabled": False,
+                "discussions": {
+                    "totalCount": 0
+                },
+                "deleteBranchOnMerge": False,
+                "squashMergeAllowed": True,
+                "licenseInfo": {}
+            }
 
-        @pytest.fixture
-        def results() -> dict:
-            CLIENT.get_repository_information = MagicMock(return_value=RESPONSE)
-            return get_repo_information(CLIENT, OWNER, REPO)
+            @pytest.fixture
+            def results() -> dict:
+                CLIENT.get_repository_information = MagicMock(return_value=RESPONSE)
+                return get_repo_information(CLIENT, OWNER, REPO)
 
-        def it_returns_no_alerts(results: dict) -> None:
-            assert results["Has Dependabot alerts"] is True
+            def it_returns_no_rules(results: dict) -> None:
+                assert results["Requires Signed commits"] is False
+                assert results["Requires Code review"] is False
+                assert results["Requires PR"] is False
+
+        def describe_given_there_are_protection_rules() -> None:
+            RESPONSE = {
+                "vulnerabilityAlerts": {
+                    "nodes": []
+                },
+                "branchProtectionRules": {
+                    "nodes": [{
+                        "pattern": "main",
+                        "requiresCommitSignatures": True,
+                        "isAdminEnforced": True,
+                        "requiresApprovingReviews": True
+                    }]
+                },
+                "hasWikiEnabled": False,
+                "hasIssuesEnabled": False,
+                "hasProjectsEnabled": False,
+                "discussions": {
+                    "totalCount": 0
+                },
+                "deleteBranchOnMerge": False,
+                "squashMergeAllowed": True,
+                "licenseInfo": {}
+            }
+
+            @pytest.fixture
+            def results() -> dict:
+                CLIENT.get_repository_information = MagicMock(return_value=RESPONSE)
+                return get_repo_information(CLIENT, OWNER, REPO)
+
+            def it_returns_rules_for_main(results: dict) -> None:
+                assert results["Requires Signed commits"] is True
+                assert results["Requires Code review"] is True
+                assert results["Requires PR"] is True
+
+        def describe_given_there_are_protection_rules_for_other_branch() -> None:
+            RESPONSE = {
+                "vulnerabilityAlerts": {
+                    "nodes": []
+                },
+                "branchProtectionRules": {
+                    "nodes": [{
+                        "pattern": "feature",
+                        "requiresCommitSignatures": True,
+                        "isAdminEnforced": True,
+                        "requiresApprovingReviews": True
+                    }]
+                },
+                "hasWikiEnabled": False,
+                "hasIssuesEnabled": False,
+                "hasProjectsEnabled": False,
+                "discussions": {
+                    "totalCount": 0
+                },
+                "deleteBranchOnMerge": False,
+                "squashMergeAllowed": True,
+                "licenseInfo": {}
+            }
+
+            @pytest.fixture
+            def results() -> dict:
+                CLIENT.get_repository_information = MagicMock(return_value=RESPONSE)
+                return get_repo_information(CLIENT, OWNER, REPO)
+
+            def it_returns_rules_for_main(results: dict) -> None:
+                assert results["Requires Signed commits"] is False
+                assert results["Requires Code review"] is False
+                assert results["Requires PR"] is False
