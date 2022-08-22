@@ -26,7 +26,7 @@ def describe_when_reviewing_files() -> None:
 
         @pytest.fixture
         def results() -> dict:
-            CLIENT.get_file_content = MagicMock(return_value="Hello")
+            CLIENT.get_file_content = MagicMock(return_value="Found")
             return review_files(CLIENT, OWNER, REPO)
 
         def it_returns_true(results: dict) -> None:

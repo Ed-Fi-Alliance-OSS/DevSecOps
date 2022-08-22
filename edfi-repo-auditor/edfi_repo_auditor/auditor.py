@@ -111,7 +111,7 @@ def get_repo_information(client: GitHubClient, organization: str, repository: st
         "Deletes head branch": information["deleteBranchOnMerge"],
         "Uses Squash Merge": information["squashMergeAllowed"],
         "Has License Information": information["licenseInfo"] is not None,
-        'Has Dependabot alerts': len(vulnerabilities) > 0
+        "Has Dependabot alerts": len(vulnerabilities) > 0
     }
 
 
