@@ -16,7 +16,7 @@ from pprint import pformat
 logger: logging.Logger = logging.getLogger(__name__)
 
 # Parameters to evaluate dependabot alerts
-ALERTS_INCLUDED_SEVERITIES = ['CRITICAL', 'HIGH']
+ALERTS_INCLUDED_SEVERITIES = ["CRITICAL", "HIGH"]
 ALERTS_WEEKS_SINCE_CREATED = 3
 
 
@@ -60,29 +60,29 @@ def run_audit(config: Configuration) -> None:
 
 def audit_actions(client: GitHubClient, organization: str, repository: str) -> dict:
     audit_results = {
-        'Has Actions': False,
-        'Uses CodeQL': False,
-        'Uses Allowed list': False
+        "Has Actions": False,
+        "Uses CodeQL": False,
+        "Uses Allowed list": False
     }
 
     actions = client.get_actions(organization, repository)
 
     logger.debug(f"Got {actions['total_count']} workflow files")
 
-    audit_results['Has Actions'] = actions['total_count'] > 0
+    audit_results["Has Actions"] = actions["total_count"] > 0
 
-    workflow_paths = [actions['workflows']['path'] for actions['workflows'] in actions['workflows']]
+    workflow_paths = [actions["workflows"]["path"] for actions["workflows"] in actions["workflows"]]
     for file_path in workflow_paths:
         file_content = client.get_file_content(organization, repository, file_path)
         if not file_content:
             logger.debug("File not found")
             continue
 
-        if not audit_results['Uses CodeQL']:
-            audit_results['Uses CodeQL'] = "uses: github/codeql-action/analyze" in file_content
+        if not audit_results["Uses CodeQL"]:
+            audit_results["Uses CodeQL"] = "uses: github/codeql-action/analyze" in file_content
 
-        if not audit_results['Uses Allowed list']:
-            audit_results['Uses Allowed list'] = "uses: ed-fi-alliance-oss/ed-fi-actions/.github/workflows/repository-scanner.yml" in file_content
+        if not audit_results["Uses Allowed list"]:
+            audit_results["Uses Allowed list"] = "uses: ed-fi-alliance-oss/ed-fi-actions/.github/workflows/repository-scanner.yml" in file_content
 
     return audit_results
 
