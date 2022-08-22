@@ -17,6 +17,7 @@
         "Has Projects Enabled": -1,
         "Has Discussions": -1,
         "Has Unit Tests": 5,
+        "Has Linter": 3,
         "Deletes head branch": 1,
         "Uses Squash Merge": 1,
         "Has License Information": 3,

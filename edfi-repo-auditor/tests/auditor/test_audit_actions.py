@@ -132,3 +132,32 @@ def describe_when_auditing_actions() -> None:
             CLIENT.get_file_content = MagicMock(return_value=file_content)
             results = audit_actions(CLIENT, OWNER, REPO)
             assert results["Has Unit Tests"] is False
+
+    def describe_given_reviewing_linter() -> None:
+        @pytest.fixture
+        def actions() -> dict:
+            return {
+                "total_count": 1,
+                "workflows": [{
+                    "path": "test-action.yml"
+                }]
+            }
+
+        def it_returns_true_when_has_linter(actions: dict) -> None:
+            file_content = """
+                - name: Linter
+            """
+
+            CLIENT.get_actions = MagicMock(return_value=actions)
+            CLIENT.get_file_content = MagicMock(return_value=file_content)
+            results = audit_actions(CLIENT, OWNER, REPO)
+            assert results["Has Linter"] is True
+
+        def it_returns_false_when_no_linter(actions: dict) -> None:
+            file_content = """
+                - name: Review and correct
+            """
+            CLIENT.get_actions = MagicMock(return_value=actions)
+            CLIENT.get_file_content = MagicMock(return_value=file_content)
+            results = audit_actions(CLIENT, OWNER, REPO)
+            assert results["Has Linter"] is False

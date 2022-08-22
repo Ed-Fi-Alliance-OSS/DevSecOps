@@ -65,7 +65,8 @@ def audit_actions(client: GitHubClient, organization: str, repository: str) -> d
         "Uses CodeQL": False,
         "Uses Allowed list": False,
         "Uses Test Reporter": False,
-        "Has Unit Tests": False
+        "Has Unit Tests": False,
+        "Has Linter": False
     }
 
     actions = client.get_actions(organization, repository)
@@ -93,6 +94,10 @@ def audit_actions(client: GitHubClient, organization: str, repository: str) -> d
         if not audit_results["Has Unit Tests"]:
             pattern = re.compile(r"unit.{0,2}test(s)?", flags=re.IGNORECASE)
             audit_results["Has Unit Tests"] = True if pattern.search(file_content) else False
+
+        if not audit_results["Has Linter"]:
+            pattern = re.compile(r"lint(er)?(s)?(ing)?", flags=re.IGNORECASE)
+            audit_results["Has Linter"] = True if pattern.search(file_content) else False
 
     return audit_results
 
