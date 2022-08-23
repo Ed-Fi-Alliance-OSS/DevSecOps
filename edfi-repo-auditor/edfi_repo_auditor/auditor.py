@@ -64,7 +64,7 @@ def audit_actions(client: GitHubClient, organization: str, repository: str) -> d
     audit_results = {
         "Has Actions": False,
         "Uses CodeQL": False,
-        "Uses Allowed list": False,
+        "Uses only approved GitHub Actions": False,
         "Uses Test Reporter": False,
         "Has Unit Tests": False,
         "Has Linter": False
@@ -86,8 +86,8 @@ def audit_actions(client: GitHubClient, organization: str, repository: str) -> d
         if not audit_results["Uses CodeQL"]:
             audit_results["Uses CodeQL"] = "uses: github/codeql-action/analyze" in file_content
 
-        if not audit_results["Uses Allowed list"]:
-            audit_results["Uses Allowed list"] = "uses: ed-fi-alliance-oss/ed-fi-actions/.github/workflows/repository-scanner.yml" in file_content
+        if not audit_results["Uses only approved GitHub Actions"]:
+            audit_results["Uses only approved GitHub Actions"] = "uses: ed-fi-alliance-oss/ed-fi-actions/.github/workflows/repository-scanner.yml" in file_content
 
         if not audit_results["Uses Test Reporter"]:
             audit_results["Uses Test Reporter"] = "uses: dorny/test-reporter" in file_content
@@ -119,7 +119,8 @@ def get_repo_information(client: GitHubClient, organization: str, repository: st
     return {
         "Requires Signed commits": rules["requiresCommitSignatures"] if rules else False,
         "Requires Code review": rules["requiresApprovingReviews"] if rules else False,
-        "Requires PR": (rules["requiresApprovingReviews"] and rules["isAdminEnforced"]) if rules else False,
+        "Requires PR": rules["requiresApprovingReviews"] if rules else False,
+        "Admin cannot bypass PR": (rules["isAdminEnforced"] is False) if rules else False,
         "Has Wiki Enabled": information["hasWikiEnabled"],
         "Has Issues Enabled": information["hasIssuesEnabled"],
         "Has Projects Enabled": information["hasProjectsEnabled"],

@@ -3,7 +3,7 @@
     "rules": {
         "Has Actions": 5,
         "Uses CodeQL": 5,
-        "Uses Allowed list": 5,
+        "Uses only approved GitHub Actions": 5,
         "Uses Test Reporter": 3,
         "README.md": 3,
         "CONTRIBUTORS.md": 1,
@@ -12,6 +12,7 @@
         "Requires Signed commits": 3,
         "Requires Code review": 3,
         "Requires PR": 3,
+        "Admin cannot bypass PR": 1,
         "Has Wiki Enabled": -1,
         "Has Issues Enabled": -1,
         "Has Projects Enabled": -1,
