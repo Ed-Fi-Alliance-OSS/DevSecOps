@@ -20,6 +20,13 @@ logger: logging.Logger = logging.getLogger(__name__)
 ALERTS_INCLUDED_SEVERITIES = ["CRITICAL", "HIGH"]
 ALERTS_WEEKS_SINCE_CREATED = 3
 
+HAS_ACTIONS = "Has Actions"
+CODEQL = "Uses CodeQL"
+APPROVED_ACTIONS = "Uses only approved GitHub Actions"
+TEST_REPORTER = "Uses Test Reporter"
+UNIT_TESTS = "Has Unit Tests"
+LINTER = "Has Linter"
+
 
 def run_audit(config: Configuration) -> None:
     start = time.time()
@@ -62,19 +69,19 @@ def run_audit(config: Configuration) -> None:
 
 def audit_actions(client: GitHubClient, organization: str, repository: str) -> dict:
     audit_results = {
-        "Has Actions": False,
-        "Uses CodeQL": False,
-        "Uses only approved GitHub Actions": False,
-        "Uses Test Reporter": False,
-        "Has Unit Tests": False,
-        "Has Linter": False
+        HAS_ACTIONS: False,
+        CODEQL: False,
+        APPROVED_ACTIONS: False,
+        TEST_REPORTER: False,
+        UNIT_TESTS: False,
+        LINTER: False
     }
 
     actions = client.get_actions(organization, repository)
 
     logger.debug(f"Got {actions['total_count']} workflow files")
 
-    audit_results["Has Actions"] = actions["total_count"] > 0
+    audit_results[HAS_ACTIONS] = actions["total_count"] > 0
 
     workflow_paths = [actions["workflows"]["path"] for actions["workflows"] in actions["workflows"]]
     for file_path in workflow_paths:
@@ -83,22 +90,22 @@ def audit_actions(client: GitHubClient, organization: str, repository: str) -> d
             logger.debug("File not found")
             continue
 
-        if not audit_results["Uses CodeQL"]:
-            audit_results["Uses CodeQL"] = "uses: github/codeql-action/analyze" in file_content
+        if not audit_results[CODEQL]:
+            audit_results[CODEQL] = "uses: github/codeql-action/analyze" in file_content
 
-        if not audit_results["Uses only approved GitHub Actions"]:
-            audit_results["Uses only approved GitHub Actions"] = "uses: ed-fi-alliance-oss/ed-fi-actions/.github/workflows/repository-scanner.yml" in file_content
+        if not audit_results[APPROVED_ACTIONS]:
+            audit_results[APPROVED_ACTIONS] = "uses: ed-fi-alliance-oss/ed-fi-actions/.github/workflows/repository-scanner.yml" in file_content
 
-        if not audit_results["Uses Test Reporter"]:
-            audit_results["Uses Test Reporter"] = "uses: dorny/test-reporter" in file_content
+        if not audit_results[TEST_REPORTER]:
+            audit_results[TEST_REPORTER] = "uses: dorny/test-reporter" in file_content
 
-        if not audit_results["Has Unit Tests"]:
+        if not audit_results[UNIT_TESTS]:
             pattern = re.compile(r"unit.{0,2}test(s)?", flags=re.IGNORECASE)
-            audit_results["Has Unit Tests"] = True if pattern.search(file_content) else False
+            audit_results[UNIT_TESTS] = True if pattern.search(file_content) else False
 
-        if not audit_results["Has Linter"]:
+        if not audit_results[LINTER]:
             pattern = re.compile(r"lint(er)?(s)?(ing)?", flags=re.IGNORECASE)
-            audit_results["Has Linter"] = True if pattern.search(file_content) else False
+            audit_results[LINTER] = True if pattern.search(file_content) else False
 
     return audit_results
 
