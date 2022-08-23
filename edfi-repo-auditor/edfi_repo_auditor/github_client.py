@@ -121,6 +121,7 @@ class GitHubClient:
         return body
 
     def get_repositories(self, owner: str) -> List[str]:
+        logger.info(f"Getting all repositories for organization {owner}")
         if len(owner.strip()) == 0:
             raise ValueError("owner cannot be blank")
 

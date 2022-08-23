@@ -29,6 +29,7 @@ def run_audit(config: Configuration) -> None:
 
     report: dict = {}
     for repo in repositories:
+        logger.info(f"Scanning repository {repo}")
         repo_config = get_repo_information(client, config.organization, repo)
         logger.debug(f"Repo configuration: {repo_config}")
         actions = audit_actions(client, config.organization, repo)
