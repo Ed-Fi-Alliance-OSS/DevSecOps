@@ -26,7 +26,10 @@ Parameters:
 | --organization -o  | Organization Name    | Yes                                                                                                                         |
 | --repositories -r  | Repositories         | No. If not specified, will get all repos for the organization. Can specify multiple repositories separated by a blank space |
 | --log_level -r     | Log level            | No. Default: INFO. Can be: ERROR, WARNING, INFO, DEBUG                                                                      |
-| --save_results -s  | Save results to file | No. Default: false. If false, will print the results to console. If true, will save results to `reports/audit-result.json`  |
+| --save_results -s  | Save results to file | No. Default: console. If specified, will save the
+results to a file |
+| --file_name -f  | Filename | No. Default: `audit-results`. If specified,
+will save the results with given name. |
 
 ## Test
 

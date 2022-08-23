@@ -23,6 +23,7 @@ class Configuration:
     repositories: List[str]
     log_level: str
     save_results: bool
+    file_name: str
 
 
 def load_configuration(args_in: List[str]) -> Configuration:
@@ -71,15 +72,23 @@ def load_configuration(args_in: List[str]) -> Configuration:
     parser.add(  # type: ignore
         "-s",
         "--save_results",
-        required=False,
+        action="store_true",
         help="Save results into file",
+        env_var="AUDIT_SAVE_RESULTS",
+    )
+
+    parser.add(  # type: ignore
+        "-f",
+        "--file_name",
+        required=False,
+        help="File name for results",
         default=False,
-        type=bool,
-        env_var="AUDIT_FILE_PATH",
+        type=str,
+        env_var="AUDIT_FILE_NAME",
     )
 
     parsed = parser.parse_args(args_in)
 
     return Configuration(
-        parsed.organization, parsed.access_token, parsed.repositories, parsed.log_level, parsed.save_results
+        parsed.organization, parsed.access_token, parsed.repositories, parsed.log_level, parsed.save_results, parsed.file_name
     )

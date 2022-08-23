@@ -5,6 +5,7 @@
 
 import json
 import logging
+import os
 import re
 import time
 from edfi_repo_auditor.checklist import CHECKLIST
@@ -50,11 +51,7 @@ def run_audit(config: Configuration) -> None:
         }
 
     if config.save_results is True:
-        logger.info("Saving report to reports/audit-result.json")
-        json_report = json.dumps(report, indent=4)
-
-        with open("reports/audit-result.json", "w") as outfile:
-            outfile.write(json_report)
+        save_to_file(report, config.file_name)
     else:
         logger.info(pformat(report))
 
@@ -159,6 +156,28 @@ def get_result(checklist: dict, rules: dict) -> int:
             logger.error(f"Unable to read property {property} in results")
 
     return score
+
+
+def save_to_file(report: dict, file_name: str) -> None:
+    folder_name = "reports"
+
+    path: str = None
+    if file_name:
+        _, ext = os.path.splitext(file_name)
+        if (not ext) or (ext != '.json'):
+            file_name += '.json'
+        path = f"{folder_name}/{file_name}"
+    else:
+        path = f"{folder_name}/audit-result.json"
+
+    logger.info(f"Saving report to {path}")
+    json_report = json.dumps(report, indent=4)
+
+    if not os.path.exists(f"{folder_name}/"):
+        os.mkdir(folder_name)
+
+    with open(path, "w") as outfile:
+        outfile.write(json_report)
 
 
 def get_file() -> dict:
