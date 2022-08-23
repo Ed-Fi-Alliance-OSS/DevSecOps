@@ -7,6 +7,7 @@ import json
 import logging
 import re
 import time
+from edfi_repo_auditor.checklist import CHECKLIST
 
 from edfi_repo_auditor.config import Configuration
 from edfi_repo_auditor.github_client import GitHubClient
@@ -19,13 +20,6 @@ logger: logging.Logger = logging.getLogger(__name__)
 # Parameters to evaluate dependabot alerts
 ALERTS_INCLUDED_SEVERITIES = ["CRITICAL", "HIGH"]
 ALERTS_WEEKS_SINCE_CREATED = 3
-
-HAS_ACTIONS = "Has Actions"
-CODEQL = "Uses CodeQL"
-APPROVED_ACTIONS = "Uses only approved GitHub Actions"
-TEST_REPORTER = "Uses Test Reporter"
-UNIT_TESTS = "Has Unit Tests"
-LINTER = "Has Linter"
 
 
 def run_audit(config: Configuration) -> None:
@@ -69,19 +63,19 @@ def run_audit(config: Configuration) -> None:
 
 def audit_actions(client: GitHubClient, organization: str, repository: str) -> dict:
     audit_results = {
-        HAS_ACTIONS: False,
-        CODEQL: False,
-        APPROVED_ACTIONS: False,
-        TEST_REPORTER: False,
-        UNIT_TESTS: False,
-        LINTER: False
+        CHECKLIST.HAS_ACTIONS: False,
+        CHECKLIST.CODEQL: False,
+        CHECKLIST.APPROVED_ACTIONS: False,
+        CHECKLIST.TEST_REPORTER: False,
+        CHECKLIST.UNIT_TESTS: False,
+        CHECKLIST.LINTER: False
     }
 
     actions = client.get_actions(organization, repository)
 
     logger.debug(f"Got {actions['total_count']} workflow files")
 
-    audit_results[HAS_ACTIONS] = actions["total_count"] > 0
+    audit_results[CHECKLIST.HAS_ACTIONS] = actions["total_count"] > 0
 
     workflow_paths = [actions["workflows"]["path"] for actions["workflows"] in actions["workflows"]]
     for file_path in workflow_paths:
@@ -90,22 +84,22 @@ def audit_actions(client: GitHubClient, organization: str, repository: str) -> d
             logger.debug("File not found")
             continue
 
-        if not audit_results[CODEQL]:
-            audit_results[CODEQL] = "uses: github/codeql-action/analyze" in file_content
+        if not audit_results[CHECKLIST.CODEQL]:
+            audit_results[CHECKLIST.CODEQL] = "uses: github/codeql-action/analyze" in file_content
 
-        if not audit_results[APPROVED_ACTIONS]:
-            audit_results[APPROVED_ACTIONS] = "uses: ed-fi-alliance-oss/ed-fi-actions/.github/workflows/repository-scanner.yml" in file_content
+        if not audit_results[CHECKLIST.APPROVED_ACTIONS]:
+            audit_results[CHECKLIST.APPROVED_ACTIONS] = "uses: ed-fi-alliance-oss/ed-fi-actions/.github/workflows/repository-scanner.yml" in file_content
 
-        if not audit_results[TEST_REPORTER]:
-            audit_results[TEST_REPORTER] = "uses: dorny/test-reporter" in file_content
+        if not audit_results[CHECKLIST.TEST_REPORTER]:
+            audit_results[CHECKLIST.TEST_REPORTER] = "uses: dorny/test-reporter" in file_content
 
-        if not audit_results[UNIT_TESTS]:
+        if not audit_results[CHECKLIST.UNIT_TESTS]:
             pattern = re.compile(r"unit.{0,2}test(s)?", flags=re.IGNORECASE)
-            audit_results[UNIT_TESTS] = True if pattern.search(file_content) else False
+            audit_results[CHECKLIST.UNIT_TESTS] = True if pattern.search(file_content) else False
 
-        if not audit_results[LINTER]:
+        if not audit_results[CHECKLIST.LINTER]:
             pattern = re.compile(r"lint(er)?(s)?(ing)?", flags=re.IGNORECASE)
-            audit_results[LINTER] = True if pattern.search(file_content) else False
+            audit_results[CHECKLIST.LINTER] = True if pattern.search(file_content) else False
 
     return audit_results
 
@@ -124,27 +118,27 @@ def get_repo_information(client: GitHubClient, organization: str, repository: st
     logger.debug(f"Repository information: {information}")
 
     return {
-        "Requires Signed commits": rules["requiresCommitSignatures"] if rules else False,
-        "Requires Code review": rules["requiresApprovingReviews"] if rules else False,
-        "Requires PR": rules["requiresApprovingReviews"] if rules else False,
-        "Admin cannot bypass PR": (rules["isAdminEnforced"] is False) if rules else False,
-        "Has Wiki Enabled": information["hasWikiEnabled"],
-        "Has Issues Enabled": information["hasIssuesEnabled"],
-        "Has Projects Enabled": information["hasProjectsEnabled"],
-        "Has Discussions": information["discussions"]["totalCount"] > 0,
-        "Deletes head branch": information["deleteBranchOnMerge"],
-        "Uses Squash Merge": information["squashMergeAllowed"],
-        "Has License Information": information["licenseInfo"] is not None,
-        "Has Dependabot alerts": len(vulnerabilities) > 0
+        CHECKLIST.SIGNED_COMMITS: rules["requiresCommitSignatures"] if rules else False,
+        CHECKLIST.CODE_REVIEW: rules["requiresApprovingReviews"] if rules else False,
+        CHECKLIST.REQUIRES_PR: rules["requiresApprovingReviews"] if rules else False,
+        CHECKLIST.ADMIN_PR: (rules["isAdminEnforced"] is False) if rules else False,
+        CHECKLIST.WIKI: information["hasWikiEnabled"],
+        CHECKLIST.ISSUES: information["hasIssuesEnabled"],
+        CHECKLIST.PROJECTS: information["hasProjectsEnabled"],
+        CHECKLIST.DISCUSSIONS: information["discussions"]["totalCount"] > 0,
+        CHECKLIST.DELETES_HEAD: information["deleteBranchOnMerge"],
+        CHECKLIST.USES_SQUASH: information["squashMergeAllowed"],
+        CHECKLIST.LICENSE_INFORMATION: information["licenseInfo"] is not None,
+        CHECKLIST.DEPENDABOT_HAS_ALERTS: len(vulnerabilities) > 0
     }
 
 
 def review_files(client: GitHubClient, organization: str, repository: str) -> dict:
     files = {
-        "README.md": False,
-        "CONTRIBUTORS.md": False,
-        "NOTICES.md": False,
-        "LICENSE": False
+        CHECKLIST.README: False,
+        CHECKLIST.CONTRIBUTORS: False,
+        CHECKLIST.NOTICES: False,
+        CHECKLIST.LICENSE: False
     }
 
     for file in files:
