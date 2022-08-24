@@ -7,6 +7,7 @@ import pytest
 
 from unittest.mock import MagicMock
 from edfi_repo_auditor.auditor import review_files
+from edfi_repo_auditor.checklist import CHECKLIST
 from edfi_repo_auditor.github_client import GitHubClient
 
 ACCESS_TOKEN = "asd09uasdfu09asdfj;iolkasdfklj"
@@ -18,10 +19,10 @@ CLIENT = GitHubClient(ACCESS_TOKEN)
 def describe_when_reviewing_files() -> None:
     def describe_given_all_files_found() -> None:
         FILES = {
-            "README.md": True,
-            "CONTRIBUTORS.md": True,
-            "NOTICES.md": True,
-            "LICENSE": True
+            CHECKLIST.README: True,
+            CHECKLIST.CONTRIBUTORS: True,
+            CHECKLIST.NOTICES: True,
+            CHECKLIST.LICENSE: True,
         }
 
         @pytest.fixture
@@ -34,10 +35,10 @@ def describe_when_reviewing_files() -> None:
 
     def describe_given_files_not_found() -> None:
         FILES = {
-            "README.md": False,
-            "CONTRIBUTORS.md": False,
-            "NOTICES.md": False,
-            "LICENSE": False
+            CHECKLIST.README: False,
+            CHECKLIST.CONTRIBUTORS: False,
+            CHECKLIST.NOTICES: False,
+            CHECKLIST.LICENSE: False,
         }
 
         @pytest.fixture

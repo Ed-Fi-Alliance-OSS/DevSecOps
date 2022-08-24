@@ -39,15 +39,15 @@ def run_audit(config: Configuration) -> None:
         file_review = review_files(client, config.organization, repo)
         logger.debug(f"Files: {file_review}")
 
-        checklist = actions | file_review | repo_config
+        results = actions | file_review | repo_config
         auditing_rules = get_file()
-        score = get_result(checklist, auditing_rules["rules"])
+        score = get_result(results, auditing_rules["rules"])
         logger.debug(f"Rules to follow: {auditing_rules}")
 
         report[repo] = {
             "score": score,
             "result": "OK" if score > auditing_rules["threshold"] else "Action required",
-            "description": checklist
+            "description": results
         }
 
     if config.save_results is True:

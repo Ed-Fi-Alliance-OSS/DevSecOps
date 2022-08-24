@@ -8,6 +8,7 @@ import pytest
 
 from unittest.mock import MagicMock
 from edfi_repo_auditor.auditor import ALERTS_WEEKS_SINCE_CREATED, get_repo_information
+from edfi_repo_auditor.checklist import CHECKLIST
 from edfi_repo_auditor.github_client import GitHubClient
 
 ACCESS_TOKEN = "asd09uasdfu09asdfj;iolkasdfklj"
@@ -43,7 +44,7 @@ def describe_when_getting_repo_info() -> None:
                 return get_repo_information(CLIENT, OWNER, REPO)
 
             def it_returns_no_alerts(results: dict) -> None:
-                assert results["Has Dependabot alerts"] is False
+                assert results[CHECKLIST.DEPENDABOT_HAS_ALERTS] is False
 
         def describe_given_there_are_alerts_not_old() -> None:
             RESPONSE = {
@@ -82,7 +83,7 @@ def describe_when_getting_repo_info() -> None:
                 return get_repo_information(CLIENT, OWNER, REPO)
 
             def it_returns_no_alerts(results: dict) -> None:
-                assert results["Has Dependabot alerts"] is False
+                assert results[CHECKLIST.DEPENDABOT_HAS_ALERTS] is False
 
         def describe_given_there_are_old_alerts_not_severe() -> None:
             RESPONSE = {
@@ -132,7 +133,7 @@ def describe_when_getting_repo_info() -> None:
                 return get_repo_information(CLIENT, OWNER, REPO)
 
             def it_returns_no_alerts(results: dict) -> None:
-                assert results["Has Dependabot alerts"] is False
+                assert results[CHECKLIST.DEPENDABOT_HAS_ALERTS] is False
 
         def describe_given_there_are_old_critical_risk_alerts() -> None:
             RESPONSE = {
@@ -210,7 +211,7 @@ def describe_when_getting_repo_info() -> None:
                 return get_repo_information(CLIENT, OWNER, REPO)
 
             def it_returns_no_alerts(results: dict) -> None:
-                assert results["Has Dependabot alerts"] is True
+                assert results[CHECKLIST.DEPENDABOT_HAS_ALERTS] is True
 
     def describe_branch_protection() -> None:
         def describe_given_there_are_no_protection_rules() -> None:
@@ -238,9 +239,10 @@ def describe_when_getting_repo_info() -> None:
                 return get_repo_information(CLIENT, OWNER, REPO)
 
             def it_returns_no_rules(results: dict) -> None:
-                assert results["Requires Signed commits"] is False
-                assert results["Requires Code review"] is False
-                assert results["Requires PR"] is False
+                assert results[CHECKLIST.SIGNED_COMMITS] is False
+                assert results[CHECKLIST.CODE_REVIEW] is False
+                assert results[CHECKLIST.REQUIRES_PR] is False
+                assert results[CHECKLIST.ADMIN_PR] is False
 
         def describe_given_there_are_protection_rules() -> None:
             RESPONSE = {
@@ -272,9 +274,10 @@ def describe_when_getting_repo_info() -> None:
                 return get_repo_information(CLIENT, OWNER, REPO)
 
             def it_returns_rules_for_main(results: dict) -> None:
-                assert results["Requires Signed commits"] is True
-                assert results["Requires Code review"] is True
-                assert results["Requires PR"] is True
+                assert results[CHECKLIST.SIGNED_COMMITS] is True
+                assert results[CHECKLIST.CODE_REVIEW] is True
+                assert results[CHECKLIST.REQUIRES_PR] is True
+                assert results[CHECKLIST.ADMIN_PR] is False
 
         def describe_given_there_are_protection_rules_for_other_branch() -> None:
             RESPONSE = {
@@ -306,6 +309,7 @@ def describe_when_getting_repo_info() -> None:
                 return get_repo_information(CLIENT, OWNER, REPO)
 
             def it_returns_rules_for_main(results: dict) -> None:
-                assert results["Requires Signed commits"] is False
-                assert results["Requires Code review"] is False
-                assert results["Requires PR"] is False
+                assert results[CHECKLIST.SIGNED_COMMITS] is False
+                assert results[CHECKLIST.CODE_REVIEW] is False
+                assert results[CHECKLIST.REQUIRES_PR] is False
+                assert results[CHECKLIST.ADMIN_PR] is False

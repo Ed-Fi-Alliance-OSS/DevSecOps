@@ -6,6 +6,7 @@
 import pytest
 
 from edfi_repo_auditor.auditor import get_result
+from edfi_repo_auditor.checklist import CHECKLIST
 
 
 def describe_when_getting_results() -> None:
@@ -24,40 +25,40 @@ def describe_when_getting_results() -> None:
             assert results == 0
 
     def describe_given_property_not_in_checklist() -> None:
-        CHECKLIST = {
-            "Uses Allowed list": False,
-            "README.md": True
+        RESULT = {
+            CHECKLIST.APPROVED_ACTIONS: False,
+            CHECKLIST.README: True
         }
 
         RULES = {
-            "Has Actions": 5,
-            "Uses Allowed list": 5,
-            "README.md": 3
+            CHECKLIST.HAS_ACTIONS: 5,
+            CHECKLIST.APPROVED_ACTIONS: 5,
+            CHECKLIST.README: 3
         }
 
         @pytest.fixture
         def results() -> int:
-            return get_result(CHECKLIST, RULES)
+            return get_result(RESULT, RULES)
 
         def it_adds_the_existing_properties(results: int) -> None:
             assert results == 3
 
     def describe_given_values_are_present() -> None:
-        CHECKLIST = {
-            "Has Actions": True,
-            "Uses Allowed list": False,
-            "README.md": True
+        RESULT = {
+            CHECKLIST.HAS_ACTIONS: True,
+            CHECKLIST.APPROVED_ACTIONS: False,
+            CHECKLIST.README: True
         }
 
         RULES = {
-            "Has Actions": 5,
-            "Uses Allowed list": 5,
-            "README.md": 3
+            CHECKLIST.HAS_ACTIONS: 5,
+            CHECKLIST.APPROVED_ACTIONS: 5,
+            CHECKLIST.README: 3
         }
 
         @pytest.fixture
         def results() -> int:
-            return get_result(CHECKLIST, RULES)
+            return get_result(RESULT, RULES)
 
         def it_adds_the_properties(results: int) -> None:
             assert results == 8
