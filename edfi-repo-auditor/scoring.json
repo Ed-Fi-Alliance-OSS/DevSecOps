@@ -21,7 +21,7 @@
         "Has Linter": 3,
         "Deletes head branch": 1,
         "Uses Squash Merge": 1,
-        "Has License Information": 3,
+        "License Information": 3,
         "Dependabot enabled": -5,
         "Dependabot alerts": -5
     }

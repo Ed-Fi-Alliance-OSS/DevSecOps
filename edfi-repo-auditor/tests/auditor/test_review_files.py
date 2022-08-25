@@ -19,10 +19,10 @@ CLIENT = GitHubClient(ACCESS_TOKEN)
 def describe_when_reviewing_files() -> None:
     def describe_given_all_files_found() -> None:
         FILES = {
-            CHECKLIST.README: True,
-            CHECKLIST.CONTRIBUTORS: True,
-            CHECKLIST.NOTICES: True,
-            CHECKLIST.LICENSE: True,
+            CHECKLIST.README["description"]: True,
+            CHECKLIST.CONTRIBUTORS["description"]: True,
+            CHECKLIST.NOTICES["description"]: True,
+            CHECKLIST.LICENSE["description"]: True,
         }
 
         @pytest.fixture
@@ -35,10 +35,10 @@ def describe_when_reviewing_files() -> None:
 
     def describe_given_files_not_found() -> None:
         FILES = {
-            CHECKLIST.README: False,
-            CHECKLIST.CONTRIBUTORS: False,
-            CHECKLIST.NOTICES: False,
-            CHECKLIST.LICENSE: False,
+            CHECKLIST.README["description"]: False,
+            CHECKLIST.CONTRIBUTORS["description"]: False,
+            CHECKLIST.NOTICES["description"]: False,
+            CHECKLIST.LICENSE["description"]: False,
         }
 
         @pytest.fixture

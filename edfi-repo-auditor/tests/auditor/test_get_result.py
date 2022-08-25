@@ -26,14 +26,14 @@ def describe_when_getting_results() -> None:
 
     def describe_given_property_not_in_checklist() -> None:
         RESULT = {
-            CHECKLIST.APPROVED_ACTIONS: False,
-            CHECKLIST.README: True
+            CHECKLIST.APPROVED_ACTIONS["description"]: False,
+            CHECKLIST.README["description"]: True
         }
 
         RULES = {
-            CHECKLIST.HAS_ACTIONS: 5,
-            CHECKLIST.APPROVED_ACTIONS: 5,
-            CHECKLIST.README: 3
+            CHECKLIST.HAS_ACTIONS["description"]: 5,
+            CHECKLIST.APPROVED_ACTIONS["description"]: 5,
+            CHECKLIST.README["description"]: 3
         }
 
         @pytest.fixture
@@ -45,15 +45,15 @@ def describe_when_getting_results() -> None:
 
     def describe_given_values_are_present() -> None:
         RESULT = {
-            CHECKLIST.HAS_ACTIONS: True,
-            CHECKLIST.APPROVED_ACTIONS: False,
-            CHECKLIST.README: True
+            CHECKLIST.HAS_ACTIONS["description"]: True,
+            CHECKLIST.APPROVED_ACTIONS["description"]: False,
+            CHECKLIST.README["description"]: True
         }
 
         RULES = {
-            CHECKLIST.HAS_ACTIONS: 5,
-            CHECKLIST.APPROVED_ACTIONS: 5,
-            CHECKLIST.README: 3
+            CHECKLIST.HAS_ACTIONS["description"]: 5,
+            CHECKLIST.APPROVED_ACTIONS["description"]: 5,
+            CHECKLIST.README["description"]: 3
         }
 
         @pytest.fixture

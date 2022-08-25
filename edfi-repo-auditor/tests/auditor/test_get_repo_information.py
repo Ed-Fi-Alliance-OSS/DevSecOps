@@ -45,10 +45,10 @@ def describe_when_getting_repo_info() -> None:
                 return get_repo_information(CLIENT, OWNER, REPO)
 
             def it_returns_no_rules(results: dict) -> None:
-                assert results[CHECKLIST.SIGNED_COMMITS] is False
-                assert results[CHECKLIST.CODE_REVIEW] is False
-                assert results[CHECKLIST.REQUIRES_PR] is False
-                assert results[CHECKLIST.ADMIN_PR] is False
+                assert results[CHECKLIST.SIGNED_COMMITS["description"]] is False
+                assert results[CHECKLIST.CODE_REVIEW["description"]] is False
+                assert results[CHECKLIST.REQUIRES_PR["description"]] is False
+                assert results[CHECKLIST.ADMIN_PR["description"]] is False
 
         def describe_given_there_are_protection_rules() -> None:
             RESPONSE = {
@@ -82,10 +82,10 @@ def describe_when_getting_repo_info() -> None:
                 return get_repo_information(CLIENT, OWNER, REPO)
 
             def it_returns_rules_for_main(results: dict) -> None:
-                assert results[CHECKLIST.SIGNED_COMMITS] is True
-                assert results[CHECKLIST.CODE_REVIEW] is True
-                assert results[CHECKLIST.REQUIRES_PR] is True
-                assert results[CHECKLIST.ADMIN_PR] is False
+                assert results[CHECKLIST.SIGNED_COMMITS["description"]] is True
+                assert results[CHECKLIST.CODE_REVIEW["description"]] is True
+                assert results[CHECKLIST.REQUIRES_PR["description"]] is True
+                assert results[CHECKLIST.ADMIN_PR["description"]] is False
 
         def describe_given_there_are_protection_rules_for_other_branch() -> None:
             RESPONSE = {
@@ -119,7 +119,7 @@ def describe_when_getting_repo_info() -> None:
                 return get_repo_information(CLIENT, OWNER, REPO)
 
             def it_returns_rules_for_main(results: dict) -> None:
-                assert results[CHECKLIST.SIGNED_COMMITS] is False
-                assert results[CHECKLIST.CODE_REVIEW] is False
-                assert results[CHECKLIST.REQUIRES_PR] is False
-                assert results[CHECKLIST.ADMIN_PR] is False
+                assert results[CHECKLIST.SIGNED_COMMITS["description"]] is False
+                assert results[CHECKLIST.CODE_REVIEW["description"]] is False
+                assert results[CHECKLIST.REQUIRES_PR["description"]] is False
+                assert results[CHECKLIST.ADMIN_PR["description"]] is False

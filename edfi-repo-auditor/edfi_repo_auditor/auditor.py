@@ -68,19 +68,19 @@ def set_audit_results(results: dict) -> dict:
 
 def audit_actions(client: GitHubClient, organization: str, repository: str) -> dict:
     audit_results = {
-        CHECKLIST.HAS_ACTIONS: False,
-        CHECKLIST.CODEQL: False,
-        CHECKLIST.APPROVED_ACTIONS: False,
-        CHECKLIST.TEST_REPORTER: False,
-        CHECKLIST.UNIT_TESTS: False,
-        CHECKLIST.LINTER: False
+        CHECKLIST.HAS_ACTIONS["description"]: False,
+        CHECKLIST.CODEQL["description"]: False,
+        CHECKLIST.APPROVED_ACTIONS["description"]: False,
+        CHECKLIST.TEST_REPORTER["description"]: False,
+        CHECKLIST.UNIT_TESTS["description"]: False,
+        CHECKLIST.LINTER["description"]: False
     }
 
     actions = client.get_actions(organization, repository)
 
     logger.debug(f"Got {actions['total_count']} workflow files")
 
-    audit_results[CHECKLIST.HAS_ACTIONS] = actions["total_count"] > 0
+    audit_results[CHECKLIST.HAS_ACTIONS["description"]] = actions["total_count"] > 0
 
     workflow_paths = [actions["workflows"]["path"] for actions["workflows"] in actions["workflows"]]
     for file_path in workflow_paths:
@@ -89,22 +89,22 @@ def audit_actions(client: GitHubClient, organization: str, repository: str) -> d
             logger.debug("File not found")
             continue
 
-        if not audit_results[CHECKLIST.CODEQL]:
-            audit_results[CHECKLIST.CODEQL] = "uses: github/codeql-action/analyze" in file_content
+        if not audit_results[CHECKLIST.CODEQL["description"]]:
+            audit_results[CHECKLIST.CODEQL["description"]] = "uses: github/codeql-action/analyze" in file_content
 
-        if not audit_results[CHECKLIST.APPROVED_ACTIONS]:
-            audit_results[CHECKLIST.APPROVED_ACTIONS] = "uses: ed-fi-alliance-oss/ed-fi-actions/.github/workflows/repository-scanner.yml" in file_content
+        if not audit_results[CHECKLIST.APPROVED_ACTIONS["description"]]:
+            audit_results[CHECKLIST.APPROVED_ACTIONS["description"]] = "uses: ed-fi-alliance-oss/ed-fi-actions/.github/workflows/repository-scanner.yml" in file_content
 
-        if not audit_results[CHECKLIST.TEST_REPORTER]:
-            audit_results[CHECKLIST.TEST_REPORTER] = "uses: dorny/test-reporter" in file_content
+        if not audit_results[CHECKLIST.TEST_REPORTER["description"]]:
+            audit_results[CHECKLIST.TEST_REPORTER["description"]] = "uses: dorny/test-reporter" in file_content
 
-        if not audit_results[CHECKLIST.UNIT_TESTS]:
+        if not audit_results[CHECKLIST.UNIT_TESTS["description"]]:
             pattern = re.compile(r"unit.{0,2}test(s)?", flags=re.IGNORECASE)
-            audit_results[CHECKLIST.UNIT_TESTS] = True if pattern.search(file_content) else False
+            audit_results[CHECKLIST.UNIT_TESTS["description"]] = True if pattern.search(file_content) else False
 
-        if not audit_results[CHECKLIST.LINTER]:
+        if not audit_results[CHECKLIST.LINTER["description"]]:
             pattern = re.compile(r"lint(er)?(s)?(ing)?", flags=re.IGNORECASE)
-            audit_results[CHECKLIST.LINTER] = True if pattern.search(file_content) else False
+            audit_results[CHECKLIST.LINTER["description"]] = True if pattern.search(file_content) else False
 
     return audit_results
 
@@ -112,8 +112,8 @@ def audit_actions(client: GitHubClient, organization: str, repository: str) -> d
 def get_repo_information(client: GitHubClient, organization: str, repository: str) -> dict:
     information = client.get_repository_information(organization, repository)
 
-    dependabot = audit_alerts(client, organization, repository,
-                              information["vulnerabilityAlerts"]["nodes"])
+    dependabot_results = audit_alerts(client, organization, repository,
+                                      information["vulnerabilityAlerts"]["nodes"])
 
     rulesForMain = [rules for rules in information["branchProtectionRules"]["nodes"] if rules["pattern"] == "main"]
     rules = rulesForMain[0] if rulesForMain else None
@@ -121,18 +121,18 @@ def get_repo_information(client: GitHubClient, organization: str, repository: st
     logger.debug(f"Repository information: {information}")
 
     return {
-        CHECKLIST.SIGNED_COMMITS: rules["requiresCommitSignatures"] if rules else False,
-        CHECKLIST.CODE_REVIEW: rules["requiresApprovingReviews"] if rules else False,
-        CHECKLIST.REQUIRES_PR: rules["requiresApprovingReviews"] if rules else False,
-        CHECKLIST.ADMIN_PR: (rules["isAdminEnforced"] is False) if rules else False,
-        CHECKLIST.WIKI: information["hasWikiEnabled"],
-        CHECKLIST.ISSUES: information["hasIssuesEnabled"],
-        CHECKLIST.PROJECTS: information["hasProjectsEnabled"],
-        CHECKLIST.DISCUSSIONS: information["discussions"]["totalCount"] > 0,
-        CHECKLIST.DELETES_HEAD: information["deleteBranchOnMerge"],
-        CHECKLIST.USES_SQUASH: information["squashMergeAllowed"],
-        CHECKLIST.LICENSE_INFORMATION: information["licenseInfo"] is not None,
-    } | dependabot
+        CHECKLIST.SIGNED_COMMITS["description"]: rules["requiresCommitSignatures"] if rules else False,
+        CHECKLIST.CODE_REVIEW["description"]: rules["requiresApprovingReviews"] if rules else False,
+        CHECKLIST.REQUIRES_PR["description"]: rules["requiresApprovingReviews"] if rules else False,
+        CHECKLIST.ADMIN_PR["description"]: (rules["isAdminEnforced"] is False) if rules else False,
+        CHECKLIST.WIKI["description"]: information["hasWikiEnabled"],
+        CHECKLIST.ISSUES["description"]: information["hasIssuesEnabled"],
+        CHECKLIST.PROJECTS["description"]: information["hasProjectsEnabled"],
+        CHECKLIST.DISCUSSIONS["description"]: information["discussions"]["totalCount"] > 0,
+        CHECKLIST.DELETES_HEAD["description"]: information["deleteBranchOnMerge"],
+        CHECKLIST.USES_SQUASH["description"]: information["squashMergeAllowed"],
+        CHECKLIST.LICENSE_INFORMATION["description"]: "OK" if information["licenseInfo"] is not None else "License not found",
+    } | dependabot_results
 
 
 def audit_alerts(client: GitHubClient, organization: str, repository: str, alerts: List[str]) -> dict:
@@ -144,17 +144,17 @@ def audit_alerts(client: GitHubClient, organization: str, repository: str, alert
     dependabot_enabled = client.has_dependabot_enabled(organization, repository)
     # ToDo: Get messages on success from a constant
     return {
-        CHECKLIST.DEPENDABOT_ENABLED: "OK" if dependabot_enabled else "Dependabot is not enabled or given token does not have admin permission",
-        CHECKLIST.DEPENDABOT_ALERTS: "OK" if dependabot_enabled and total_vulnerabilities == 0 else "Review existing alerts and dependabot status"
+        CHECKLIST.DEPENDABOT_ENABLED["description"]: CHECKLIST.DEPENDABOT_ENABLED["success"] if dependabot_enabled else CHECKLIST.DEPENDABOT_ENABLED["error"],
+        CHECKLIST.DEPENDABOT_ALERTS["description"]: CHECKLIST.DEPENDABOT_ENABLED["success"] if total_vulnerabilities == 0 else CHECKLIST.DEPENDABOT_ALERTS["error"],
     }
 
 
 def review_files(client: GitHubClient, organization: str, repository: str) -> dict:
     files = {
-        CHECKLIST.README: False,
-        CHECKLIST.CONTRIBUTORS: False,
-        CHECKLIST.NOTICES: False,
-        CHECKLIST.LICENSE: False
+        CHECKLIST.README["description"]: False,
+        CHECKLIST.CONTRIBUTORS["description"]: False,
+        CHECKLIST.NOTICES["description"]: False,
+        CHECKLIST.LICENSE["description"]: False
     }
 
     for file in files:
@@ -169,7 +169,7 @@ def get_result(checklist: dict, rules: dict) -> int:
     score = 0
     for property in rules:
         try:
-            if (checklist[property] is True):
+            if (checklist[property] is True or checklist[property] == "OK"):
                 score += rules[property]
         except KeyError:
             logger.error(f"Unable to read property {property} in results")

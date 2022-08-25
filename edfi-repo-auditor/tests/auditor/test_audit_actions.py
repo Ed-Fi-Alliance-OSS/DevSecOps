@@ -34,7 +34,7 @@ def describe_when_auditing_actions() -> None:
             CLIENT.get_actions = MagicMock(return_value=actions)
             CLIENT.get_file_content = MagicMock(return_value=file_content)
             results = audit_actions(CLIENT, OWNER, REPO)
-            assert results[CHECKLIST.CODEQL] is False
+            assert results[CHECKLIST.CODEQL["description"]] is False
 
         def it_returns_true_when_has_codeql(actions: dict) -> None:
             file_content = """
@@ -44,7 +44,7 @@ def describe_when_auditing_actions() -> None:
             CLIENT.get_actions = MagicMock(return_value=actions)
             CLIENT.get_file_content = MagicMock(return_value=file_content)
             results = audit_actions(CLIENT, OWNER, REPO)
-            assert results[CHECKLIST.CODEQL] is True
+            assert results[CHECKLIST.CODEQL["description"]] is True
 
     def describe_given_reviewing_allowed_list() -> None:
         @pytest.fixture
@@ -64,7 +64,7 @@ def describe_when_auditing_actions() -> None:
             CLIENT.get_actions = MagicMock(return_value=actions)
             CLIENT.get_file_content = MagicMock(return_value=file_content)
             results = audit_actions(CLIENT, OWNER, REPO)
-            assert results[CHECKLIST.APPROVED_ACTIONS] is False
+            assert results[CHECKLIST.APPROVED_ACTIONS["description"]] is False
 
         def it_returns_true_when_uses_approved_actions(actions: dict) -> None:
             file_content = """
@@ -74,7 +74,7 @@ def describe_when_auditing_actions() -> None:
             CLIENT.get_actions = MagicMock(return_value=actions)
             CLIENT.get_file_content = MagicMock(return_value=file_content)
             results = audit_actions(CLIENT, OWNER, REPO)
-            assert results[CHECKLIST.APPROVED_ACTIONS] is True
+            assert results[CHECKLIST.APPROVED_ACTIONS["description"]] is True
 
     def describe_given_reviewing_test_reporter() -> None:
         @pytest.fixture
@@ -93,7 +93,7 @@ def describe_when_auditing_actions() -> None:
             CLIENT.get_actions = MagicMock(return_value=actions)
             CLIENT.get_file_content = MagicMock(return_value=file_content)
             results = audit_actions(CLIENT, OWNER, REPO)
-            assert results[CHECKLIST.TEST_REPORTER] is False
+            assert results[CHECKLIST.TEST_REPORTER["description"]] is False
 
         def it_returns_true_when_has_test_reporter(actions: dict) -> None:
             file_content = """
@@ -103,7 +103,7 @@ def describe_when_auditing_actions() -> None:
             CLIENT.get_actions = MagicMock(return_value=actions)
             CLIENT.get_file_content = MagicMock(return_value=file_content)
             results = audit_actions(CLIENT, OWNER, REPO)
-            assert results[CHECKLIST.TEST_REPORTER] is True
+            assert results[CHECKLIST.TEST_REPORTER["description"]] is True
 
     def describe_given_reviewing_unit_tests() -> None:
         @pytest.fixture
@@ -123,7 +123,7 @@ def describe_when_auditing_actions() -> None:
             CLIENT.get_actions = MagicMock(return_value=actions)
             CLIENT.get_file_content = MagicMock(return_value=file_content)
             results = audit_actions(CLIENT, OWNER, REPO)
-            assert results[CHECKLIST.UNIT_TESTS] is True
+            assert results[CHECKLIST.UNIT_TESTS["description"]] is True
 
         def it_returns_false_when_no_unit_tests(actions: dict) -> None:
             file_content = """
@@ -132,7 +132,7 @@ def describe_when_auditing_actions() -> None:
             CLIENT.get_actions = MagicMock(return_value=actions)
             CLIENT.get_file_content = MagicMock(return_value=file_content)
             results = audit_actions(CLIENT, OWNER, REPO)
-            assert results[CHECKLIST.UNIT_TESTS] is False
+            assert results[CHECKLIST.UNIT_TESTS["description"]] is False
 
     def describe_given_reviewing_linter() -> None:
         @pytest.fixture
@@ -152,7 +152,7 @@ def describe_when_auditing_actions() -> None:
             CLIENT.get_actions = MagicMock(return_value=actions)
             CLIENT.get_file_content = MagicMock(return_value=file_content)
             results = audit_actions(CLIENT, OWNER, REPO)
-            assert results[CHECKLIST.LINTER] is True
+            assert results[CHECKLIST.LINTER["description"]] is True
 
         def it_returns_false_when_no_linter(actions: dict) -> None:
             file_content = """
@@ -161,4 +161,4 @@ def describe_when_auditing_actions() -> None:
             CLIENT.get_actions = MagicMock(return_value=actions)
             CLIENT.get_file_content = MagicMock(return_value=file_content)
             results = audit_actions(CLIENT, OWNER, REPO)
-            assert results[CHECKLIST.LINTER] is False
+            assert results[CHECKLIST.LINTER["description"]] is False
