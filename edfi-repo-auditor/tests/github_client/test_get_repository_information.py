@@ -116,7 +116,7 @@ def describe_when_getting_repository_information() -> None:
           "column": 3
         }
       ],
-      "message": "Could not resolve to a Repository with the name 'Ed-Fi-Exchange-OSS/Meadowlarks'."
+      "message": "Could not resolve to a Repository with the name 'Ed-Fi-Alliance-OSS/Ed-Fi-ODS'."
     }
   ]
 }

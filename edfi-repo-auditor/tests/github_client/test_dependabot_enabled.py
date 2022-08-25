@@ -15,7 +15,7 @@ REPO = "Ed-Fi-ODS"
 DEPENDABOT_URL = f"{API_URL}/repos/{OWNER}/{REPO}/vulnerability-alerts"
 
 
-def describe_when_checking_for_Dependabot() -> None:
+def describe_when_checking_for_dependabot() -> None:
     def describe_given_blank_owner() -> None:
         def it_raises_an_a_ValueError() -> None:
             with pytest.raises(ValueError):
@@ -48,11 +48,16 @@ def describe_when_checking_for_Dependabot() -> None:
 
             @pytest.fixture
             def result() -> bool:
-                with pytest.raises(RuntimeError):
-                    GitHubClient(ACCESS_TOKEN).has_dependabot_enabled(
-                        OWNER,
-                        REPO
+                with requests_mock.Mocker() as m:
+                    m.get(
+                        DEPENDABOT_URL,
+                        status_code=HTTPStatus.NOT_FOUND
                     )
+
+                    return GitHubClient(ACCESS_TOKEN).has_dependabot_enabled(
+                            OWNER,
+                            REPO
+                        )
 
             def it_returns_false(result: bool) -> None:
                 assert result is False
@@ -61,11 +66,16 @@ def describe_when_checking_for_Dependabot() -> None:
 
             @pytest.fixture
             def result() -> bool:
-                with pytest.raises(RuntimeError):
-                    GitHubClient("").has_dependabot_enabled(
-                        OWNER,
-                        REPO
+                with requests_mock.Mocker() as m:
+                    m.get(
+                        DEPENDABOT_URL,
+                        status_code=HTTPStatus.NOT_FOUND
                     )
+
+                    return GitHubClient("non-@dm!nT0Ken").has_dependabot_enabled(
+                            OWNER,
+                            REPO
+                        )
 
             def it_returns_false(result: bool) -> None:
                 assert result is False

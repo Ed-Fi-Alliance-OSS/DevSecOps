@@ -5,7 +5,7 @@
 
 import pytest
 
-from unittest.mock import MagicMock
+from unittest.mock import patch, MagicMock
 from edfi_repo_auditor.auditor import get_repo_information
 from edfi_repo_auditor.checklist import CHECKLIST
 from edfi_repo_auditor.github_client import GitHubClient
@@ -38,8 +38,10 @@ def describe_when_getting_repo_info() -> None:
             }
 
             @pytest.fixture
-            def results() -> dict:
+            @patch('edfi_repo_auditor.auditor.audit_alerts')
+            def results(mock_audit_alerts) -> dict:
                 CLIENT.get_repository_information = MagicMock(return_value=RESPONSE)
+                mock_audit_alerts.return_value = {}
                 return get_repo_information(CLIENT, OWNER, REPO)
 
             def it_returns_no_rules(results: dict) -> None:
@@ -73,8 +75,10 @@ def describe_when_getting_repo_info() -> None:
             }
 
             @pytest.fixture
-            def results() -> dict:
+            @patch('edfi_repo_auditor.auditor.audit_alerts')
+            def results(mock_audit_alerts) -> dict:
                 CLIENT.get_repository_information = MagicMock(return_value=RESPONSE)
+                mock_audit_alerts.return_value = {}
                 return get_repo_information(CLIENT, OWNER, REPO)
 
             def it_returns_rules_for_main(results: dict) -> None:
@@ -108,8 +112,10 @@ def describe_when_getting_repo_info() -> None:
             }
 
             @pytest.fixture
-            def results() -> dict:
+            @patch('edfi_repo_auditor.auditor.audit_alerts')
+            def results(mock_audit_alerts) -> dict:
                 CLIENT.get_repository_information = MagicMock(return_value=RESPONSE)
+                mock_audit_alerts.return_value = {}
                 return get_repo_information(CLIENT, OWNER, REPO)
 
             def it_returns_rules_for_main(results: dict) -> None:
