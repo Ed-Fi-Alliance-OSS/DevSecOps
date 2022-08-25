@@ -107,6 +107,9 @@ class GitHubClient:
                 raise http_error(msg, response)
 
             return body
+        elif response.status_code == requests.codes.no_content:
+            # There's a failure when attempting to convert a 204 response to JSON
+            return {"status_code": response.status_code}
         else:
             msg = f"Query for {description}."
             raise http_error(msg, response)
@@ -161,6 +164,23 @@ class GitHubClient:
         )
 
         return body["data"]["repository"]
+
+    def has_dependabot_enabled(self, owner: str, repository: str) -> bool:
+        if len(owner.strip()) == 0:
+            raise ValueError("owner cannot be blank")
+        if len(repository.strip()) == 0:
+            raise ValueError("repository cannot be blank")
+
+        has_dependabot = False
+        try:
+            dependabot = self._execute_api_call(
+                f"Getting actions for {owner}/{repository}", "GET", f"{API_URL}/repos/{owner}/{repository}/vulnerability-alerts"
+            )
+            has_dependabot = dependabot["status_code"] == requests.codes.no_content
+        except RuntimeError:
+            has_dependabot = False
+
+        return has_dependabot
 
     def get_file_content(self, owner: str, repository: str, path: str) -> str:
         if len(owner.strip()) == 0:

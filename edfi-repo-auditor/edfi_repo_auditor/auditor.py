@@ -34,12 +34,14 @@ def run_audit(config: Configuration) -> None:
         logger.info(f"Scanning repository {repo}")
         repo_config = get_repo_information(client, config.organization, repo)
         logger.debug(f"Repo configuration: {repo_config}")
+        dependabot_enabled = client.has_dependabot_enabled(config.organization, repo)
+        logger.debug(f"Has dependabot enabled: {dependabot_enabled}")
         actions = audit_actions(client, config.organization, repo)
         logger.debug(f"Actions {actions}")
         file_review = review_files(client, config.organization, repo)
         logger.debug(f"Files: {file_review}")
 
-        results = actions | file_review | repo_config
+        results = actions | file_review | repo_config | {CHECKLIST.HAS_DEPENDABOT_ENABLED: dependabot_enabled}
         auditing_rules = get_file()
         score = get_result(results, auditing_rules["rules"])
         logger.debug(f"Rules to follow: {auditing_rules}")
