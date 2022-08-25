@@ -8,6 +8,7 @@ import logging
 import os
 import re
 import time
+from typing import List
 from edfi_repo_auditor.checklist import CHECKLIST
 
 from edfi_repo_auditor.config import Configuration
@@ -34,16 +35,14 @@ def run_audit(config: Configuration) -> None:
         logger.info(f"Scanning repository {repo}")
         repo_config = get_repo_information(client, config.organization, repo)
         logger.debug(f"Repo configuration: {repo_config}")
-        dependabot_enabled = client.has_dependabot_enabled(config.organization, repo)
-        logger.debug(f"Has dependabot enabled: {dependabot_enabled}")
         actions = audit_actions(client, config.organization, repo)
         logger.debug(f"Actions {actions}")
         file_review = review_files(client, config.organization, repo)
         logger.debug(f"Files: {file_review}")
 
-        results = actions | file_review | repo_config | {CHECKLIST.HAS_DEPENDABOT_ENABLED: dependabot_enabled}
+        results = set_audit_results(actions | file_review | repo_config)
         auditing_rules = get_file()
-        score = get_result(results, auditing_rules["rules"])
+        score = 0  # get_result(results, auditing_rules["rules"])
         logger.debug(f"Rules to follow: {auditing_rules}")
 
         report[repo] = {
@@ -58,6 +57,13 @@ def run_audit(config: Configuration) -> None:
         logger.info(pformat(report))
 
     logger.info(f"Finished auditing repositories for {config.organization} in {'{:.2f}'.format(time.time() - start)} seconds")
+
+
+def set_audit_results(results: dict) -> dict:
+    for property in CHECKLIST:
+        print(property)
+
+    return results
 
 
 def audit_actions(client: GitHubClient, organization: str, repository: str) -> dict:
@@ -106,10 +112,8 @@ def audit_actions(client: GitHubClient, organization: str, repository: str) -> d
 def get_repo_information(client: GitHubClient, organization: str, repository: str) -> dict:
     information = client.get_repository_information(organization, repository)
 
-    # Currently,this is only checking if there are alerts, which does not differentiates if dependabot is enabled or not
-    vulnerabilities = [alerts for alerts in information["vulnerabilityAlerts"]["nodes"]
-                       if (alerts["createdAt"] < (datetime.now() - timedelta(ALERTS_WEEKS_SINCE_CREATED * 7)).isoformat() and
-                       alerts["securityVulnerability"]["advisory"]["severity"] in ALERTS_INCLUDED_SEVERITIES)]
+    dependabot = audit_alerts(client, organization, repository,
+                              information["vulnerabilityAlerts"]["nodes"])
 
     rulesForMain = [rules for rules in information["branchProtectionRules"]["nodes"] if rules["pattern"] == "main"]
     rules = rulesForMain[0] if rulesForMain else None
@@ -128,7 +132,20 @@ def get_repo_information(client: GitHubClient, organization: str, repository: st
         CHECKLIST.DELETES_HEAD: information["deleteBranchOnMerge"],
         CHECKLIST.USES_SQUASH: information["squashMergeAllowed"],
         CHECKLIST.LICENSE_INFORMATION: information["licenseInfo"] is not None,
-        CHECKLIST.DEPENDABOT_HAS_ALERTS: len(vulnerabilities) > 0
+    } | dependabot
+
+
+def audit_alerts(client: GitHubClient, organization: str, repository: str, alerts: List[str]) -> dict:
+    vulnerabilities = [alerts for alerts in alerts
+                       if (alerts["createdAt"] < (datetime.now() - timedelta(ALERTS_WEEKS_SINCE_CREATED * 7)).isoformat() and
+                           alerts["securityVulnerability"]["advisory"]["severity"] in ALERTS_INCLUDED_SEVERITIES)]
+    total_vulnerabilities = len(vulnerabilities)
+
+    dependabot_enabled = client.has_dependabot_enabled(organization, repository)
+    # ToDo: Get messages on success from a constant
+    return {
+        CHECKLIST.DEPENDABOT_ENABLED: "OK" if dependabot_enabled else "Dependabot is not enabled or given token does not have admin permission",
+        CHECKLIST.DEPENDABOT_ALERTS: "OK" if dependabot_enabled and total_vulnerabilities == 0 else "Review existing alerts and dependabot status"
     }
 
 
