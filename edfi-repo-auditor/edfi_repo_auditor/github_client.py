@@ -196,6 +196,6 @@ class GitHubClient:
                 f"Getting file {path} for {owner}/{repository}", "GET", f"{API_URL}/repos/{owner}/{repository}/contents/{path}"
             )
         except RuntimeError:
-            logger.warn(f"Unable to get file {path}. Verify that the file is available. Skipping")
+            pass
 
         return base64.b64decode(file_result["content"]).decode('UTF-8') if file_result else None

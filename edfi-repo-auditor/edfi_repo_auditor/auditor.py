@@ -96,10 +96,10 @@ def audit_actions(client: GitHubClient, organization: str, repository: str) -> d
         if CHECKLIST.UNIT_TESTS["description"] not in audit_results or audit_results[CHECKLIST.UNIT_TESTS["description"]] == CHECKLIST.UNIT_TESTS["fail"]:
             audit_results[CHECKLIST.UNIT_TESTS["description"]] = get_message(
                 CHECKLIST.UNIT_TESTS,
-                ut_pattern.search(file_content))
+                ut_pattern.search(file_content) is not None)
 
         if CHECKLIST.LINTER["description"] not in audit_results or audit_results[CHECKLIST.LINTER["description"]] == CHECKLIST.LINTER["fail"]:
-            audit_results[CHECKLIST.LINTER["description"]] = get_message(CHECKLIST.LINTER, lint_pattern.search(file_content))
+            audit_results[CHECKLIST.LINTER["description"]] = get_message(CHECKLIST.LINTER, lint_pattern.search(file_content) is not None)
 
     return audit_results
 
@@ -131,7 +131,7 @@ def get_repo_information(client: GitHubClient, organization: str, repository: st
     }, **dependabot_results}
 
 
-def audit_alerts(client: GitHubClient, organization: str, repository: str, alerts: List[str]) -> dict:
+def audit_alerts(client: GitHubClient, organization: str, repository: str, alerts: List[dict]) -> dict:
     vulnerabilities = [alerts for alerts in alerts
                        if (alerts["createdAt"] < (datetime.now() - timedelta(ALERTS_WEEKS_SINCE_CREATED * 7)).isoformat() and
                            alerts["securityVulnerability"]["advisory"]["severity"] in ALERTS_INCLUDED_SEVERITIES)]
@@ -170,7 +170,7 @@ def get_result(results: dict, rules: dict) -> int:
             if (results[property] == CHECKLIST_DEFAULT_SUCCESS_MESSAGE):
                 score += rules[property]
         except KeyError:
-            logger.error(f"Unable to read property {property} in results")
+            logger.info(f"Unable to read property {property} in results")
 
     return score
 
@@ -178,7 +178,7 @@ def get_result(results: dict, rules: dict) -> int:
 def save_to_file(report: dict, file_name: str) -> None:
     folder_name = "reports"
 
-    path: str = None
+    path: str = ""
     if file_name:
         _, ext = os.path.splitext(file_name)
         if (not ext) or (ext != '.json'):
