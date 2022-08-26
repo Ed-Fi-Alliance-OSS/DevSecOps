@@ -5,3 +5,6 @@ edfi-repo-auditor/.env
 /**/.coverage
 
 edfi-repo-auditor/reports/*.json
+
+
+**/*junit.xml
