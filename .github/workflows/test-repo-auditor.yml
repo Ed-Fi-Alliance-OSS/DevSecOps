@@ -43,9 +43,11 @@ jobs:
         run: poetry run flake8
 
       - name: Type Check
+        if: always()
         run: poetry run mypy . --junit-xml mypy-junit.xml
 
       - name: Unit Tests
+        if: always()
         run: poetry run pytest --junitxml=pytest-junit.xml
 
       - name: Upload PyTest Results
