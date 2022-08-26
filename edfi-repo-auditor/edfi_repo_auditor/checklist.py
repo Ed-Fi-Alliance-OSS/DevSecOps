@@ -37,115 +37,123 @@ CHECKLIST = options(
               HAS_ACTIONS={
                 "description": "Has Actions",
                 "success": DEFAULT_SUCCESS_MESSAGE,
-                "error": ""
+                "fail": "Repo is not using GH Actions"
               },
               CODEQL={
                 "description": "Uses CodeQL",
                 "success": DEFAULT_SUCCESS_MESSAGE,
-                "error": ""
+                "fail": "CodeQL not found"
               },
               APPROVED_ACTIONS={
                 "description": "Uses only approved GitHub Actions",
                 "success": DEFAULT_SUCCESS_MESSAGE,
-                "error": ""
+                "fail": "Consider using only approved GH Actions"
               },
               TEST_REPORTER={
                 "description": "Uses Test Reporter",
                 "success": DEFAULT_SUCCESS_MESSAGE,
-                "error": ""
+                "fail": "Not found"
               },
               UNIT_TESTS={
                 "description": "Has Unit Tests",
                 "success": DEFAULT_SUCCESS_MESSAGE,
-                "error": ""
+                "fail": "Not found"
               },
               LINTER={
                 "description": "Has Linter",
                 "success": DEFAULT_SUCCESS_MESSAGE,
-                "error": ""
+                "fail": "Linting step not found"
               },
               SIGNED_COMMITS={
                 "description": "Requires Signed commits",
                 "success": DEFAULT_SUCCESS_MESSAGE,
-                "error": ""
+                "fail": "Commits should be signed"
               },
               CODE_REVIEW={
                 "description": "Requires Code review",
                 "success": DEFAULT_SUCCESS_MESSAGE,
-                "error": ""
+                "fail": "Code review not required"
               },
               REQUIRES_PR={
                 "description": "Requires PR",
                 "success": DEFAULT_SUCCESS_MESSAGE,
-                "error": ""
+                "fail": "Can push without PR"
               },
               ADMIN_PR={
                 "description": "Admin cannot bypass PR",
                 "success": DEFAULT_SUCCESS_MESSAGE,
-                "error": ""
+                "fail": "Admin can bypass"
               },
               WIKI={
-                "description": "Has Wiki Enabled",
+                "description": "Wiki Disabled",
                 "success": DEFAULT_SUCCESS_MESSAGE,
-                "error": ""
+                "fail": "WARNING: Wiki is enabled"
               },
               ISSUES={
-                "description": "Has Issues Enabled",
+                "description": "Issues Disabled",
                 "success": DEFAULT_SUCCESS_MESSAGE,
-                "error": ""
+                "fail": "WARNING: Issues are enabled"
               },
               PROJECTS={
-                "description": "Has Projects Enabled",
+                "description": "Projects Disabled",
                 "success": DEFAULT_SUCCESS_MESSAGE,
-                "error": ""
+                "fail": "WARNING: Projects are enabled"
               },
               DISCUSSIONS={
-                "description": "Has Discussions",
+                "description": "Discussions Disabled",
                 "success": DEFAULT_SUCCESS_MESSAGE,
-                "error": ""
+                "fail": "WARNING: Discussions are enabled"
               },
               DELETES_HEAD={
                 "description": "Deletes head branch",
                 "success": DEFAULT_SUCCESS_MESSAGE,
-                "error": ""
+                "fail": "Branch should be deleted on merge"
               },
               USES_SQUASH={
                 "description": "Uses Squash Merge",
                 "success": DEFAULT_SUCCESS_MESSAGE,
-                "error": ""
+                "fail": "Should use squash merges"
               },
               LICENSE_INFORMATION={
                 "description": "License Information",
                 "success": DEFAULT_SUCCESS_MESSAGE,
-                "error": ""
+                "fail": "License not found"
               },
               DEPENDABOT_ENABLED={
                 "description": "Dependabot Enabled",
                 "success": DEFAULT_SUCCESS_MESSAGE,
-                "error": "Dependabot is not enabled or given token does not have admin permission"
+                "fail": "Dependabot is not enabled"
               },
               DEPENDABOT_ALERTS={
                 "description": "Dependabot Alerts",
                 "success": DEFAULT_SUCCESS_MESSAGE,
-                "error": "Review existing alerts and dependabot status"
+                "fail": "WARNING: Review existing alerts and dependabot status"
               },
               README={
-                "description": "README.md",
+                "description": "Has README",
+                "filename": ["README.md"],
                 "success": DEFAULT_SUCCESS_MESSAGE,
-                "error": ""
+                "fail": "File not found"
               },
               CONTRIBUTORS={
-                "description": "CONTRIBUTORS.md",
+                "description": "Has CONTRIBUTORS",
+                "filename": ["CONTRIBUTORS.md"],
                 "success": DEFAULT_SUCCESS_MESSAGE,
-                "error": ""
+                "fail": "File not found"
               },
               NOTICES={
-                "description": "NOTICES.md",
+                "description": "Has NOTICES",
+                "filename": ["NOTICES.md"],
                 "success": DEFAULT_SUCCESS_MESSAGE,
-                "error": ""
+                "fail": "File not found"
               },
               LICENSE={
-                "description": "LICENSE",
+                "description": "Has LICENSE",
+                "filename": ["LICENSE.txt", "LICENSE"],
                 "success": DEFAULT_SUCCESS_MESSAGE,
-                "error": ""
+                "fail": "LICENSE or LICENSE.txt file not found"
               })
+
+
+def get_message(property: str, flag: bool) -> str:
+    return property["success"] if flag else property["fail"]

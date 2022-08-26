@@ -19,10 +19,10 @@ CLIENT = GitHubClient(ACCESS_TOKEN)
 def describe_when_reviewing_files() -> None:
     def describe_given_all_files_found() -> None:
         FILES = {
-            CHECKLIST.README["description"]: True,
-            CHECKLIST.CONTRIBUTORS["description"]: True,
-            CHECKLIST.NOTICES["description"]: True,
-            CHECKLIST.LICENSE["description"]: True,
+            CHECKLIST.README["description"]: CHECKLIST.README["success"],
+            CHECKLIST.CONTRIBUTORS["description"]: CHECKLIST.CONTRIBUTORS["success"],
+            CHECKLIST.NOTICES["description"]: CHECKLIST.NOTICES["success"],
+            CHECKLIST.LICENSE["description"]: CHECKLIST.LICENSE["success"],
         }
 
         @pytest.fixture
@@ -30,15 +30,15 @@ def describe_when_reviewing_files() -> None:
             CLIENT.get_file_content = MagicMock(return_value="Found")
             return review_files(CLIENT, OWNER, REPO)
 
-        def it_returns_true(results: dict) -> None:
+        def it_returns_success_message(results: dict) -> None:
             assert results == FILES
 
     def describe_given_files_not_found() -> None:
         FILES = {
-            CHECKLIST.README["description"]: False,
-            CHECKLIST.CONTRIBUTORS["description"]: False,
-            CHECKLIST.NOTICES["description"]: False,
-            CHECKLIST.LICENSE["description"]: False,
+            CHECKLIST.README["description"]: CHECKLIST.README["fail"],
+            CHECKLIST.CONTRIBUTORS["description"]: CHECKLIST.CONTRIBUTORS["fail"],
+            CHECKLIST.NOTICES["description"]: CHECKLIST.NOTICES["fail"],
+            CHECKLIST.LICENSE["description"]: CHECKLIST.LICENSE["fail"],
         }
 
         @pytest.fixture
@@ -46,5 +46,6 @@ def describe_when_reviewing_files() -> None:
             CLIENT.get_file_content = MagicMock(return_value=None)
             return review_files(CLIENT, OWNER, REPO)
 
-        def it_returns_false(results: dict) -> None:
+        def it_returns_fail_message(results: dict) -> None:
+            print(results)
             assert results == FILES

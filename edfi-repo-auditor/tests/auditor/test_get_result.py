@@ -26,13 +26,13 @@ def describe_when_getting_results() -> None:
 
     def describe_given_property_not_in_checklist() -> None:
         RESULT = {
-            CHECKLIST.APPROVED_ACTIONS["description"]: False,
-            CHECKLIST.README["description"]: True
+            CHECKLIST.LICENSE_INFORMATION["description"]: CHECKLIST.LICENSE_INFORMATION["success"],
+            CHECKLIST.README["description"]: CHECKLIST.README["fail"]
         }
 
         RULES = {
             CHECKLIST.HAS_ACTIONS["description"]: 5,
-            CHECKLIST.APPROVED_ACTIONS["description"]: 5,
+            CHECKLIST.LICENSE_INFORMATION["description"]: 5,
             CHECKLIST.README["description"]: 3
         }
 
@@ -41,13 +41,13 @@ def describe_when_getting_results() -> None:
             return get_result(RESULT, RULES)
 
         def it_adds_the_existing_properties(results: int) -> None:
-            assert results == 3
+            assert results == 5
 
     def describe_given_values_are_present() -> None:
         RESULT = {
-            CHECKLIST.HAS_ACTIONS["description"]: True,
-            CHECKLIST.APPROVED_ACTIONS["description"]: False,
-            CHECKLIST.README["description"]: True
+            CHECKLIST.HAS_ACTIONS["description"]: CHECKLIST.HAS_ACTIONS["success"],
+            CHECKLIST.APPROVED_ACTIONS["description"]: CHECKLIST.APPROVED_ACTIONS["fail"],
+            CHECKLIST.README["description"]: CHECKLIST.README["success"]
         }
 
         RULES = {

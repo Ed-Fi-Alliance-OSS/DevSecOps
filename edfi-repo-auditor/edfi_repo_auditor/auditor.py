@@ -9,7 +9,7 @@ import os
 import re
 import time
 from typing import List
-from edfi_repo_auditor.checklist import CHECKLIST
+from edfi_repo_auditor.checklist import CHECKLIST, DEFAULT_SUCCESS_MESSAGE, get_message
 
 from edfi_repo_auditor.config import Configuration
 from edfi_repo_auditor.github_client import GitHubClient
@@ -40,9 +40,9 @@ def run_audit(config: Configuration) -> None:
         file_review = review_files(client, config.organization, repo)
         logger.debug(f"Files: {file_review}")
 
-        results = set_audit_results(actions | file_review | repo_config)
+        results = actions | file_review | repo_config
         auditing_rules = get_file()
-        score = 0  # get_result(results, auditing_rules["rules"])
+        score = get_result(results, auditing_rules["rules"])
         logger.debug(f"Rules to follow: {auditing_rules}")
 
         report[repo] = {
@@ -59,52 +59,47 @@ def run_audit(config: Configuration) -> None:
     logger.info(f"Finished auditing repositories for {config.organization} in {'{:.2f}'.format(time.time() - start)} seconds")
 
 
-def set_audit_results(results: dict) -> dict:
-    for property in CHECKLIST:
-        print(property)
-
-    return results
-
-
 def audit_actions(client: GitHubClient, organization: str, repository: str) -> dict:
-    audit_results = {
-        CHECKLIST.HAS_ACTIONS["description"]: False,
-        CHECKLIST.CODEQL["description"]: False,
-        CHECKLIST.APPROVED_ACTIONS["description"]: False,
-        CHECKLIST.TEST_REPORTER["description"]: False,
-        CHECKLIST.UNIT_TESTS["description"]: False,
-        CHECKLIST.LINTER["description"]: False
-    }
+    audit_results: dict = {}
 
     actions = client.get_actions(organization, repository)
 
     logger.debug(f"Got {actions['total_count']} workflow files")
 
-    audit_results[CHECKLIST.HAS_ACTIONS["description"]] = actions["total_count"] > 0
+    audit_results[CHECKLIST.HAS_ACTIONS["description"]] = get_message(CHECKLIST.HAS_ACTIONS, actions["total_count"] > 0)
 
+    ut_pattern = re.compile(r"unit.{0,2}test(s)?", flags=re.IGNORECASE)
+    lint_pattern = re.compile(r"lint(er)?(s)?(ing)?", flags=re.IGNORECASE)
     workflow_paths = [actions["workflows"]["path"] for actions["workflows"] in actions["workflows"]]
+
     for file_path in workflow_paths:
         file_content = client.get_file_content(organization, repository, file_path)
         if not file_content:
             logger.debug("File not found")
             continue
 
-        if not audit_results[CHECKLIST.CODEQL["description"]]:
-            audit_results[CHECKLIST.CODEQL["description"]] = "uses: github/codeql-action/analyze" in file_content
+        if CHECKLIST.CODEQL["description"] not in audit_results or audit_results[CHECKLIST.CODEQL["description"]] == CHECKLIST.CODEQL["fail"]:
+            audit_results[CHECKLIST.CODEQL["description"]] = get_message(
+                CHECKLIST.CODEQL,
+                "uses: github/codeql-action/analyze" in file_content)
 
-        if not audit_results[CHECKLIST.APPROVED_ACTIONS["description"]]:
-            audit_results[CHECKLIST.APPROVED_ACTIONS["description"]] = "uses: ed-fi-alliance-oss/ed-fi-actions/.github/workflows/repository-scanner.yml" in file_content
+        if CHECKLIST.APPROVED_ACTIONS["description"] not in audit_results or audit_results[CHECKLIST.APPROVED_ACTIONS["description"]] == CHECKLIST.APPROVED_ACTIONS["fail"]:
+            audit_results[CHECKLIST.APPROVED_ACTIONS["description"]] = get_message(
+                CHECKLIST.APPROVED_ACTIONS,
+                "uses: ed-fi-alliance-oss/ed-fi-actions/.github/workflows/repository-scanner.yml" in file_content)
 
-        if not audit_results[CHECKLIST.TEST_REPORTER["description"]]:
-            audit_results[CHECKLIST.TEST_REPORTER["description"]] = "uses: dorny/test-reporter" in file_content
+        if CHECKLIST.TEST_REPORTER["description"] not in audit_results or audit_results[CHECKLIST.TEST_REPORTER["description"]] == CHECKLIST.TEST_REPORTER["fail"]:
+            audit_results[CHECKLIST.TEST_REPORTER["description"]] = get_message(
+                CHECKLIST.TEST_REPORTER,
+                "uses: dorny/test-reporter" in file_content)
 
-        if not audit_results[CHECKLIST.UNIT_TESTS["description"]]:
-            pattern = re.compile(r"unit.{0,2}test(s)?", flags=re.IGNORECASE)
-            audit_results[CHECKLIST.UNIT_TESTS["description"]] = True if pattern.search(file_content) else False
+        if CHECKLIST.UNIT_TESTS["description"] not in audit_results or audit_results[CHECKLIST.UNIT_TESTS["description"]] == CHECKLIST.UNIT_TESTS["fail"]:
+            audit_results[CHECKLIST.UNIT_TESTS["description"]] = get_message(
+                CHECKLIST.UNIT_TESTS,
+                ut_pattern.search(file_content))
 
-        if not audit_results[CHECKLIST.LINTER["description"]]:
-            pattern = re.compile(r"lint(er)?(s)?(ing)?", flags=re.IGNORECASE)
-            audit_results[CHECKLIST.LINTER["description"]] = True if pattern.search(file_content) else False
+        if CHECKLIST.LINTER["description"] not in audit_results or audit_results[CHECKLIST.LINTER["description"]] == CHECKLIST.LINTER["fail"]:
+            audit_results[CHECKLIST.LINTER["description"]] = get_message(CHECKLIST.LINTER, lint_pattern.search(file_content))
 
     return audit_results
 
@@ -121,17 +116,17 @@ def get_repo_information(client: GitHubClient, organization: str, repository: st
     logger.debug(f"Repository information: {information}")
 
     return {
-        CHECKLIST.SIGNED_COMMITS["description"]: rules["requiresCommitSignatures"] if rules else False,
-        CHECKLIST.CODE_REVIEW["description"]: rules["requiresApprovingReviews"] if rules else False,
-        CHECKLIST.REQUIRES_PR["description"]: rules["requiresApprovingReviews"] if rules else False,
-        CHECKLIST.ADMIN_PR["description"]: (rules["isAdminEnforced"] is False) if rules else False,
-        CHECKLIST.WIKI["description"]: information["hasWikiEnabled"],
-        CHECKLIST.ISSUES["description"]: information["hasIssuesEnabled"],
-        CHECKLIST.PROJECTS["description"]: information["hasProjectsEnabled"],
-        CHECKLIST.DISCUSSIONS["description"]: information["discussions"]["totalCount"] > 0,
-        CHECKLIST.DELETES_HEAD["description"]: information["deleteBranchOnMerge"],
-        CHECKLIST.USES_SQUASH["description"]: information["squashMergeAllowed"],
-        CHECKLIST.LICENSE_INFORMATION["description"]: "OK" if information["licenseInfo"] is not None else "License not found",
+        CHECKLIST.SIGNED_COMMITS["description"]: get_message(CHECKLIST.SIGNED_COMMITS, rules and rules["requiresCommitSignatures"]),
+        CHECKLIST.CODE_REVIEW["description"]: get_message(CHECKLIST.CODE_REVIEW, rules and rules["requiresApprovingReviews"]),
+        CHECKLIST.REQUIRES_PR["description"]: get_message(CHECKLIST.REQUIRES_PR, rules and rules["requiresApprovingReviews"]),
+        CHECKLIST.ADMIN_PR["description"]: get_message(CHECKLIST.ADMIN_PR, rules and rules["isAdminEnforced"] is False),
+        CHECKLIST.WIKI["description"]: get_message(CHECKLIST.WIKI, not information["hasWikiEnabled"]),
+        CHECKLIST.ISSUES["description"]: get_message(CHECKLIST.DISCUSSIONS, not information["hasIssuesEnabled"]),
+        CHECKLIST.PROJECTS["description"]: get_message(CHECKLIST.PROJECTS, not information["hasProjectsEnabled"]),
+        CHECKLIST.DISCUSSIONS["description"]: get_message(CHECKLIST.DISCUSSIONS, information["discussions"]["totalCount"] == 0),
+        CHECKLIST.DELETES_HEAD["description"]: get_message(CHECKLIST.DELETES_HEAD, information["deleteBranchOnMerge"]),
+        CHECKLIST.USES_SQUASH["description"]: get_message(CHECKLIST.USES_SQUASH, information["squashMergeAllowed"]),
+        CHECKLIST.LICENSE_INFORMATION["description"]: get_message(CHECKLIST.LICENSE_INFORMATION, information["licenseInfo"] is not None),
     } | dependabot_results
 
 
@@ -142,34 +137,31 @@ def audit_alerts(client: GitHubClient, organization: str, repository: str, alert
     total_vulnerabilities = len(vulnerabilities)
 
     dependabot_enabled = client.has_dependabot_enabled(organization, repository)
-    # ToDo: Get messages on success from a constant
     return {
-        CHECKLIST.DEPENDABOT_ENABLED["description"]: CHECKLIST.DEPENDABOT_ENABLED["success"] if dependabot_enabled else CHECKLIST.DEPENDABOT_ENABLED["error"],
-        CHECKLIST.DEPENDABOT_ALERTS["description"]: CHECKLIST.DEPENDABOT_ENABLED["success"] if total_vulnerabilities == 0 else CHECKLIST.DEPENDABOT_ALERTS["error"],
+        CHECKLIST.DEPENDABOT_ENABLED["description"]: CHECKLIST.DEPENDABOT_ENABLED["success"] if dependabot_enabled else CHECKLIST.DEPENDABOT_ENABLED["fail"],
+        CHECKLIST.DEPENDABOT_ALERTS["description"]: CHECKLIST.DEPENDABOT_ENABLED["success"] if total_vulnerabilities == 0 else CHECKLIST.DEPENDABOT_ALERTS["fail"],
     }
 
 
 def review_files(client: GitHubClient, organization: str, repository: str) -> dict:
-    files = {
-        CHECKLIST.README["description"]: False,
-        CHECKLIST.CONTRIBUTORS["description"]: False,
-        CHECKLIST.NOTICES["description"]: False,
-        CHECKLIST.LICENSE["description"]: False
-    }
+    file_audit: dict = {}
 
-    for file in files:
-        file_content = client.get_file_content(organization, repository, file)
-        if file_content:
-            files[file] = True
+    files_to_review = [CHECKLIST.README, CHECKLIST.CONTRIBUTORS, CHECKLIST.NOTICES, CHECKLIST.LICENSE]
 
-    return files
+    for file in files_to_review:
+        for filename in file["filename"]:
+            file_content = client.get_file_content(organization, repository, filename)
+            file_audit[file["description"]] = get_message(file, file_content is not None)
+
+    return file_audit
 
 
-def get_result(checklist: dict, rules: dict) -> int:
+def get_result(results: dict, rules: dict) -> int:
     score = 0
+
     for property in rules:
         try:
-            if (checklist[property] is True or checklist[property] == "OK"):
+            if (results[property] == DEFAULT_SUCCESS_MESSAGE):
                 score += rules[property]
         except KeyError:
             logger.error(f"Unable to read property {property} in results")

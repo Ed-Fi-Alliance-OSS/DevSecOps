@@ -34,7 +34,7 @@ def describe_when_getting_repo_info() -> None:
                 },
                 "deleteBranchOnMerge": False,
                 "squashMergeAllowed": True,
-                "licenseInfo": {}
+                "licenseInfo": None
             }
 
             @pytest.fixture
@@ -45,10 +45,10 @@ def describe_when_getting_repo_info() -> None:
                 return get_repo_information(CLIENT, OWNER, REPO)
 
             def it_returns_no_rules(results: dict) -> None:
-                assert results[CHECKLIST.SIGNED_COMMITS["description"]] is False
-                assert results[CHECKLIST.CODE_REVIEW["description"]] is False
-                assert results[CHECKLIST.REQUIRES_PR["description"]] is False
-                assert results[CHECKLIST.ADMIN_PR["description"]] is False
+                assert results[CHECKLIST.SIGNED_COMMITS["description"]] == CHECKLIST.SIGNED_COMMITS["fail"]
+                assert results[CHECKLIST.CODE_REVIEW["description"]] == CHECKLIST.CODE_REVIEW["fail"]
+                assert results[CHECKLIST.REQUIRES_PR["description"]] == CHECKLIST.REQUIRES_PR["fail"]
+                assert results[CHECKLIST.ADMIN_PR["description"]] == CHECKLIST.ADMIN_PR["fail"]
 
         def describe_given_there_are_protection_rules() -> None:
             RESPONSE = {
@@ -71,7 +71,7 @@ def describe_when_getting_repo_info() -> None:
                 },
                 "deleteBranchOnMerge": False,
                 "squashMergeAllowed": True,
-                "licenseInfo": {}
+                "licenseInfo": None
             }
 
             @pytest.fixture
@@ -82,10 +82,10 @@ def describe_when_getting_repo_info() -> None:
                 return get_repo_information(CLIENT, OWNER, REPO)
 
             def it_returns_rules_for_main(results: dict) -> None:
-                assert results[CHECKLIST.SIGNED_COMMITS["description"]] is True
-                assert results[CHECKLIST.CODE_REVIEW["description"]] is True
-                assert results[CHECKLIST.REQUIRES_PR["description"]] is True
-                assert results[CHECKLIST.ADMIN_PR["description"]] is False
+                assert results[CHECKLIST.SIGNED_COMMITS["description"]] == CHECKLIST.SIGNED_COMMITS["success"]
+                assert results[CHECKLIST.CODE_REVIEW["description"]] == CHECKLIST.CODE_REVIEW["success"]
+                assert results[CHECKLIST.REQUIRES_PR["description"]] == CHECKLIST.REQUIRES_PR["success"]
+                assert results[CHECKLIST.ADMIN_PR["description"]] == CHECKLIST.ADMIN_PR["fail"]
 
         def describe_given_there_are_protection_rules_for_other_branch() -> None:
             RESPONSE = {
@@ -108,7 +108,9 @@ def describe_when_getting_repo_info() -> None:
                 },
                 "deleteBranchOnMerge": False,
                 "squashMergeAllowed": True,
-                "licenseInfo": {}
+                "licenseInfo": {
+                    'key': 'test-key'
+                }
             }
 
             @pytest.fixture
@@ -119,7 +121,7 @@ def describe_when_getting_repo_info() -> None:
                 return get_repo_information(CLIENT, OWNER, REPO)
 
             def it_returns_rules_for_main(results: dict) -> None:
-                assert results[CHECKLIST.SIGNED_COMMITS["description"]] is False
-                assert results[CHECKLIST.CODE_REVIEW["description"]] is False
-                assert results[CHECKLIST.REQUIRES_PR["description"]] is False
-                assert results[CHECKLIST.ADMIN_PR["description"]] is False
+                assert results[CHECKLIST.SIGNED_COMMITS["description"]] == CHECKLIST.SIGNED_COMMITS["fail"]
+                assert results[CHECKLIST.CODE_REVIEW["description"]] == CHECKLIST.CODE_REVIEW["fail"]
+                assert results[CHECKLIST.REQUIRES_PR["description"]] == CHECKLIST.REQUIRES_PR["fail"]
+                assert results[CHECKLIST.ADMIN_PR["description"]] == CHECKLIST.ADMIN_PR["fail"]

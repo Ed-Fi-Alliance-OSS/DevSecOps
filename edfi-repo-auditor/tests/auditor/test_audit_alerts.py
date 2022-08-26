@@ -28,7 +28,7 @@ def describe_when_auditing_alerts() -> None:
                 return audit_alerts(CLIENT, OWNER, REPO, ALERTS)
 
             def it_returns_dependabot_enabled(results: dict) -> None:
-                assert results[CHECKLIST.DEPENDABOT_ENABLED["description"]] == CHECKLIST.DEPENDABOT_ENABLED["error"]
+                assert results[CHECKLIST.DEPENDABOT_ENABLED["description"]] == CHECKLIST.DEPENDABOT_ENABLED["fail"]
 
             def it_returns_no_alerts(results: dict) -> None:
                 assert results[CHECKLIST.DEPENDABOT_ALERTS["description"]] == CHECKLIST.DEPENDABOT_ALERTS["success"]
@@ -156,7 +156,7 @@ def describe_when_auditing_alerts() -> None:
                 return audit_alerts(CLIENT, OWNER, REPO, ALERTS)
 
             def it_returns_warning(results: dict) -> None:
-                assert results[CHECKLIST.DEPENDABOT_ALERTS["description"]] == CHECKLIST.DEPENDABOT_ALERTS["error"]
+                assert results[CHECKLIST.DEPENDABOT_ALERTS["description"]] == CHECKLIST.DEPENDABOT_ALERTS["fail"]
 
         def describe_given_there_are_old_high_risk_alerts() -> None:
             ALERTS = [
@@ -179,4 +179,4 @@ def describe_when_auditing_alerts() -> None:
                 return audit_alerts(CLIENT, OWNER, REPO, ALERTS)
 
             def it_returns_warning(results: dict) -> None:
-                assert results[CHECKLIST.DEPENDABOT_ALERTS["description"]] == CHECKLIST.DEPENDABOT_ALERTS["error"]
+                assert results[CHECKLIST.DEPENDABOT_ALERTS["description"]] == CHECKLIST.DEPENDABOT_ALERTS["fail"]
