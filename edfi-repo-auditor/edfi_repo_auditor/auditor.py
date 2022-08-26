@@ -114,6 +114,7 @@ def get_repo_information(client: GitHubClient, organization: str, repository: st
     rules = rulesForMain[0] if rulesForMain else None
 
     logger.debug(f"Repository information: {information}")
+    logger.debug(f"Rules for main: {rules}")
 
     return {
         CHECKLIST.SIGNED_COMMITS["description"]: get_message(CHECKLIST.SIGNED_COMMITS, rules and rules["requiresCommitSignatures"]),
@@ -138,8 +139,8 @@ def audit_alerts(client: GitHubClient, organization: str, repository: str, alert
 
     dependabot_enabled = client.has_dependabot_enabled(organization, repository)
     return {
-        CHECKLIST.DEPENDABOT_ENABLED["description"]: CHECKLIST.DEPENDABOT_ENABLED["success"] if dependabot_enabled else CHECKLIST.DEPENDABOT_ENABLED["fail"],
-        CHECKLIST.DEPENDABOT_ALERTS["description"]: CHECKLIST.DEPENDABOT_ENABLED["success"] if total_vulnerabilities == 0 else CHECKLIST.DEPENDABOT_ALERTS["fail"],
+        CHECKLIST.DEPENDABOT_ENABLED["description"]: get_message(CHECKLIST.DEPENDABOT_ENABLED, dependabot_enabled),
+        CHECKLIST.DEPENDABOT_ALERTS["description"]: get_message(CHECKLIST.DEPENDABOT_ALERTS, total_vulnerabilities == 0),
     }
 
 
