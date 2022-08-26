@@ -150,7 +150,7 @@ def review_files(client: GitHubClient, organization: str, repository: str) -> di
     files_to_review = [CHECKLIST.README, CHECKLIST.CONTRIBUTORS, CHECKLIST.NOTICES, CHECKLIST.LICENSE]
 
     for file in files_to_review:
-        file_found = True
+        file_found = False
         for filename in file["filename"]:
             if file_found:
                 # There are multiple possible file names, and one of them was already detected
