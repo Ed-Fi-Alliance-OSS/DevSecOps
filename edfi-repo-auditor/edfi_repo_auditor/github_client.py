@@ -4,7 +4,7 @@
 # See the LICENSE and NOTICES files in the project root for more information.
 
 import logging
-from typing import List
+from typing import List, Optional
 from json import dumps
 
 import base64
@@ -182,7 +182,7 @@ class GitHubClient:
 
         return has_dependabot
 
-    def get_file_content(self, owner: str, repository: str, path: str) -> str:
+    def get_file_content(self, owner: str, repository: str, path: str) -> Optional[str]:
         if len(owner.strip()) == 0:
             raise ValueError("owner cannot be blank")
         if len(repository.strip()) == 0:

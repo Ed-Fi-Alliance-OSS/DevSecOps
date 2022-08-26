@@ -5,15 +5,13 @@
 
 import pytest
 
-from unittest.mock import MagicMock
+from unittest.mock import patch
 from edfi_repo_auditor.auditor import review_files
 from edfi_repo_auditor.checklist import CHECKLIST, CHECKLIST_DEFAULT_SUCCESS_MESSAGE
-from edfi_repo_auditor.github_client import GitHubClient
 
 ACCESS_TOKEN = "asd09uasdfu09asdfj;iolkasdfklj"
 OWNER = "Ed-Fi-Alliance-OSS"
 REPO = "Ed-Fi-ODS"
-CLIENT = GitHubClient(ACCESS_TOKEN)
 
 
 def describe_when_reviewing_files() -> None:
@@ -26,9 +24,10 @@ def describe_when_reviewing_files() -> None:
         }
 
         @pytest.fixture
-        def results() -> dict:
-            CLIENT.get_file_content = MagicMock(return_value="Found")
-            return review_files(CLIENT, OWNER, REPO)
+        @patch('edfi_repo_auditor.github_client.GitHubClient')
+        def results(mock_client) -> dict:
+            mock_client.get_file_content.return_value="Found"
+            return review_files(mock_client, OWNER, REPO)
 
         def it_returns_success_message(results: dict) -> None:
             assert results == FILES
@@ -42,9 +41,10 @@ def describe_when_reviewing_files() -> None:
         }
 
         @pytest.fixture
-        def results() -> dict:
-            CLIENT.get_file_content = MagicMock(return_value=None)
-            return review_files(CLIENT, OWNER, REPO)
+        @patch('edfi_repo_auditor.github_client.GitHubClient')
+        def results(mock_client) -> dict:
+            mock_client.get_file_content.return_value=None
+            return review_files(mock_client, OWNER, REPO)
 
         def it_returns_fail_message(results: dict) -> None:
             print(results)

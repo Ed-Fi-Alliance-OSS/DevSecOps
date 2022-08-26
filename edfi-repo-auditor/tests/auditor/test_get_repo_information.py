@@ -5,15 +5,13 @@
 
 import pytest
 
-from unittest.mock import patch, MagicMock
+from unittest.mock import patch
 from edfi_repo_auditor.auditor import get_repo_information
 from edfi_repo_auditor.checklist import CHECKLIST, CHECKLIST_DEFAULT_SUCCESS_MESSAGE
-from edfi_repo_auditor.github_client import GitHubClient
 
 ACCESS_TOKEN = "asd09uasdfu09asdfj;iolkasdfklj"
 OWNER = "Ed-Fi-Alliance-OSS"
 REPO = "Ed-Fi-ODS"
-CLIENT = GitHubClient(ACCESS_TOKEN)
 
 
 def describe_when_getting_repo_info() -> None:
@@ -39,10 +37,11 @@ def describe_when_getting_repo_info() -> None:
 
             @pytest.fixture
             @patch('edfi_repo_auditor.auditor.audit_alerts')
-            def results(mock_audit_alerts) -> dict:
-                CLIENT.get_repository_information = MagicMock(return_value=RESPONSE)
+            @patch('edfi_repo_auditor.github_client.GitHubClient')
+            def results(mock_audit_alerts, mock_client) -> dict:
+                mock_client.get_repository_information.return_value=RESPONSE
                 mock_audit_alerts.return_value = {}
-                return get_repo_information(CLIENT, OWNER, REPO)
+                return get_repo_information(mock_client, OWNER, REPO)
 
             def it_returns_no_rules(results: dict) -> None:
                 assert results[CHECKLIST.SIGNED_COMMITS["description"]] == CHECKLIST.SIGNED_COMMITS["fail"]
@@ -76,10 +75,11 @@ def describe_when_getting_repo_info() -> None:
 
             @pytest.fixture
             @patch('edfi_repo_auditor.auditor.audit_alerts')
-            def results(mock_audit_alerts) -> dict:
-                CLIENT.get_repository_information = MagicMock(return_value=RESPONSE)
+            @patch('edfi_repo_auditor.github_client.GitHubClient')
+            def results(mock_audit_alerts, mock_client) -> dict:
+                mock_client.get_repository_information.return_value=RESPONSE
                 mock_audit_alerts.return_value = {}
-                return get_repo_information(CLIENT, OWNER, REPO)
+                return get_repo_information(mock_client, OWNER, REPO)
 
             def it_returns_rules_for_main(results: dict) -> None:
                 assert results[CHECKLIST.SIGNED_COMMITS["description"]] == CHECKLIST_DEFAULT_SUCCESS_MESSAGE
@@ -115,10 +115,11 @@ def describe_when_getting_repo_info() -> None:
 
             @pytest.fixture
             @patch('edfi_repo_auditor.auditor.audit_alerts')
-            def results(mock_audit_alerts) -> dict:
-                CLIENT.get_repository_information = MagicMock(return_value=RESPONSE)
+            @patch('edfi_repo_auditor.github_client.GitHubClient')
+            def results(mock_audit_alerts, mock_client) -> dict:
+                mock_client.get_repository_information.return_value=RESPONSE
                 mock_audit_alerts.return_value = {}
-                return get_repo_information(CLIENT, OWNER, REPO)
+                return get_repo_information(mock_client, OWNER, REPO)
 
             def it_returns_rules_for_main(results: dict) -> None:
                 assert results[CHECKLIST.SIGNED_COMMITS["description"]] == CHECKLIST.SIGNED_COMMITS["fail"]
