@@ -9,7 +9,7 @@ import os
 import re
 import time
 from typing import List
-from edfi_repo_auditor.checklist import CHECKLIST, DEFAULT_SUCCESS_MESSAGE, get_message
+from edfi_repo_auditor.checklist import CHECKLIST, CHECKLIST_DEFAULT_SUCCESS_MESSAGE, get_message
 
 from edfi_repo_auditor.config import Configuration
 from edfi_repo_auditor.github_client import GitHubClient
@@ -162,7 +162,7 @@ def get_result(results: dict, rules: dict) -> int:
 
     for property in rules:
         try:
-            if (results[property] == DEFAULT_SUCCESS_MESSAGE):
+            if (results[property] == CHECKLIST_DEFAULT_SUCCESS_MESSAGE):
                 score += rules[property]
         except KeyError:
             logger.error(f"Unable to read property {property} in results")

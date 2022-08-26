@@ -6,7 +6,7 @@
 import pytest
 
 from edfi_repo_auditor.auditor import get_result
-from edfi_repo_auditor.checklist import CHECKLIST
+from edfi_repo_auditor.checklist import CHECKLIST, CHECKLIST_DEFAULT_SUCCESS_MESSAGE
 
 
 def describe_when_getting_results() -> None:
@@ -26,7 +26,7 @@ def describe_when_getting_results() -> None:
 
     def describe_given_property_not_in_checklist() -> None:
         RESULT = {
-            CHECKLIST.LICENSE_INFORMATION["description"]: CHECKLIST.LICENSE_INFORMATION["success"],
+            CHECKLIST.LICENSE_INFORMATION["description"]: CHECKLIST_DEFAULT_SUCCESS_MESSAGE,
             CHECKLIST.README["description"]: CHECKLIST.README["fail"]
         }
 
@@ -45,9 +45,9 @@ def describe_when_getting_results() -> None:
 
     def describe_given_values_are_present() -> None:
         RESULT = {
-            CHECKLIST.HAS_ACTIONS["description"]: CHECKLIST.HAS_ACTIONS["success"],
+            CHECKLIST.HAS_ACTIONS["description"]: CHECKLIST_DEFAULT_SUCCESS_MESSAGE,
             CHECKLIST.APPROVED_ACTIONS["description"]: CHECKLIST.APPROVED_ACTIONS["fail"],
-            CHECKLIST.README["description"]: CHECKLIST.README["success"]
+            CHECKLIST.README["description"]: CHECKLIST_DEFAULT_SUCCESS_MESSAGE
         }
 
         RULES = {

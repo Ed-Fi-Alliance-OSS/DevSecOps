@@ -7,7 +7,7 @@ import pytest
 
 from unittest.mock import patch, MagicMock
 from edfi_repo_auditor.auditor import get_repo_information
-from edfi_repo_auditor.checklist import CHECKLIST
+from edfi_repo_auditor.checklist import CHECKLIST, CHECKLIST_DEFAULT_SUCCESS_MESSAGE
 from edfi_repo_auditor.github_client import GitHubClient
 
 ACCESS_TOKEN = "asd09uasdfu09asdfj;iolkasdfklj"
@@ -82,9 +82,9 @@ def describe_when_getting_repo_info() -> None:
                 return get_repo_information(CLIENT, OWNER, REPO)
 
             def it_returns_rules_for_main(results: dict) -> None:
-                assert results[CHECKLIST.SIGNED_COMMITS["description"]] == CHECKLIST.SIGNED_COMMITS["success"]
-                assert results[CHECKLIST.CODE_REVIEW["description"]] == CHECKLIST.CODE_REVIEW["success"]
-                assert results[CHECKLIST.REQUIRES_PR["description"]] == CHECKLIST.REQUIRES_PR["success"]
+                assert results[CHECKLIST.SIGNED_COMMITS["description"]] == CHECKLIST_DEFAULT_SUCCESS_MESSAGE
+                assert results[CHECKLIST.CODE_REVIEW["description"]] == CHECKLIST_DEFAULT_SUCCESS_MESSAGE
+                assert results[CHECKLIST.REQUIRES_PR["description"]] == CHECKLIST_DEFAULT_SUCCESS_MESSAGE
                 assert results[CHECKLIST.ADMIN_PR["description"]] == CHECKLIST.ADMIN_PR["fail"]
 
         def describe_given_there_are_protection_rules_for_other_branch() -> None:

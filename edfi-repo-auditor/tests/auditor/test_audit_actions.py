@@ -7,7 +7,7 @@ import pytest
 
 from unittest.mock import MagicMock
 from edfi_repo_auditor.auditor import audit_actions
-from edfi_repo_auditor.checklist import CHECKLIST
+from edfi_repo_auditor.checklist import CHECKLIST, CHECKLIST_DEFAULT_SUCCESS_MESSAGE
 from edfi_repo_auditor.github_client import GitHubClient
 
 ACCESS_TOKEN = "asd09uasdfu09asdfj;iolkasdfklj"
@@ -44,7 +44,7 @@ def describe_when_auditing_actions() -> None:
             CLIENT.get_actions = MagicMock(return_value=actions)
             CLIENT.get_file_content = MagicMock(return_value=file_content)
             results = audit_actions(CLIENT, OWNER, REPO)
-            assert results[CHECKLIST.CODEQL["description"]] == CHECKLIST.CODEQL["success"]
+            assert results[CHECKLIST.CODEQL["description"]] == CHECKLIST_DEFAULT_SUCCESS_MESSAGE
 
     def describe_given_reviewing_allowed_list() -> None:
         @pytest.fixture
@@ -74,7 +74,7 @@ def describe_when_auditing_actions() -> None:
             CLIENT.get_actions = MagicMock(return_value=actions)
             CLIENT.get_file_content = MagicMock(return_value=file_content)
             results = audit_actions(CLIENT, OWNER, REPO)
-            assert results[CHECKLIST.APPROVED_ACTIONS["description"]] == CHECKLIST.APPROVED_ACTIONS["success"]
+            assert results[CHECKLIST.APPROVED_ACTIONS["description"]] == CHECKLIST_DEFAULT_SUCCESS_MESSAGE
 
     def describe_given_reviewing_test_reporter() -> None:
         @pytest.fixture
@@ -103,7 +103,7 @@ def describe_when_auditing_actions() -> None:
             CLIENT.get_actions = MagicMock(return_value=actions)
             CLIENT.get_file_content = MagicMock(return_value=file_content)
             results = audit_actions(CLIENT, OWNER, REPO)
-            assert results[CHECKLIST.TEST_REPORTER["description"]] == CHECKLIST.TEST_REPORTER["success"]
+            assert results[CHECKLIST.TEST_REPORTER["description"]] == CHECKLIST_DEFAULT_SUCCESS_MESSAGE
 
     def describe_given_reviewing_unit_tests() -> None:
         @pytest.fixture
@@ -123,7 +123,7 @@ def describe_when_auditing_actions() -> None:
             CLIENT.get_actions = MagicMock(return_value=actions)
             CLIENT.get_file_content = MagicMock(return_value=file_content)
             results = audit_actions(CLIENT, OWNER, REPO)
-            assert results[CHECKLIST.UNIT_TESTS["description"]] == CHECKLIST.UNIT_TESTS["success"]
+            assert results[CHECKLIST.UNIT_TESTS["description"]] == CHECKLIST_DEFAULT_SUCCESS_MESSAGE
 
         def it_returns_fail_message_when_no_unit_tests(actions: dict) -> None:
             file_content = """
@@ -152,7 +152,7 @@ def describe_when_auditing_actions() -> None:
             CLIENT.get_actions = MagicMock(return_value=actions)
             CLIENT.get_file_content = MagicMock(return_value=file_content)
             results = audit_actions(CLIENT, OWNER, REPO)
-            assert results[CHECKLIST.LINTER["description"]] == CHECKLIST.LINTER["success"]
+            assert results[CHECKLIST.LINTER["description"]] == CHECKLIST_DEFAULT_SUCCESS_MESSAGE
 
         def it_returns_false_when_no_linter(actions: dict) -> None:
             file_content = """

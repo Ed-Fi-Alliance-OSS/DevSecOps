@@ -7,7 +7,7 @@ import pytest
 
 from unittest.mock import MagicMock
 from edfi_repo_auditor.auditor import review_files
-from edfi_repo_auditor.checklist import CHECKLIST
+from edfi_repo_auditor.checklist import CHECKLIST, CHECKLIST_DEFAULT_SUCCESS_MESSAGE
 from edfi_repo_auditor.github_client import GitHubClient
 
 ACCESS_TOKEN = "asd09uasdfu09asdfj;iolkasdfklj"
@@ -19,10 +19,10 @@ CLIENT = GitHubClient(ACCESS_TOKEN)
 def describe_when_reviewing_files() -> None:
     def describe_given_all_files_found() -> None:
         FILES = {
-            CHECKLIST.README["description"]: CHECKLIST.README["success"],
-            CHECKLIST.CONTRIBUTORS["description"]: CHECKLIST.CONTRIBUTORS["success"],
-            CHECKLIST.NOTICES["description"]: CHECKLIST.NOTICES["success"],
-            CHECKLIST.LICENSE["description"]: CHECKLIST.LICENSE["success"],
+            CHECKLIST.README["description"]: CHECKLIST_DEFAULT_SUCCESS_MESSAGE,
+            CHECKLIST.CONTRIBUTORS["description"]: CHECKLIST_DEFAULT_SUCCESS_MESSAGE,
+            CHECKLIST.NOTICES["description"]: CHECKLIST_DEFAULT_SUCCESS_MESSAGE,
+            CHECKLIST.LICENSE["description"]: CHECKLIST_DEFAULT_SUCCESS_MESSAGE,
         }
 
         @pytest.fixture

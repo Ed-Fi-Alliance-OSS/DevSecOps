@@ -8,7 +8,7 @@ import pytest
 
 from unittest.mock import MagicMock
 from edfi_repo_auditor.auditor import ALERTS_WEEKS_SINCE_CREATED, audit_alerts
-from edfi_repo_auditor.checklist import CHECKLIST
+from edfi_repo_auditor.checklist import CHECKLIST, CHECKLIST_DEFAULT_SUCCESS_MESSAGE
 from edfi_repo_auditor.github_client import GitHubClient
 
 ACCESS_TOKEN = "asd09uasdfu09asdfj;iolkasdfklj"
@@ -31,7 +31,7 @@ def describe_when_auditing_alerts() -> None:
                 assert results[CHECKLIST.DEPENDABOT_ENABLED["description"]] == CHECKLIST.DEPENDABOT_ENABLED["fail"]
 
             def it_returns_no_alerts(results: dict) -> None:
-                assert results[CHECKLIST.DEPENDABOT_ALERTS["description"]] == CHECKLIST.DEPENDABOT_ALERTS["success"]
+                assert results[CHECKLIST.DEPENDABOT_ALERTS["description"]] == CHECKLIST_DEFAULT_SUCCESS_MESSAGE
 
         def describe_given_is_enabled() -> None:
             ALERTS = []
@@ -42,7 +42,7 @@ def describe_when_auditing_alerts() -> None:
                 return audit_alerts(CLIENT, OWNER, REPO, ALERTS)
 
             def it_returns_dependabot_enabled(results: dict) -> None:
-                assert results[CHECKLIST.DEPENDABOT_ENABLED["description"]] == CHECKLIST.DEPENDABOT_ENABLED["success"]
+                assert results[CHECKLIST.DEPENDABOT_ENABLED["description"]] == CHECKLIST_DEFAULT_SUCCESS_MESSAGE
 
         def describe_given_there_are_no_alerts() -> None:
             ALERTS = []
@@ -53,7 +53,7 @@ def describe_when_auditing_alerts() -> None:
                 return audit_alerts(CLIENT, OWNER, REPO, ALERTS)
 
             def it_returns_no_alerts(results: dict) -> None:
-                assert results[CHECKLIST.DEPENDABOT_ENABLED["description"]] == CHECKLIST.DEPENDABOT_ENABLED["success"]
+                assert results[CHECKLIST.DEPENDABOT_ENABLED["description"]] == CHECKLIST_DEFAULT_SUCCESS_MESSAGE
 
         def describe_given_there_are_alerts_not_old() -> None:
             ALERTS = [
@@ -76,7 +76,7 @@ def describe_when_auditing_alerts() -> None:
                 return audit_alerts(CLIENT, OWNER, REPO, ALERTS)
 
             def it_returns_no_alerts(results: dict) -> None:
-                assert results[CHECKLIST.DEPENDABOT_ALERTS["description"]] == CHECKLIST.DEPENDABOT_ALERTS["success"]
+                assert results[CHECKLIST.DEPENDABOT_ALERTS["description"]] == CHECKLIST_DEFAULT_SUCCESS_MESSAGE
 
         def describe_given_there_are_old_alerts_not_severe() -> None:
             ALERTS = [
@@ -110,7 +110,7 @@ def describe_when_auditing_alerts() -> None:
                 return audit_alerts(CLIENT, OWNER, REPO, ALERTS)
 
             def it_returns_no_alerts(results: dict) -> None:
-                assert results[CHECKLIST.DEPENDABOT_ALERTS["description"]] == CHECKLIST.DEPENDABOT_ALERTS["success"]
+                assert results[CHECKLIST.DEPENDABOT_ALERTS["description"]] == CHECKLIST_DEFAULT_SUCCESS_MESSAGE
 
         def describe_given_there_are_critical_risk_alerts_not_old() -> None:
             ALERTS = [
@@ -133,7 +133,7 @@ def describe_when_auditing_alerts() -> None:
                 return audit_alerts(CLIENT, OWNER, REPO, ALERTS)
 
             def it_returns_no_alerts(results: dict) -> None:
-                assert results[CHECKLIST.DEPENDABOT_ALERTS["description"]] == CHECKLIST.DEPENDABOT_ALERTS["success"]
+                assert results[CHECKLIST.DEPENDABOT_ALERTS["description"]] == CHECKLIST_DEFAULT_SUCCESS_MESSAGE
 
         def describe_given_there_are_old_critical_risk_alerts() -> None:
             ALERTS = [
