@@ -40,7 +40,7 @@ def run_audit(config: Configuration) -> None:
         file_review = review_files(client, config.organization, repo)
         logger.debug(f"Files: {file_review}")
 
-        results = actions | file_review | repo_config
+        results = {**actions, **file_review, **repo_config}
         auditing_rules = get_file()
         score = get_result(results, auditing_rules["rules"])
         logger.debug(f"Rules to follow: {auditing_rules}")
@@ -116,7 +116,7 @@ def get_repo_information(client: GitHubClient, organization: str, repository: st
     logger.debug(f"Repository information: {information}")
     logger.debug(f"Rules for main: {rules}")
 
-    return {
+    return {**{
         CHECKLIST.SIGNED_COMMITS["description"]: get_message(CHECKLIST.SIGNED_COMMITS, rules and rules["requiresCommitSignatures"]),
         CHECKLIST.CODE_REVIEW["description"]: get_message(CHECKLIST.CODE_REVIEW, rules and rules["requiresApprovingReviews"]),
         CHECKLIST.REQUIRES_PR["description"]: get_message(CHECKLIST.REQUIRES_PR, rules and rules["requiresApprovingReviews"]),
@@ -128,7 +128,7 @@ def get_repo_information(client: GitHubClient, organization: str, repository: st
         CHECKLIST.DELETES_HEAD["description"]: get_message(CHECKLIST.DELETES_HEAD, information["deleteBranchOnMerge"]),
         CHECKLIST.USES_SQUASH["description"]: get_message(CHECKLIST.USES_SQUASH, information["squashMergeAllowed"]),
         CHECKLIST.LICENSE_INFORMATION["description"]: get_message(CHECKLIST.LICENSE_INFORMATION, information["licenseInfo"] is not None),
-    } | dependabot_results
+    }, **dependabot_results}
 
 
 def audit_alerts(client: GitHubClient, organization: str, repository: str, alerts: List[str]) -> dict:
