@@ -30,8 +30,8 @@ def describe_when_auditing_actions() -> None:
             file_content = """
                 - name: Analyze
             """
-            mock_client.get_actions.return_value=actions
-            mock_client.get_file_content.return_value=file_content
+            mock_client.get_actions.return_value = actions
+            mock_client.get_file_content.return_value = file_content
             results = audit_actions(mock_client, OWNER, REPO)
             assert results[CHECKLIST.CODEQL["description"]] == CHECKLIST.CODEQL["fail"]
 
@@ -41,8 +41,8 @@ def describe_when_auditing_actions() -> None:
                 - name: Analyze
                   uses: github/codeql-action/analyze
             """
-            mock_client.get_actions.return_value=actions
-            mock_client.get_file_content.return_value=file_content
+            mock_client.get_actions.return_value = actions
+            mock_client.get_file_content.return_value = file_content
             results = audit_actions(mock_client, OWNER, REPO)
             assert results[CHECKLIST.CODEQL["description"]] == CHECKLIST_DEFAULT_SUCCESS_MESSAGE
 
@@ -62,8 +62,8 @@ def describe_when_auditing_actions() -> None:
                 - name: Scan
                   uses: fake-action/allowed-list
             """
-            mock_client.get_actions.return_value=actions
-            mock_client.get_file_content.return_value=file_content
+            mock_client.get_actions.return_value = actions
+            mock_client.get_file_content.return_value = file_content
             results = audit_actions(mock_client, OWNER, REPO)
             assert results[CHECKLIST.APPROVED_ACTIONS["description"]] == CHECKLIST.APPROVED_ACTIONS["fail"]
 
@@ -73,8 +73,8 @@ def describe_when_auditing_actions() -> None:
                 - name: Scan
                   uses: ed-fi-alliance-oss/ed-fi-actions/.github/workflows/repository-scanner.yml
             """
-            mock_client.get_actions.return_value=actions
-            mock_client.get_file_content.return_value=file_content
+            mock_client.get_actions.return_value = actions
+            mock_client.get_file_content.return_value = file_content
             results = audit_actions(mock_client, OWNER, REPO)
             assert results[CHECKLIST.APPROVED_ACTIONS["description"]] == CHECKLIST_DEFAULT_SUCCESS_MESSAGE
 
@@ -93,19 +93,19 @@ def describe_when_auditing_actions() -> None:
             file_content = """
                 - name: Integration Tests
             """
-            mock_client.get_actions.return_value=actions
-            mock_client.get_file_content.return_value=file_content
+            mock_client.get_actions.return_value = actions
+            mock_client.get_file_content.return_value = file_content
             results = audit_actions(mock_client, OWNER, REPO)
             assert results[CHECKLIST.TEST_REPORTER["description"]] == CHECKLIST.TEST_REPORTER["fail"]
 
         @patch('edfi_repo_auditor.github_client.GitHubClient')
-        def it_returns_success_message_when_has_test_reporter(mock_client,actions: dict) -> None:
+        def it_returns_success_message_when_has_test_reporter(mock_client, actions: dict) -> None:
             file_content = """
                 - name: Integration Tests Report
                 uses: dorny/test-reporter
             """
-            mock_client.get_actions.return_value=actions
-            mock_client.get_file_content.return_value=file_content
+            mock_client.get_actions.return_value = actions
+            mock_client.get_file_content.return_value = file_content
             results = audit_actions(mock_client, OWNER, REPO)
             assert results[CHECKLIST.TEST_REPORTER["description"]] == CHECKLIST_DEFAULT_SUCCESS_MESSAGE
 
@@ -125,8 +125,8 @@ def describe_when_auditing_actions() -> None:
                 - name: Unit Tests with coverage
             """
 
-            mock_client.get_actions.return_value=actions
-            mock_client.get_file_content.return_value=file_content
+            mock_client.get_actions.return_value = actions
+            mock_client.get_file_content.return_value = file_content
             results = audit_actions(mock_client, OWNER, REPO)
             assert results[CHECKLIST.UNIT_TESTS["description"]] == CHECKLIST_DEFAULT_SUCCESS_MESSAGE
 
@@ -135,8 +135,8 @@ def describe_when_auditing_actions() -> None:
             file_content = """
                 - name: Integration Tests
             """
-            mock_client.get_actions.return_value=actions
-            mock_client.get_file_content.return_value=file_content
+            mock_client.get_actions.return_value = actions
+            mock_client.get_file_content.return_value = file_content
             results = audit_actions(mock_client, OWNER, REPO)
             assert results[CHECKLIST.UNIT_TESTS["description"]] == CHECKLIST.UNIT_TESTS["fail"]
 
@@ -156,8 +156,8 @@ def describe_when_auditing_actions() -> None:
                 - name: Linter
             """
 
-            mock_client.get_actions.return_value=actions
-            mock_client.get_file_content.return_value=file_content
+            mock_client.get_actions.return_value = actions
+            mock_client.get_file_content.return_value = file_content
             results = audit_actions(mock_client, OWNER, REPO)
             assert results[CHECKLIST.LINTER["description"]] == CHECKLIST_DEFAULT_SUCCESS_MESSAGE
 

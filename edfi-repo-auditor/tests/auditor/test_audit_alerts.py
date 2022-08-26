@@ -24,7 +24,7 @@ def describe_when_auditing_alerts() -> None:
             @pytest.fixture
             @patch('edfi_repo_auditor.github_client.GitHubClient')
             def results(mock_client) -> dict:
-                mock_client.has_dependabot_enabled.return_value=False
+                mock_client.has_dependabot_enabled.return_value = False
                 return audit_alerts(mock_client, OWNER, REPO, ALERTS)
 
             def it_returns_dependabot_enabled(results: dict) -> None:
@@ -39,7 +39,7 @@ def describe_when_auditing_alerts() -> None:
             @pytest.fixture
             @patch('edfi_repo_auditor.github_client.GitHubClient')
             def results(mock_client) -> dict:
-                mock_client.has_dependabot_enabled.return_value=True
+                mock_client.has_dependabot_enabled.return_value = True
                 return audit_alerts(mock_client, OWNER, REPO, ALERTS)
 
             def it_returns_dependabot_enabled(results: dict) -> None:
@@ -51,7 +51,7 @@ def describe_when_auditing_alerts() -> None:
             @pytest.fixture
             @patch('edfi_repo_auditor.github_client.GitHubClient')
             def results(mock_client) -> dict:
-                mock_client.has_dependabot_enabled.return_value=True
+                mock_client.has_dependabot_enabled.return_value = True
                 return audit_alerts(mock_client, OWNER, REPO, ALERTS)
 
             def it_returns_no_alerts(results: dict) -> None:
@@ -75,7 +75,7 @@ def describe_when_auditing_alerts() -> None:
             @pytest.fixture
             @patch('edfi_repo_auditor.github_client.GitHubClient')
             def results(mock_client) -> dict:
-                mock_client.get_repository_information.return_value=True
+                mock_client.get_repository_information.return_value = True
                 return audit_alerts(mock_client, OWNER, REPO, ALERTS)
 
             def it_returns_no_alerts(results: dict) -> None:
@@ -110,7 +110,7 @@ def describe_when_auditing_alerts() -> None:
             @pytest.fixture
             @patch('edfi_repo_auditor.github_client.GitHubClient')
             def results(mock_client) -> dict:
-                mock_client.get_repository_information.return_value=True
+                mock_client.get_repository_information.return_value = True
                 return audit_alerts(mock_client, OWNER, REPO, ALERTS)
 
             def it_returns_no_alerts(results: dict) -> None:
@@ -134,7 +134,7 @@ def describe_when_auditing_alerts() -> None:
             @pytest.fixture
             @patch('edfi_repo_auditor.github_client.GitHubClient')
             def results(mock_client) -> dict:
-                mock_client.has_dependabot_enabled.return_value=True
+                mock_client.has_dependabot_enabled.return_value = True
                 return audit_alerts(mock_client, OWNER, REPO, ALERTS)
 
             def it_returns_no_alerts(results: dict) -> None:
@@ -158,7 +158,7 @@ def describe_when_auditing_alerts() -> None:
             @pytest.fixture
             @patch('edfi_repo_auditor.github_client.GitHubClient')
             def results(mock_client) -> dict:
-                mock_client.get_repository_information.return_value=True
+                mock_client.get_repository_information.return_value = True
                 return audit_alerts(mock_client, OWNER, REPO, ALERTS)
 
             def it_returns_warning(results: dict) -> None:
@@ -182,7 +182,7 @@ def describe_when_auditing_alerts() -> None:
             @pytest.fixture
             @patch('edfi_repo_auditor.github_client.GitHubClient')
             def results(mock_client) -> dict:
-                mock_client.get_repository_information.return_value=True
+                mock_client.get_repository_information.return_value = True
                 return audit_alerts(mock_client, OWNER, REPO, ALERTS)
 
             def it_returns_warning(results: dict) -> None:

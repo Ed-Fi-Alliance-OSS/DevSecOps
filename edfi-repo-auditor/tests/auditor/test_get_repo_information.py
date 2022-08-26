@@ -39,7 +39,7 @@ def describe_when_getting_repo_info() -> None:
             @patch('edfi_repo_auditor.auditor.audit_alerts')
             @patch('edfi_repo_auditor.github_client.GitHubClient')
             def results(mock_audit_alerts, mock_client) -> dict:
-                mock_client.get_repository_information.return_value=RESPONSE
+                mock_client.get_repository_information.return_value = RESPONSE
                 mock_audit_alerts.return_value = {}
                 return get_repo_information(mock_client, OWNER, REPO)
 
@@ -77,7 +77,7 @@ def describe_when_getting_repo_info() -> None:
             @patch('edfi_repo_auditor.auditor.audit_alerts')
             @patch('edfi_repo_auditor.github_client.GitHubClient')
             def results(mock_audit_alerts, mock_client) -> dict:
-                mock_client.get_repository_information.return_value=RESPONSE
+                mock_client.get_repository_information.return_value = RESPONSE
                 mock_audit_alerts.return_value = {}
                 return get_repo_information(mock_client, OWNER, REPO)
 
@@ -117,7 +117,7 @@ def describe_when_getting_repo_info() -> None:
             @patch('edfi_repo_auditor.auditor.audit_alerts')
             @patch('edfi_repo_auditor.github_client.GitHubClient')
             def results(mock_audit_alerts, mock_client) -> dict:
-                mock_client.get_repository_information.return_value=RESPONSE
+                mock_client.get_repository_information.return_value = RESPONSE
                 mock_audit_alerts.return_value = {}
                 return get_repo_information(mock_client, OWNER, REPO)
 
