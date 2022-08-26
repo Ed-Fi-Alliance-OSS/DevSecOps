@@ -47,7 +47,7 @@ def describe_when_getting_actions() -> None:
 """.strip()
 
             @pytest.fixture
-            def results() -> List[str]:
+            def results() -> dict:
                 # Arrange
                 with requests_mock.Mocker() as m:
                     m.get(
@@ -60,13 +60,13 @@ def describe_when_getting_actions() -> None:
                         REPO
                     )
 
-            def it_returns_one_action(results: List[str]) -> None:
+            def it_returns_one_action(results: dict) -> None:
                 assert results["total_count"] == 1
 
-            def it_returns_the_path_for_the_workflow(results: List[str]) -> None:
+            def it_returns_the_path_for_the_workflow(results: dict) -> None:
                 assert ".github/workflows/workflow.yml" == results["workflows"][0]["path"]
 
-            def it_returns_the_name_of_the_workflow(results: List[str]) -> None:
+            def it_returns_the_name_of_the_workflow(results: dict) -> None:
                 assert "A workflow file" == results["workflows"][0]["name"]
 
         def describe_given_internal_server_error() -> None:

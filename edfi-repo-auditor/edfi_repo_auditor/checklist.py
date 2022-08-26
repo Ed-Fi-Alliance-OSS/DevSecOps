@@ -7,7 +7,7 @@ from collections import namedtuple
 
 CHECKLIST_DEFAULT_SUCCESS_MESSAGE = "OK"
 
-options = namedtuple("checklist", [
+checklist = namedtuple("checklist", [
                       "HAS_ACTIONS",
                       "CODEQL",
                       "APPROVED_ACTIONS",
@@ -33,7 +33,7 @@ options = namedtuple("checklist", [
                       "LICENSE"
                     ])
 
-CHECKLIST = options(
+CHECKLIST = checklist(
               HAS_ACTIONS={
                 "description": "Has Actions",
                 "fail": "Repo is not using GH Actions"
@@ -132,5 +132,5 @@ CHECKLIST = options(
               })
 
 
-def get_message(property: str, flag: bool) -> str:
+def get_message(property: dict, flag: bool) -> str:
     return CHECKLIST_DEFAULT_SUCCESS_MESSAGE if flag else property["fail"]

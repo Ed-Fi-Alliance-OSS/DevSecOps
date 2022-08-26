@@ -4,6 +4,7 @@
 # See the LICENSE and NOTICES files in the project root for more information.
 
 from http import HTTPStatus
+from typing import Optional
 import pytest
 import requests_mock
 
@@ -44,7 +45,7 @@ def describe_when_getting_file() -> None:
 """.strip()
 
             @pytest.fixture
-            def results() -> str:
+            def results() -> Optional[str]:
                 # Arrange
                 with requests_mock.Mocker() as m:
                     m.get(
@@ -73,7 +74,7 @@ def describe_when_getting_file() -> None:
 """.strip()
 
             @pytest.fixture
-            def results() -> str:
+            def results() -> None:
                 # Arrange
                 with requests_mock.Mocker() as m:
                     m.get(
