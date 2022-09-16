@@ -44,7 +44,7 @@ CHECKLIST = checklist(
               },
               APPROVED_ACTIONS={
                 "description": "Uses only approved GitHub Actions",
-                "fail": "Consider using only approved GH Actions"
+                "fail": "No. Consider using only approved GH Actions"
               },
               TEST_REPORTER={
                 "description": "Uses Test Reporter",
