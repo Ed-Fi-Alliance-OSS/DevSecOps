@@ -13,7 +13,7 @@ DIRECTORY = "../reports" if os.path.exists("../reports") else "reports"
 
 
 def convert(file_name: str, file_contents: str, lines: List[str]) -> List[str]:
-    file_name = file_name.path.split(".")[0]
+    file_name = file_name.split(".")[0]
     lines.append(f"<h2>{file_name}</h2>")
 
     doc: Dict[str, dict] = json.loads(file_contents)
@@ -43,12 +43,12 @@ def convert(file_name: str, file_contents: str, lines: List[str]) -> List[str]:
 
 
 def read_files() -> str:
-    lines = []
+    lines: List[str] = []
 
     for file_entry in os.scandir(f"{DIRECTORY}"):
         if file_entry.is_file() and file_entry.name.endswith(".json"):
             with open(file_entry.path) as f:
-                lines = convert(file_entry, f.read(), lines)
+                lines = convert(file_entry.path, f.read(), lines)
 
     return "\n".join(lines)
 
