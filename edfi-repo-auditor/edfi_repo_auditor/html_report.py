@@ -8,7 +8,8 @@ import json
 import os
 from typing import Dict, List
 
-DIRECTORY = "../reports"
+# Enable running from this directory or from parent
+DIRECTORY = "../reports" if os.path.exists("../reports") else "reports"
 
 
 def convert(file_name: str, file_contents: str, lines: List[str]) -> List[str]:
