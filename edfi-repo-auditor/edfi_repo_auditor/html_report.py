@@ -71,7 +71,10 @@ def write_consolidated_file(contents: str) -> None:
 """
         )
 
-
-if __name__ == "__main__":
+def convert_to_html():
     contents = read_files()
     write_consolidated_file(contents)
+
+
+if __name__ == "__main__":
+    convert_to_html()

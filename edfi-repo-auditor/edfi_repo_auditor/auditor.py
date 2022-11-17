@@ -22,6 +22,7 @@ from edfi_repo_auditor.checklist import (
 
 from edfi_repo_auditor.config import Configuration
 from edfi_repo_auditor.github_client import GitHubClient
+from edfi_repo_auditor.html_report import convert_to_html
 
 
 logger: logging.Logger = logging.getLogger(__name__)
@@ -82,6 +83,8 @@ def run_audit(config: Configuration) -> None:
     if config.save_results is True:
         save_to_json(report_json, config.file_name)
         save_to_csv(df, config.file_name)
+        convert_to_html()
+
     else:
         logger.info(pformat(report_json))
 
