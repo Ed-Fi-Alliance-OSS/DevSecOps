@@ -71,6 +71,7 @@ def write_consolidated_file(contents: str) -> None:
 """
         )
 
+
 def convert_to_html():
     contents = read_files()
     write_consolidated_file(contents)
