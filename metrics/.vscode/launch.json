@@ -5,10 +5,10 @@
     "version": "0.2.0",
     "configurations": [
         {
-            "name": "Repo Auditor",
+            "name": "Tech Metrics",
             "type": "debugpy",
             "request": "launch",
-            "program": "edfi_repo_auditor/__main__.py",
+            "program": "edfi_tech_metrics/__main__.py",
             "console": "integratedTerminal",
             "justMyCode": true
         }
