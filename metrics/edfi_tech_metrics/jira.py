@@ -34,7 +34,7 @@ class JiraBrowser:
         self.jira = JIRA(conf.jira_base_url, token_auth=conf.jira_token)
 
     def get_page_of_issues(self, project_key: str, begin: str) -> IssuePage:
-        jql = f"project={project_key} {begin} AND resolution = Unresolved order by created asc"
+        jql = f"project={project_key} {begin} AND issuetype != Test AND resolution = Unresolved AND fixVersion = EMPTY order by created asc"
         self.conf.debug(jql)
         fields = f"{STORY_POINTS_FIELD},key,created,fixVersions"
         issues: ResultList[Issue] = self.jira.search_issues(jql, maxResults=self.conf.page_size, fields=fields)  # type: ignore  # have never seen it return the alternate dictionary
