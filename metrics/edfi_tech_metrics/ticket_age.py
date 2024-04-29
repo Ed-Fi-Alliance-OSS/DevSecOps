@@ -3,6 +3,8 @@
 # The Ed-Fi Alliance licenses this file to you under the Apache License, Version 2.0.
 # See the LICENSE and NOTICES files in the project root for more information.
 
+from edfi_tech_metrics.settings import Configuration
+
 from datetime import datetime
 from dataclasses import dataclass
 from typing import List, Tuple
@@ -21,7 +23,7 @@ from plotnine import (
 )
 import numpy as np
 
-def _write_stats_file(df: pd.DataFrame, directory: str) -> None:
+def _write_stats_file(conf: Configuration, df: pd.DataFrame, today: str, directory: str) -> None:
     stats_df = df[["project", "age"]].groupby(by="project").describe()
     stats_df.reset_index(inplace=True)
 
@@ -37,12 +39,12 @@ def _write_stats_file(df: pd.DataFrame, directory: str) -> None:
     stats_df.to_csv(file_name)
 
 
-def write_ticket_age_files(df: pd.DataFrame) -> None:
+def write_ticket_age_files(conf: Configuration, df: pd.DataFrame) -> None:
     today = datetime.today().strftime('%Y-%m-%d')
-    _write_stats_file(df, "ticket-age")
+    _write_stats_file(conf, df, today, "ticket-age")
     
     filtered = df[(df["issuetype"] != "Test") & (df["fixVersions"].notnull())]
-    _write_stats_file(filtered, "ticket-age-filtered")
+    _write_stats_file(conf, filtered, today, "ticket-age-filtered")
 
 
 def generate_ticket_age_plots(base_dir: str, projects: List[str]) -> None:
