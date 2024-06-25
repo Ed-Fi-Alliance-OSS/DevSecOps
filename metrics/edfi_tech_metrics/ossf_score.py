@@ -1,4 +1,5 @@
 import requests
+import math as Math
 
 # Function to fetch OSSF score
 def get_ossf_score(organization, repository):
@@ -19,7 +20,7 @@ def report_ossf_scores(repositories):
         if score is not None:
             scores[repo] = score
         else:
-            scores[repo] = 'Error fetching score'
+            scores[repo] = Math.nan
     return scores
 
 # Function to fetch repositories for an organization
