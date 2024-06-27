@@ -25,7 +25,7 @@ def report_ossf_scores(repositories):
 
 # Function to fetch repositories for an organization
 def fetch_repositories(organization):
-    url = f"https://api.github.com/orgs/{organization}/repos"
+    url = f"https://api.github.com/orgs/{organization}/repos?per_page=100"
     response = requests.get(url)
     if response.status_code == 200:
         data = response.json()
