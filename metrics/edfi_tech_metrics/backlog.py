@@ -8,7 +8,7 @@ from pathlib import Path
 from typing import List
 
 import ipywidgets as widgets
-from IPython.display import display, Markdown
+from IPython.display import display
 import pandas as pd
 
 # TODO: refactor out these globals, using proper function closures.

@@ -6,14 +6,12 @@
 from edfi_tech_metrics.settings import Configuration
 
 from datetime import datetime
-from dataclasses import dataclass
-from typing import List, Tuple
+from typing import List
 from pathlib import Path
 from os import listdir, path
 
 import pandas as pd
 from plotnine import aes, ggplot, theme_bw, labs, geom_text, geom_boxplot, coord_flip
-import numpy as np
 
 
 def _write_stats_file(
