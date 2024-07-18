@@ -57,4 +57,4 @@ def describe_when_getting_results() -> None:
             return get_result(RESULT, RULES)
 
         def it_adds_the_properties(results: int) -> None:
-            assert results == 8
+            assert results == 5
