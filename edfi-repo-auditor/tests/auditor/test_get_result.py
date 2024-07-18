@@ -45,7 +45,6 @@ def describe_when_getting_results() -> None:
             CHECKLIST.APPROVED_ACTIONS["description"]: CHECKLIST.APPROVED_ACTIONS[
                 "fail"
             ],
-            CHECKLIST.README["description"]: CHECKLIST_DEFAULT_SUCCESS_MESSAGE,
         }
 
         RULES = {
