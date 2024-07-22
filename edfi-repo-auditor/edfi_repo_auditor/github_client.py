@@ -40,7 +40,7 @@ REPOSITORIES_TEMPLATE = """
 # are more than 100 alerts.
 REPOSITORY_INFORMATION_TEMPLATE = """
 {
-  repository(name: "[REPOSITORY]", owner: "[OWNER]") {
+  repository(name: "[REPOSITORY]"", owner: "[OWNER]") {
     vulnerabilityAlerts(first: 100, states: [OPEN]) {
       nodes {
         createdAt
@@ -54,12 +54,31 @@ REPOSITORY_INFORMATION_TEMPLATE = """
         }
       }
     }
-    branchProtectionRules(first: 10) {
+    rulesets(first: 10) {
       nodes {
-        pattern
-        requiresCommitSignatures
-        isAdminEnforced
-        requiresApprovingReviews
+        bypassActors(first: 10) {
+          edges {
+            node {
+              organizationAdmin
+              actor {
+                __typename
+              }
+            }
+          }
+        }
+        conditions {
+          refName {
+            include
+          }
+        }
+        enforcement
+        name
+        rules(first: 20) {
+          nodes {
+            type
+          }
+        }
+        target
       }
     }
     hasWikiEnabled
