@@ -165,7 +165,7 @@ def get_repo_information(
         rule
         for ruleset in information["rulesets"]["nodes"]
         if any(
-            "main" in refName["include"] for refName in ruleset["conditions"]["refName"]
+            "main" in refName for refName in ruleset["conditions"]["refName"]["include"]
         )
         for rule in ruleset["rules"]["nodes"]
     ]
