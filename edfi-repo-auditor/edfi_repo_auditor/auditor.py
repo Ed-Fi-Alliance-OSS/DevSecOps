@@ -184,7 +184,6 @@ def get_repo_information(
         for rule in ruleset.get("rules", {}).get("nodes", [])
     )
 
-
     return {
         **{
             CHECKLIST.SIGNED_COMMITS["description"]: get_message(
