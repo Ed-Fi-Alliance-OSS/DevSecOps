@@ -178,10 +178,12 @@ def get_repo_information(
         rule.get("type") == "REQUIRED_SIGNATURES"
         for ruleset in information.get("rulesets", {}).get("nodes", [])
         if any(
-            "main" in refName for refName in ruleset["conditions"]["refName"]["include"]
+            refName == "main" or refName == "~DEFAULT_BRANCH" or "main" in refName
+            for refName in ruleset["conditions"]["refName"].get("include", [])
         )
         for rule in ruleset.get("rules", {}).get("nodes", [])
     )
+
 
     return {
         **{
