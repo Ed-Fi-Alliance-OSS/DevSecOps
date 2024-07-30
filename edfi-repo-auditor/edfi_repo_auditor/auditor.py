@@ -174,14 +174,16 @@ def get_repo_information(
     logger.debug(f"Repository information: {information}")
     logger.debug(f"Rules for main: {rules}")
 
+    requires_signed_commits = any(
+        rule.get("type") == "REQUIRED_SIGNATURES"
+        for ruleset in information.get("rulesets", {}).get("nodes", [])
+        for rule in ruleset.get("rules", {}).get("nodes", [])
+    )
+
     return {
         **{
             CHECKLIST.SIGNED_COMMITS["description"]: get_message(
-                CHECKLIST.SIGNED_COMMITS,
-                bool(
-                    rules
-                    and any(rule["type"] == "REQUIRED_SIGNATURES" for rule in rules)
-                ),
+                CHECKLIST.SIGNED_COMMITS, requires_signed_commits
             ),
             CHECKLIST.WIKI["description"]: get_message(
                 CHECKLIST.WIKI, not information["hasWikiEnabled"]

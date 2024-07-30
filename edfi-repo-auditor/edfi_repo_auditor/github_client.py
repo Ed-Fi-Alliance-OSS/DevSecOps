@@ -40,7 +40,7 @@ REPOSITORIES_TEMPLATE = """
 # are more than 100 alerts.
 REPOSITORY_INFORMATION_TEMPLATE = """
 {
-  repository(name: "[REPOSITORY]"", owner: "[OWNER]") {
+  repository(name: "[REPOSITORY]", owner: "[OWNER]") {
     vulnerabilityAlerts(first: 100, states: [OPEN]) {
       nodes {
         createdAt
