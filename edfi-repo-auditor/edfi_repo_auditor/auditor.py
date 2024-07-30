@@ -177,6 +177,9 @@ def get_repo_information(
     requires_signed_commits = any(
         rule.get("type") == "REQUIRED_SIGNATURES"
         for ruleset in information.get("rulesets", {}).get("nodes", [])
+        if any(
+            "main" in refName for refName in ruleset["conditions"]["refName"]["include"]
+        )
         for rule in ruleset.get("rules", {}).get("nodes", [])
     )
 
