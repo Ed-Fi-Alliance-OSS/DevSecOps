@@ -5,23 +5,25 @@
 
 from settings import Configuration, load_from_env
 from jira_browser import JiraBrowser, IssuePage, EdFiIssue
+
 from github import Github
 from github import Auth
 import time
 
-c: Configuration = load_from_env()
-jira: JiraBrowser = JiraBrowser(c)
 
-# https://github.com/Ed-Fi-Exchange-OSS/Ed-Fi-Analytics-Middle-Tier/issues?q=is%3Aissue+is%3Aclosed
-# https://pygithub.readthedocs.io/en/stable/examples/Issue.html#create-issue-with-body
+config: Configuration = load_from_env()
+jira: JiraBrowser = JiraBrowser(config)
 
-gh_auth = Auth.Token(c.github_token)
+gh_auth = Auth.Token(config.github_token)
 gh_client = Github(auth=gh_auth)
 
-repo = gh_client.get_repo("Ed-Fi-Exchange-OSS/Ed-Fi-Analytics-Middle-Tier")
+repo = gh_client.get_repo(config.github_repository)
 
 
 def create_github_issue(issue: EdFiIssue) -> None:
+    if len(issue.attachments) > 0:
+        config.info(f"Attachments found in {issue.issue_key}")
+
     gh_issue = repo.create_issue(
         title=issue.title,
         body=issue.create_gh_description(),
@@ -43,7 +45,7 @@ def create_github_issue(issue: EdFiIssue) -> None:
 
 begin = ""
 while True:
-    page: IssuePage = jira.get_page_of_issues("BIA", begin)
+    page: IssuePage = jira.get_page_of_issues(config.project_key, begin)
 
     for i in range(len(page.issue_list)):
         create_github_issue(page.issue_list[i])

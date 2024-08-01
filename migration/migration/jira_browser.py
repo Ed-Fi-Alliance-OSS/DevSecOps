@@ -5,35 +5,16 @@
 
 from dataclasses import dataclass
 from typing import List, Tuple, Optional
-import re
 
 from jira import JIRA, Issue
 from jira.client import ResultList
 
 from settings import Configuration
+from conversion import convert_markdown
 
 # This value varies from one installation to the next. The following constant was discovered
 # by inspecting the output from `GET https://tracker.ed-fi.org/rest/agile/1.0/board/167/backlog`
 STORY_POINTS_FIELD = "customfield_10004"
-
-
-def convert_markdown(input: str) -> str:
-    # sometimes a non-string seems to come through
-    output = str(input)
-
-    output = re.sub(r"\n#", "\n1.", input)
-    output = re.sub("h1.", "#", output)
-    output = re.sub("h2.", "##", output)
-    output = re.sub("h3.", "###", output)
-    output = re.sub("h4.", "####", output)
-
-    output = re.sub(r"{code:([^}]+)}", r"\n```\1\n", output)
-    output = re.sub("{code}", "\n```\n", output)
-
-    # convert links
-    output = re.sub(r"\[([^|]+)\|([^\]]+)\]", r"[\1](\2)", output)
-
-    return output
 
 
 @dataclass
@@ -69,6 +50,7 @@ class EdFiIssue:
     reporter: str
     title: str
     epic: str
+    attachments: Optional[List[str]]
 
     def create_gh_description(self) -> str:
         return f"""# Jira Description
@@ -108,9 +90,11 @@ class JiraBrowser:
 
     def get_page_of_issues(self, project_key: str, begin: str) -> IssuePage:
         jql = f"project={project_key} {begin} order by created asc"
+        # Uncomment out below to experiment with a specific issue
+        # jql = "key=LP-122"
 
         self.conf.debug(jql)
-        fields = f"{STORY_POINTS_FIELD},key,created,fixVersions,issuetype,labels,priority,fixVersions,status,description,comment,reporter,summary,epic"
+        fields = f"{STORY_POINTS_FIELD},key,created,fixVersions,issuetype,labels,priority,fixVersions,status,description,comment,reporter,summary,epic,attachments"
         issues: ResultList[Issue] = self.jira.search_issues(jql, maxResults=self.conf.page_size, fields=fields)  # type: ignore  # have never seen it return the alternate dictionary
 
         last: str = ""
@@ -147,6 +131,7 @@ class JiraBrowser:
                         if "epic" in i.raw["fields"]
                         else "n/a"
                     ),
+                    i.fields.attachment
                 )
                 for i in issues
             ],

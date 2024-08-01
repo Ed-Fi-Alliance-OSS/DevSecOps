@@ -24,9 +24,11 @@ class Configuration:
 
     jira_token: str
     jira_base_url: str
+    project_key: str
     log_level: str
     page_size: int
     github_token: str
+    github_repository: str
 
     def info(self, message: str) -> None:
         if self.log_level in ("INFO", "DEBUG"):
@@ -53,9 +55,11 @@ def load_from_env() -> Configuration:
     c = Configuration(
         getenv("JIRA_TOKEN", ""),
         getenv("JIRA_BASE_URL", ""),
+        getenv("JIRA_PROJECT_KEY", ""),
         getenv("LOG_LEVEL", DEFAULT_LOG_LEVEL),
         int(getenv("PAGE_SIZE", DEFAULT_PAGE_SIZE)),
-        getenv("GITHUB_TOKEN", "")
+        getenv("GITHUB_TOKEN", ""),
+        getenv("GITHUB_REPOSITORY", "")
     )
     c.configure_logging()
 
