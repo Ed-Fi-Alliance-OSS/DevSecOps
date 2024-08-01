@@ -7,7 +7,10 @@ import re
 
 
 def convert_markdown(input: str) -> str:
-    output = re.sub(r"\n#", "\n1.", input)
+    if input is None or input == "":
+        return ""
+
+    output = re.sub(r"\n\s*#", "\n1.", input)
     output = re.sub("h1.", "#", output)
     output = re.sub("h2.", "##", output)
     output = re.sub("h3.", "###", output)
@@ -19,37 +22,21 @@ def convert_markdown(input: str) -> str:
     # convert links
     output = re.sub(r"\[([^|]+)\|([^\]]+)\]", r"[\1](\2)", output)
 
+    # This doesn't get new lines right. Just ignore and let it go.
+    # output = re.sub("{quote}\n", r"> ", output)
+
     return output
 
 
-sample = """
-h2. whatever
+# sample = """
+# h4. Items
+# # Create a shell React App under src/web folder
+#  # Add styles based on the UI assets from Jonathan and create a layout structure.
 
-# a
-# b [link|https://eheread?sdfasdfasdfa sdfasdfasdf asdf]
+# h4. Acceptance: 
 
-h3. another
+# Web app loads and layout matches the UX.
 
-* c
-* d
+# """
 
-kkloreklsd faksu;da kdsnfah;ksdhf aksdfkl;adskfja sdkfj a;klsjf aksdjf a
-sd aksdf;klas fads [linkk|
-https://example.com/asdfasdfasdf+asdfasdfasd+adsf]
-
-{code:java}
-something
-{code}
-
-
-{code:sql}
-something else
-{code}
-
-{quote}
-blockquote
-{quote}
-
-"""
-
-print(convert_markdown(sample))
+# print(convert_markdown(sample))
