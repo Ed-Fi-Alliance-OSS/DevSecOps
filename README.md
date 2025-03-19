@@ -1,5 +1,7 @@
 # DevSecOps
 
+[![OpenSSF Scorecard](https://api.securityscorecards.dev/projects/github.com/Ed-Fi-Alliance-OSS/DevSecOps/badge)](https://securityscorecards.dev/viewer/?uri=github.com/Ed-Fi-Alliance-OSS/DevSecOps)
+
 Ed-Fi organizational tools for supporting code analysis, DevSecOps, etc.
 
 * [JavaScript and Typescript](javascript/README.md)
