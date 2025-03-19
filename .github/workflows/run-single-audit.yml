@@ -47,7 +47,7 @@ jobs:
         run: pipx install poetry
 
       - name: Install Python 3.9
-        uses: actions/setup-python@98f2ad02fd48d057ee3b4d4f66525b231c3e52b6 # v3.1.2
+        uses: actions/setup-python@0b93645e9fea7318ecaed2b359559ac225c90a2b # v5.3.0
         with:
           python-version: "3.9"
           cache: "poetry"
