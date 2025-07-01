@@ -2296,14 +2296,14 @@ type = ["mypy (>=1.14.1)"]
 
 [[package]]
 name = "plotnine"
-version = "0.14.5"
+version = "0.14.6"
 description = "A Grammar of Graphics for Python"
 optional = false
 python-versions = ">=3.10"
 groups = ["main"]
 files = [
-    {file = "plotnine-0.14.5-py3-none-any.whl", hash = "sha256:4a8bc4360732dd69a0263def4abab285ed8f0f4386186f1e44c642f2cea79b88"},
-    {file = "plotnine-0.14.5.tar.gz", hash = "sha256:9e75969e8e10d8d770a4be36d10e075cc10b88ca6fcc99e36ada53436fb5653f"},
+    {file = "plotnine-0.14.6-py3-none-any.whl", hash = "sha256:45d66970a8dbc679258cc9f03ef046c26c985df7723ba0417297d18dcca9f1fd"},
+    {file = "plotnine-0.14.6.tar.gz", hash = "sha256:6e4d1cd17d360c18a3fccf9d838d5fa17859d29b6c1d722fa6f9bec89f269504"},
 ]
 
 [package.dependencies]
@@ -2311,7 +2311,7 @@ matplotlib = ">=3.8.0"
 mizani = ">=0.13.0,<0.14.0"
 numpy = ">=1.23.5"
 pandas = ">=2.2.0"
-scipy = ">=1.8.0"
+scipy = ">=1.8.0,<1.16.0"
 statsmodels = ">=0.14.0"
 
 [package.extras]
@@ -3484,4 +3484,4 @@ files = [
 [metadata]
 lock-version = "2.1"
 python-versions = "^3.10"
-content-hash = "1966d337f5d75f8667da77cd17d18f9e7e9e93660b5c9ce0728cfff76201b3d6"
+content-hash = "8f960ef59b8156ba2111aceffcace987d701d27b8cc3843d206e8b2228dc894d"
