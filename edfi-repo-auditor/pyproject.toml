@@ -9,7 +9,7 @@ repository = "https://github.com/Ed-Fi-Exchange-OSS/DevSecOps"
 [tool.poetry.dependencies]
 python = "^3.10"
 ConfigArgParse = "^1.7.1"
-python-dotenv = "^1.1.0"
+python-dotenv = "^1.1.1"
 errorhandler = "^2.0.1"
 requests = "^2.32.4"
 pandas = "^2.3.0"
