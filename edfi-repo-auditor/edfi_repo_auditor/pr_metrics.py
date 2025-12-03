@@ -150,8 +150,8 @@ def _fetch_pr_details(
         try:
             detail = client.get_pull_request_detail(owner, repository, pr["number"])
             detailed_prs.append({**pr, **detail})
-        except RuntimeError:
-            logger.warning(f"Failed to fetch details for PR #{pr['number']}")
+        except RuntimeError as e:
+            logger.warning(f"Failed to fetch details for PR #{pr['number']}: {e}")
             detailed_prs.append(pr)
     return detailed_prs
 
@@ -213,8 +213,8 @@ def audit_pr_size_indicators(
         n = len(sorted_values)
         mid = n // 2
         if n % 2 == 0:
-            return (sorted_values[mid - 1] + sorted_values[mid]) / 2
-        return float(sorted_values[mid])
+            return round((sorted_values[mid - 1] + sorted_values[mid]) / 2, 2)
+        return round(float(sorted_values[mid]), 2)
 
     def _average_int(values: List[int]) -> Optional[float]:
         if not values:
@@ -288,8 +288,8 @@ def audit_pr_review_cycle(
                         first_approval_time - created_at
                     ).total_seconds() / 3600
                     times_to_first_approval.append(hours)
-        except RuntimeError:
-            logger.warning(f"Failed to fetch reviews for PR #{pr['number']}")
+        except RuntimeError as e:
+            logger.warning(f"Failed to fetch reviews for PR #{pr['number']}: {e}")
 
     def _average(values: List[float]) -> Optional[float]:
         if not values:
@@ -342,8 +342,8 @@ def audit_reviewer_load_balance(
                 reviewer = review.get("user")
                 if reviewer:
                     reviewer_counts[reviewer] = reviewer_counts.get(reviewer, 0) + 1
-        except RuntimeError:
-            logger.warning(f"Failed to fetch reviews for PR #{pr['number']}")
+        except RuntimeError as e:
+            logger.warning(f"Failed to fetch reviews for PR #{pr['number']}: {e}")
 
     total_reviews = sum(reviewer_counts.values())
     if total_reviews == 0:
@@ -413,8 +413,8 @@ def audit_time_to_first_response(
                     if review_time:
                         if first_response_time is None or review_time < first_response_time:
                             first_response_time = review_time
-        except RuntimeError:
-            pass
+        except RuntimeError as e:
+            logger.warning(f"Failed to fetch reviews for PR #{pr['number']}: {e}")
 
         try:
             comments = client.get_pull_request_comments(
@@ -426,8 +426,8 @@ def audit_time_to_first_response(
                     if comment_time:
                         if first_response_time is None or comment_time < first_response_time:
                             first_response_time = comment_time
-        except RuntimeError:
-            pass
+        except RuntimeError as e:
+            logger.warning(f"Failed to fetch comments for PR #{pr['number']}: {e}")
 
         if first_response_time:
             hours = (first_response_time - created_at).total_seconds() / 3600
@@ -447,11 +447,14 @@ def audit_time_to_first_response(
     }
 
 
-def get_all_pr_metrics(
+def get_basic_pr_metrics(
     client: GitHubClient, owner: str, repository: str
 ) -> Dict[str, object]:
     """
-    Get all PR metrics combined into a single dictionary.
+    Get basic PR metrics (duration and lead time) combined into a single dictionary.
+
+    For extended metrics (review cycle, size indicators, etc.), use the
+    individual audit functions directly.
 
     Args:
         client: GitHubClient instance
@@ -459,7 +462,8 @@ def get_all_pr_metrics(
         repository: Repository name
 
     Returns:
-        Dictionary with all PR metrics combined
+        Dictionary with basic PR metrics including avg_pr_duration_days,
+        avg_lead_time_days, and merged_pr_count
     """
     logger.info(f"Computing PR metrics for {owner}/{repository}")
 
