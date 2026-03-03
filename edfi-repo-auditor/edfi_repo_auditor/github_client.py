@@ -201,7 +201,8 @@ class GitHubClient:
                 f"{API_URL}/repos/{owner}/{repository}/vulnerability-alerts",
             )
             has_dependabot = dependabot["status_code"] == requests.codes.no_content
-        except RuntimeError:
+        except RuntimeError as e:
+            logger.warning(f"Failed to detect Dependabot status for {owner}/{repository}: {e}")
             has_dependabot = False
 
         return has_dependabot
@@ -221,8 +222,8 @@ class GitHubClient:
                 "GET",
                 f"{API_URL}/repos/{owner}/{repository}/contents/{path}",
             )
-        except RuntimeError:
-            pass
+        except RuntimeError as e:
+            logger.warning(f"Failed to get file {path} for {owner}/{repository}: {e}")
 
         return (
             base64.b64decode(file_result["content"]).decode("UTF-8")
