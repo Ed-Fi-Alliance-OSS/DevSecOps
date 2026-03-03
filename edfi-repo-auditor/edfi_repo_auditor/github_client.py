@@ -196,7 +196,7 @@ class GitHubClient:
         has_dependabot = False
         try:
             dependabot = self._execute_api_call(
-                f"Getting actions for {owner}/{repository}",
+                f"Detecting if Dependabot is enabled for {owner}/{repository}",
                 "GET",
                 f"{API_URL}/repos/{owner}/{repository}/vulnerability-alerts",
             )
