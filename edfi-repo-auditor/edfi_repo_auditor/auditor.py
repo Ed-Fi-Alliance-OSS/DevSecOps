@@ -69,18 +69,14 @@ def run_audit(config: Configuration) -> None:
         ossf_score = get_ossf_score(organization, repository)
         logger.debug(f"OpenSSF Score: {ossf_score}")
 
-        results = {**actions, **file_review, **repo_config, **pr_metrics, **ossf_score}
+        results = {**ossf_score, **actions, **file_review, **repo_config, **pr_metrics}
 
         output_to_github_actions(repository, results)
 
         report_data.append(
             {
                 "repository": repository,
-                **actions,
-                **file_review,
-                **repo_config,
-                **pr_metrics,
-                **ossf_score,
+                **results
             }
         )
 
@@ -287,20 +283,6 @@ def review_files(client: GitHubClient, organization: str, repository: str) -> di
     return file_audit
 
 
-def calculate_score(results: dict, rules: dict) -> int:
-    """Calculate the total score based on audit results."""
-    score = 0
-
-    for property in rules:
-        try:
-            if results[property] == CHECKLIST_DEFAULT_SUCCESS_MESSAGE:
-                score += rules[property]
-        except KeyError:
-            logger.info(f"Unable to read property {property} in results")
-
-    return score
-
-
 def output_to_github_actions(repository: str, results: dict) -> None:
     """
     Output audit results to GitHub Actions job summary.
@@ -321,8 +303,7 @@ def output_to_github_actions(repository: str, results: dict) -> None:
 |-------|--------|
 """
 
-    # Sort results for consistent output
-    for check, result in sorted(results.items()):
+    for check, result in results.items():
         summary += f"| {check} | {result} |\n"
 
     # Write to job summary
