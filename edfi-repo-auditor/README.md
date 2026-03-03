@@ -18,14 +18,15 @@ poetry run python edfi_repo_auditor -p {TOKEN} -s True -o {ORGANIZATION} -r {REP
 
 Parameters:
 
-| Parameter          | Description          | Required?                                                                          |
-| ------------------ | -------------------- | ---------------------------------------------------------------------------------- |
-| --access_token  -p | GitHub Access Token  | To call private repos and get branch protection info                               |
-| --organization -o  | Organization Name    | Yes                                                                                |
-| --repositories -r  | Repositories         | No. If not specified, will get all repos for the organization.                     |
-| --log_level -r     | Log level            | No. Default: INFO. Can be: ERROR, WARNING, INFO, DEBUG                             |
-| --save_results -s  | Save results to file | No. Default: console. If specified, will save the  results to a file               |
-| --file_name -f     | Filename             | No. Default: `audit-results`. If specified, will save the results with given name. |
+| Parameter          | Description          | Required?                                                                             |
+| ------------------ | -------------------- | ------------------------------------------------------------------------------------- |
+| --access_token  -p | GitHub Access Token  | To call private repos and get branch protection info                                  |
+| --organization -o  | Organization Name    | Yes                                                                                   |
+| --repositories -r  | Repositories         | No. If not specified, will get all repos for the organization.                        |
+| --log_level -r     | Log level            | No. Default: INFO. Can be: ERROR, WARNING, INFO, DEBUG                                |
+| --save_results -s  | Save results to file | No. Default: console. If specified, will save the  results to a file                  |
+| --file_name -f     | Filename             | No. Default: `audit-results`. If specified, will save the results with given name.    |
+| --no_verify_ssl    | Do not verify certs  | No. Default: False. If specified, will not verify SSL certificates (not recommended). |
 
 Alternatively, you can copy `.env.example` to `.env`, add your GitHub API token,
 and skip all of the arguments: `poetry run python edfi_repo_auditor`.
@@ -62,10 +63,12 @@ the scoring results.
 
 ### Branch Rules
 
-* **Requires Signed commits**: Branch protection for `main` _does not_ require signed commits.
-* **Requires Code review**: Branch protection for `main` requires code reviews.
-* **Requires PR**: Branch protection for `main` requires a pull request.
+* **Requires PR**: Branch protection for `main` requires a pull request, which also implies requiring a code review.
 * **Admin cannot bypass PR**: Branch protection for `main` cannot be bypassed by an admin.
+* **Restricts creation**: Branch protection for `main` restricts who can create branches.
+* **Restricts deletion**: Branch protection for `main` restricts who can delete branches
+* **Requires linear history**: Branch protection for `main` requires a linear history, which implies no merge commits.
+* **Admin cannot bypass PR**: Branch protection for `main` does not allow admins to push directly to the branch.
 
 ### Repository Features
 
