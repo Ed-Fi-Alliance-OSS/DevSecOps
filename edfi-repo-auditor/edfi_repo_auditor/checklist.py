@@ -14,6 +14,7 @@ checklist = namedtuple(
         "APPROVED_ACTIONS",
         "TEST_REPORTER",
         "UNIT_TESTS",
+        "CODEQL",
         "WIKI",
         "ISSUES",
         "PROJECTS",
@@ -39,6 +40,7 @@ CHECKLIST = checklist(
     },
     TEST_REPORTER={"description": "Uses Test Reporter", "fail": "❌ FAILED: Not found"},
     UNIT_TESTS={"description": "Has Unit Tests", "fail": "❌ FAILED: Not found"},
+    CODEQL={"description": "Uses CodeQL", "fail": "❌ FAILED: Not found"},
     WIKI={"description": "Wiki Disabled", "fail": "⚠️ WARNING: Wiki is enabled"},
     ISSUES={"description": "Issues Enabled", "fail": "⚠️ WARNING: Issues are not enabled"},
     PROJECTS={

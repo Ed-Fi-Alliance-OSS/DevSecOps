@@ -145,6 +145,16 @@ def audit_actions(client: GitHubClient, organization: str, repository: str) -> d
                 CHECKLIST.UNIT_TESTS, ut_pattern.search(file_content) is not None
             )
 
+        if (
+            CHECKLIST.CODEQL["description"] not in audit_results
+            or audit_results[CHECKLIST.CODEQL["description"]]
+            == CHECKLIST.CODEQL["fail"]
+        ):
+            audit_results[CHECKLIST.CODEQL["description"]] = get_message(
+                CHECKLIST.CODEQL,
+                "uses: github/codeql-action/analyze" in file_content,
+            )
+
     return audit_results
 
 

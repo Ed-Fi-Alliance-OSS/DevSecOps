@@ -123,3 +123,40 @@ def describe_when_auditing_actions() -> None:
                 results[CHECKLIST.UNIT_TESTS["description"]]
                 == CHECKLIST.UNIT_TESTS["fail"]
             )
+
+    def describe_given_reviewing_codeql() -> None:
+        @pytest.fixture
+        def actions() -> dict:
+            return {"total_count": 1, "workflows": [{"path": "codeql.yml"}]}
+
+        @patch("edfi_repo_auditor.github_client.GitHubClient")
+        def it_returns_success_message_when_codeql_analyze_is_present(
+            mock_client, actions: dict
+        ) -> None:
+            file_content = """
+                - name: Perform CodeQL Analysis
+                  uses: github/codeql-action/analyze
+            """
+            mock_client.get_actions.return_value = actions
+            mock_client.get_file_content.return_value = file_content
+            results = audit_actions(mock_client, OWNER, REPO)
+            assert (
+                results[CHECKLIST.CODEQL["description"]]
+                == CHECKLIST_DEFAULT_SUCCESS_MESSAGE
+            )
+
+        @patch("edfi_repo_auditor.github_client.GitHubClient")
+        def it_returns_fail_message_when_codeql_analyze_is_absent(
+            mock_client, actions: dict
+        ) -> None:
+            file_content = """
+                - name: Build
+                  run: dotnet build
+            """
+            mock_client.get_actions.return_value = actions
+            mock_client.get_file_content.return_value = file_content
+            results = audit_actions(mock_client, OWNER, REPO)
+            assert (
+                results[CHECKLIST.CODEQL["description"]]
+                == CHECKLIST.CODEQL["fail"]
+            )
