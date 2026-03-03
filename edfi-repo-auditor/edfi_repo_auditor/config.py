@@ -24,6 +24,7 @@ class Configuration:
     log_level: str
     save_results: bool
     file_name: str
+    verify_ssl: bool = True
 
 
 def load_configuration(args_in: List[str]) -> Configuration:
@@ -87,6 +88,13 @@ def load_configuration(args_in: List[str]) -> Configuration:
         env_var="AUDIT_FILE_NAME",
     )
 
+    parser.add(  # type: ignore
+        "--no_verify_ssl",
+        action="store_true",
+        help="Disable SSL certificate verification for outbound requests (use with caution)",
+        env_var="AUDIT_NO_VERIFY_SSL",
+    )
+
     parsed = parser.parse_args(args_in)
 
     return Configuration(
@@ -96,4 +104,5 @@ def load_configuration(args_in: List[str]) -> Configuration:
         parsed.log_level,
         parsed.save_results,
         parsed.file_name,
+        verify_ssl=not parsed.no_verify_ssl,
     )
