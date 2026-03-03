@@ -4,6 +4,7 @@
 # See the LICENSE and NOTICES files in the project root for more information.
 
 name: Run Single Audit
+run-name: "Audit ${{ github.event.inputs.organization }}/${{ github.event.inputs.repository }}"
 on:
   workflow_dispatch:
     inputs:
