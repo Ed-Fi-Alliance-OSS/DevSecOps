@@ -158,6 +158,51 @@ def audit_actions(client: GitHubClient, organization: str, repository: str) -> d
     return audit_results
 
 
+MAIN_BRANCH_REFS = {"~DEFAULT_BRANCH", "refs/heads/main", "main"}
+
+
+def _get_main_branch_rule_results(information: dict) -> dict:
+    """Extract branch protection rule results from active rulesets targeting the default/main branch."""
+    active_rule_types: set = set()
+    has_bypass_actors = False
+    has_applicable_ruleset = False
+
+    for ruleset in information.get("rulesets", {}).get("nodes", []):
+        if ruleset.get("enforcement") != "ACTIVE":
+            continue
+        includes = set(
+            ruleset.get("conditions", {}).get("refName", {}).get("include", [])
+        )
+        if not includes.intersection(MAIN_BRANCH_REFS):
+            continue
+        has_applicable_ruleset = True
+        for rule in ruleset.get("rules", {}).get("nodes", []):
+            active_rule_types.add(rule.get("type", ""))
+        if ruleset.get("bypassActors", {}).get("edges", []):
+            has_bypass_actors = True
+
+    admin_cannot_bypass = has_applicable_ruleset and not has_bypass_actors
+
+    return {
+        CHECKLIST.REQUIRES_PULL_REQUEST["description"]: get_message(
+            CHECKLIST.REQUIRES_PULL_REQUEST, "PULL_REQUEST" in active_rule_types
+        ),
+        CHECKLIST.ADMIN_CANNOT_BYPASS["description"]: get_message(
+            CHECKLIST.ADMIN_CANNOT_BYPASS, admin_cannot_bypass
+        ),
+        CHECKLIST.RESTRICTS_CREATION["description"]: get_message(
+            CHECKLIST.RESTRICTS_CREATION, "CREATION" in active_rule_types
+        ),
+        CHECKLIST.RESTRICTS_DELETION["description"]: get_message(
+            CHECKLIST.RESTRICTS_DELETION, "DELETION" in active_rule_types
+        ),
+        CHECKLIST.REQUIRES_LINEAR_HISTORY["description"]: get_message(
+            CHECKLIST.REQUIRES_LINEAR_HISTORY,
+            "REQUIRED_LINEAR_HISTORY" in active_rule_types,
+        ),
+    }
+
+
 def get_repo_information(
     client: GitHubClient, organization: str, repository: str
 ) -> dict:
@@ -167,6 +212,8 @@ def get_repo_information(
     dependabot_results = audit_alerts(
         client, organization, repository, information["vulnerabilityAlerts"]["nodes"]
     )
+
+    branch_rule_results = _get_main_branch_rule_results(information)
 
     return {
         **{
@@ -190,6 +237,7 @@ def get_repo_information(
             ),
         },
         **dependabot_results,
+        **branch_rule_results,
     }
 
 

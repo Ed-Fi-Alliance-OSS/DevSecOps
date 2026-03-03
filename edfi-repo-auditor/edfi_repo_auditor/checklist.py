@@ -28,7 +28,12 @@ checklist = namedtuple(
         "LICENSE",
         "CONTRIBUTORS",
         "SECURITY",
-        "AGENTS"
+        "AGENTS",
+        "REQUIRES_PULL_REQUEST",
+        "ADMIN_CANNOT_BYPASS",
+        "RESTRICTS_CREATION",
+        "RESTRICTS_DELETION",
+        "REQUIRES_LINEAR_HISTORY",
     ],
 )
 
@@ -97,7 +102,26 @@ CHECKLIST = checklist(
         "filename": "AGENTS.md",
         "fail": "⚠️ WARNING: File not found",
     },
-)
+    REQUIRES_PULL_REQUEST={
+        "description": "Requires pull request",
+        "fail": "❌ FAILED: Branch does not require a pull request",
+    },
+    ADMIN_CANNOT_BYPASS={
+        "description": "Admin cannot bypass PR",
+        "fail": "❌ FAILED: Admins can bypass branch protection",
+    },
+    RESTRICTS_CREATION={
+        "description": "Restricts branch creation",
+        "fail": "❌ FAILED: Branch creation is not restricted",
+    },
+    RESTRICTS_DELETION={
+        "description": "Restricts deletion",
+        "fail": "❌ FAILED: Branch deletion is not restricted",
+    },
+    REQUIRES_LINEAR_HISTORY={
+        "description": "Requires linear history",
+        "fail": "❌ FAILED: Linear history is not required",
+    },)
 
 
 def get_message(property: dict, flag: bool) -> str:
