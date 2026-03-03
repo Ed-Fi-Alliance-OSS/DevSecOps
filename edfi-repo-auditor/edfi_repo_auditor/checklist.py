@@ -24,6 +24,10 @@ checklist = namedtuple(
         "DEPENDABOT_ALERTS",
         "NOTICES",
         "CODE_OF_CONDUCT",
+        "LICENSE",
+        "CONTRIBUTORS",
+        "SECURITY",
+        "AGENTS"
     ],
 )
 
@@ -34,7 +38,7 @@ CHECKLIST = checklist(
         "fail": "❌ FAILED: No. Consider using only approved GH Actions",
     },
     TEST_REPORTER={"description": "Uses Test Reporter", "fail": "❌ FAILED: Not found"},
-    UNIT_TESTS={"description": "Has Unit Tests", "fail": "❌ FAILED: `Not found"},
+    UNIT_TESTS={"description": "Has Unit Tests", "fail": "❌ FAILED: Not found"},
     WIKI={"description": "Wiki Disabled", "fail": "⚠️ WARNING: Wiki is enabled"},
     ISSUES={"description": "Issues Enabled", "fail": "⚠️ WARNING: Issues are not enabled"},
     PROJECTS={
@@ -62,13 +66,33 @@ CHECKLIST = checklist(
         "fail": "⚠️ WARNING: Review existing alerts and dependabot status",
     },
     CODE_OF_CONDUCT={
-        "description": "Has CODE_OF_CONDUCT",
-        "filename": ["CODE_OF_CONDUCT.md"],
+        "description": "Has CODE_OF_CONDUCT.md",
+        "filename": "CODE_OF_CONDUCT.md",
         "fail": "⚠️ WARNING: File not found",
     },
     NOTICES={
-        "description": "Has NOTICES",
-        "filename": ["NOTICES.md"],
+        "description": "Has NOTICES.md",
+        "filename": "NOTICES.md",
+        "fail": "⚠️ WARNING: File not found",
+    },
+    LICENSE={
+        "description": "Has LICENSE",
+        "filename": "LICENSE",
+        "fail": "⚠️ WARNING: File not found",
+    },
+    CONTRIBUTORS={
+        "description": "Has CONTRIBUTORS.md",
+        "filename": "CONTRIBUTORS.md",
+        "fail": "⚠️ WARNING: File not found",
+    },
+    SECURITY={
+        "description": "Has SECURITY.md",
+        "filename": "SECURITY.md",
+        "fail": "⚠️ WARNING: File not found",
+    },
+    AGENTS={
+        "description": "Has AGENTS.md",
+        "filename": "AGENTS.md",
         "fail": "⚠️ WARNING: File not found",
     },
 )

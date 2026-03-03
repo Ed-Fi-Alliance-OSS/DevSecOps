@@ -220,14 +220,9 @@ def review_files(client: GitHubClient, organization: str, repository: str) -> di
     ]
 
     for file in files_to_review:
-        file_found = False
-        for filename in file["filename"]:
-            if file_found:
-                # There are multiple possible file names, and one of them was already detected
-                break
-            file_found = (
-                client.get_file_content(organization, repository, filename) is not None
-            )
+        file_found = (
+            client.get_file_content(organization, repository, file["filename"]) is not None
+        )
 
         file_audit[file["description"]] = get_message(file, file_found)
 
@@ -278,7 +273,7 @@ def output_to_github_actions(repository: str, results: dict) -> None:
             f.write(summary)
 
     # Also print to stdout
-    print(summary)
+    logger.info(summary)
 
 
 def save_to_csv(report: pd.DataFrame, file_name: str) -> None:
