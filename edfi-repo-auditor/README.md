@@ -23,7 +23,7 @@ Parameters:
 | --access_token  -p | GitHub Access Token  | To call private repos and get branch protection info                                  |
 | --organization -o  | Organization Name    | Yes                                                                                   |
 | --repositories -r  | Repositories         | No. If not specified, will get all repos for the organization.                        |
-| --log_level -r     | Log level            | No. Default: INFO. Can be: ERROR, WARNING, INFO, DEBUG                                |
+| --log_level -l     | Log level            | No. Default: INFO. Can be: ERROR, WARNING, INFO, DEBUG                                |
 | --save_results -s  | Save results to file | No. Default: console. If specified, will save the  results to a file                  |
 | --file_name -f     | Filename             | No. Default: `audit-results`. If specified, will save the results with given name.    |
 | --no_verify_ssl    | Do not verify certs  | No. Default: False. If specified, will not verify SSL certificates (not recommended). |
