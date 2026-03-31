@@ -38,7 +38,10 @@ checklist = namedtuple(
 )
 
 CHECKLIST = checklist(
-    HAS_ACTIONS={"description": "Has Actions", "fail": "❌ FAILED: Repo is not using GH Actions"},
+    HAS_ACTIONS={
+        "description": "Has Actions",
+        "fail": "❌ FAILED: Repo is not using GH Actions",
+    },
     APPROVED_ACTIONS={
         "description": "Uses only approved GitHub Actions",
         "fail": "❌ FAILED: No. Consider using only approved GH Actions",
@@ -47,7 +50,10 @@ CHECKLIST = checklist(
     UNIT_TESTS={"description": "Has Unit Tests", "fail": "❌ FAILED: Not found"},
     CODEQL={"description": "Uses CodeQL", "fail": "❌ FAILED: Not found"},
     WIKI={"description": "Wiki Disabled", "fail": "⚠️ WARNING: Wiki is enabled"},
-    ISSUES={"description": "Issues Enabled", "fail": "⚠️ WARNING: Issues are not enabled"},
+    ISSUES={
+        "description": "Issues Enabled",
+        "fail": "⚠️ WARNING: Issues are not enabled",
+    },
     PROJECTS={
         "description": "Projects Disabled",
         "fail": "⚠️ WARNING: Projects are enabled",
@@ -121,7 +127,8 @@ CHECKLIST = checklist(
     REQUIRES_LINEAR_HISTORY={
         "description": "Requires linear history",
         "fail": "❌ FAILED: Linear history is not required",
-    },)
+    },
+)
 
 
 def get_message(property: dict, flag: bool) -> str:

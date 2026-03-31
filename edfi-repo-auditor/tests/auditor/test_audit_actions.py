@@ -156,7 +156,4 @@ def describe_when_auditing_actions() -> None:
             mock_client.get_actions.return_value = actions
             mock_client.get_file_content.return_value = file_content
             results = audit_actions(mock_client, OWNER, REPO)
-            assert (
-                results[CHECKLIST.CODEQL["description"]]
-                == CHECKLIST.CODEQL["fail"]
-            )
+            assert results[CHECKLIST.CODEQL["description"]] == CHECKLIST.CODEQL["fail"]

@@ -110,7 +110,9 @@ def describe_when_getting_repo_info() -> None:
                     == "{'Wiki Disabled': '✅ OK', 'Issues Enabled': '✅ OK', 'Projects Disabled': '✅ OK', 'Deletes head branch': '❌ FAILED: Branch should be deleted on merge', 'Uses Squash Merge': '✅ OK', 'License Information': '✅ OK', 'Requires pull request': '❌ FAILED: Branch does not require a pull request', 'Admin cannot bypass PR': '❌ FAILED: Admins can bypass branch protection', 'Restricts branch creation': '❌ FAILED: Branch creation is not restricted', 'Restricts deletion': '❌ FAILED: Branch deletion is not restricted', 'Requires linear history': '❌ FAILED: Linear history is not required'}"
                 )
 
-        def describe_given_there_are_active_rulesets_with_all_required_branch_rules() -> None:
+        def describe_given_there_are_active_rulesets_with_all_required_branch_rules() -> (
+            None
+        ):
             RESPONSE = {
                 "vulnerabilityAlerts": {"nodes": []},
                 "rulesets": {

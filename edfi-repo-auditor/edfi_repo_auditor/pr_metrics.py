@@ -151,7 +151,9 @@ def audit_pr_review_cycle(reviews: Dict[int, List[Dict]]) -> Dict[str, object]:
         if isinstance(pr_data, dict):
             potential_reviews = pr_data.get("reviews")
             if isinstance(potential_reviews, list):
-                normalized_reviews = [r for r in potential_reviews if isinstance(r, dict)]
+                normalized_reviews = [
+                    r for r in potential_reviews if isinstance(r, dict)
+                ]
             elif pr_data.get("state"):
                 normalized_reviews = [pr_data]
             pr_created_at = _parse_datetime(pr_data.get("created_at"))

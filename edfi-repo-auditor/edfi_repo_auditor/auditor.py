@@ -73,12 +73,7 @@ def run_audit(config: Configuration) -> None:
 
         output_to_github_actions(repository, results)
 
-        report_data.append(
-            {
-                "repository": repository,
-                **results
-            }
-        )
+        report_data.append({"repository": repository, **results})
 
     if config.save_results is True:
         save_to_csv(pd.DataFrame(report_data), config.file_name)
@@ -275,7 +270,8 @@ def review_files(client: GitHubClient, organization: str, repository: str) -> di
 
     for file in files_to_review:
         file_found = (
-            client.get_file_content(organization, repository, file["filename"]) is not None
+            client.get_file_content(organization, repository, file["filename"])
+            is not None
         )
 
         file_audit[file["description"]] = get_message(file, file_found)

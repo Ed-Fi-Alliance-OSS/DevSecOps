@@ -202,7 +202,9 @@ class GitHubClient:
             )
             has_dependabot = dependabot["status_code"] == requests.codes.no_content
         except RuntimeError as e:
-            logger.warning(f"Failed to detect Dependabot status for {owner}/{repository}: {e}")
+            logger.warning(
+                f"Failed to detect Dependabot status for {owner}/{repository}: {e}"
+            )
             has_dependabot = False
 
         return has_dependabot

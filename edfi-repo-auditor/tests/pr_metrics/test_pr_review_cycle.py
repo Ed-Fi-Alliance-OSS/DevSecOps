@@ -16,13 +16,33 @@ def describe_audit_pr_review_cycle() -> None:
         def it_computes_expected_averages() -> None:
             pr_review_data = {
                 1: [
-                    {"state": "COMMENTED", "submitted_at": "2024-01-01T13:00:00Z", "created_at": "2024-01-01T12:00:00Z"},
-                    {"state": "APPROVED", "submitted_at": "2024-01-01T14:00:00Z", "created_at": "2024-01-01T12:00:00Z"},
+                    {
+                        "state": "COMMENTED",
+                        "submitted_at": "2024-01-01T13:00:00Z",
+                        "created_at": "2024-01-01T12:00:00Z",
+                    },
+                    {
+                        "state": "APPROVED",
+                        "submitted_at": "2024-01-01T14:00:00Z",
+                        "created_at": "2024-01-01T12:00:00Z",
+                    },
                 ],
                 2: [
-                    {"state": "APPROVED", "submitted_at": "2024-01-02T12:00:00Z", "created_at": "2024-01-02T10:00:00Z"},
-                    {"state": "APPROVED", "submitted_at": "2024-01-02T13:00:00Z", "created_at": "2024-01-02T10:00:00Z"},
-                    {"state": "COMMENTED", "submitted_at": "2024-01-02T14:00:00Z", "created_at": "2024-01-02T10:00:00Z"},
+                    {
+                        "state": "APPROVED",
+                        "submitted_at": "2024-01-02T12:00:00Z",
+                        "created_at": "2024-01-02T10:00:00Z",
+                    },
+                    {
+                        "state": "APPROVED",
+                        "submitted_at": "2024-01-02T13:00:00Z",
+                        "created_at": "2024-01-02T10:00:00Z",
+                    },
+                    {
+                        "state": "COMMENTED",
+                        "submitted_at": "2024-01-02T14:00:00Z",
+                        "created_at": "2024-01-02T10:00:00Z",
+                    },
                 ],
             }
 
@@ -51,8 +71,12 @@ def describe_audit_pr_review_cycle() -> None:
         def it_uses_top_level_created_at_when_present() -> None:
             pr_review_data = {
                 10: [
-                        {"state": "APPROVED", "submitted_at": "2024-01-03T11:00:00Z", "created_at": "2024-01-03T09:00:00Z"},
-                    ],
+                    {
+                        "state": "APPROVED",
+                        "submitted_at": "2024-01-03T11:00:00Z",
+                        "created_at": "2024-01-03T09:00:00Z",
+                    },
+                ],
             }
 
             result = audit_pr_review_cycle(pr_review_data)
