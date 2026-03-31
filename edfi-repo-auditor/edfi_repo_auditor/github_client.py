@@ -17,14 +17,11 @@ from edfi_repo_auditor.log_helper import http_error
 API_URL = "https://api.github.com"
 GRAPHQL_ENDPOINT = f"{API_URL}/graphql"
 
-REPO_TOKEN = "[REPOSITORY]"
-ORG_TOKEN = "[OWNER]"
-
 # Note that this doesn't handle paging and thus will not be sufficient if there
 # are more than 100 repositories.
 REPOSITORIES_TEMPLATE = """
-{
-  organization(login: "[OWNER]") {
+query($owner: String!) {
+  organization(login: $owner) {
     id
     repositories(first: 100) {
       totalCount
@@ -39,8 +36,8 @@ REPOSITORIES_TEMPLATE = """
 # Note that this doesn't handle paging and thus will not be sufficient if there
 # are more than 100 alerts.
 REPOSITORY_INFORMATION_TEMPLATE = """
-{
-  repository(name: "[REPOSITORY]", owner: "[OWNER]") {
+query($owner: String!, $repository: String!) {
+  repository(name: $repository, owner: $owner) {
     vulnerabilityAlerts(first: 100, states: [OPEN]) {
       nodes {
         createdAt
@@ -132,8 +129,8 @@ class GitHubClient:
             msg = f"Query for {description}."
             raise http_error(msg, response)
 
-    def _execute_graphql(self, description: str, query: str) -> dict:
-        payload = dumps({"query": query, "variables": {}})
+    def _execute_graphql(self, description: str, query: str, variables: dict = {}) -> dict:
+        payload = dumps({"query": query, "variables": variables})
 
         body = self._execute_api_call(
             f"Querying for {description}", "POST", f"{GRAPHQL_ENDPOINT}", payload
@@ -146,8 +143,11 @@ class GitHubClient:
         if len(owner.strip()) == 0:
             raise ValueError("owner cannot be blank")
 
-        query = REPOSITORIES_TEMPLATE.replace(ORG_TOKEN, owner)
-        body = self._execute_graphql(f"repositories for {owner}", query)
+        body = self._execute_graphql(
+            f"repositories for {owner}",
+            REPOSITORIES_TEMPLATE,
+            {"owner": owner},
+        )
 
         total_repos = body["data"]["organization"]["repositories"]["totalCount"]
         if total_repos > 100:
@@ -177,12 +177,10 @@ class GitHubClient:
         if len(repository.strip()) == 0:
             raise ValueError("repository cannot be blank")
 
-        query = REPOSITORY_INFORMATION_TEMPLATE.replace(ORG_TOKEN, owner).replace(
-            REPO_TOKEN, repository
-        )
-
         body = self._execute_graphql(
-            f"protection rules for {owner}/{repository}", query
+            f"protection rules for {owner}/{repository}",
+            REPOSITORY_INFORMATION_TEMPLATE,
+            {"owner": owner, "repository": repository},
         )
 
         return body["data"]["repository"]
