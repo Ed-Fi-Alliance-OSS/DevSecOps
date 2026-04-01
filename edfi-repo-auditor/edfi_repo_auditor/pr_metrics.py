@@ -36,7 +36,7 @@ UNIQUE_REVIEWERS_KEY = "Unique Reviewers"
 MERGED_PRS_LAST_30_DAYS_KEY = "Number of Merged PRs (last 30 days)"
 
 
-def _parse_datetime(dt_str: Optional[object]) -> Optional[datetime]:
+def _parse_datetime(dt_str: Optional[str]) -> Optional[datetime]:
     """Parse an ISO 8601 datetime string to datetime object."""
     if dt_str is None:
         return None
