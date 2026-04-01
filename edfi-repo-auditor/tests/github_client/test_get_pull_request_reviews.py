@@ -25,7 +25,9 @@ def describe_when_getting_pull_request_reviews() -> None:
     def describe_given_blank_repository() -> None:
         def it_raises_a_ValueError() -> None:
             with pytest.raises(ValueError):
-                GitHubClient(ACCESS_TOKEN).get_pull_request_reviews(OWNER, "", PR_NUMBER)
+                GitHubClient(ACCESS_TOKEN).get_pull_request_reviews(
+                    OWNER, "", PR_NUMBER
+                )
 
     def describe_given_valid_information() -> None:
         def describe_given_single_page_of_reviews() -> None:

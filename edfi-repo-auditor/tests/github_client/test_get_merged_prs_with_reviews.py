@@ -70,7 +70,9 @@ def describe_get_merged_prs_with_reviews() -> None:
         def results() -> list:
             with requests_mock_module.Mocker() as m:
                 m.post(GRAPHQL_ENDPOINT, json=_graphql_response([]))
-                return GitHubClient(ACCESS_TOKEN).get_merged_prs_with_reviews(OWNER, REPO)
+                return GitHubClient(ACCESS_TOKEN).get_merged_prs_with_reviews(
+                    OWNER, REPO
+                )
 
         def it_returns_empty_list(results: list) -> None:
             assert results == []
@@ -89,7 +91,9 @@ def describe_get_merged_prs_with_reviews() -> None:
                     GRAPHQL_ENDPOINT,
                     json=_graphql_response([_make_node(42, reviews=[REVIEW_NODE])]),
                 )
-                return GitHubClient(ACCESS_TOKEN).get_merged_prs_with_reviews(OWNER, REPO)
+                return GitHubClient(ACCESS_TOKEN).get_merged_prs_with_reviews(
+                    OWNER, REPO
+                )
 
         def it_returns_one_pr(results: list) -> None:
             assert len(results) == 1
@@ -140,7 +144,9 @@ def describe_get_merged_prs_with_reviews() -> None:
                         {"json": PAGE2, "status_code": HTTPStatus.OK},
                     ],
                 )
-                return GitHubClient(ACCESS_TOKEN).get_merged_prs_with_reviews(OWNER, REPO)
+                return GitHubClient(ACCESS_TOKEN).get_merged_prs_with_reviews(
+                    OWNER, REPO
+                )
 
         def it_returns_prs_from_both_pages(results: list) -> None:
             assert len(results) == 2
@@ -159,7 +165,9 @@ def describe_get_merged_prs_with_reviews() -> None:
                     GRAPHQL_ENDPOINT,
                     json=_graphql_response([_make_node(5, author_login=None)]),
                 )
-                return GitHubClient(ACCESS_TOKEN).get_merged_prs_with_reviews(OWNER, REPO)
+                return GitHubClient(ACCESS_TOKEN).get_merged_prs_with_reviews(
+                    OWNER, REPO
+                )
 
         def it_returns_none_for_user(results: list) -> None:
             assert results[0]["user"] is None

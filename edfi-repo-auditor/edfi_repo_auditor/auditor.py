@@ -240,7 +240,9 @@ def audit_alerts(
         for alert in alerts
         if (
             alert["createdAt"]
-            < (datetime.now(timezone.utc) - timedelta(ALERTS_WEEKS_SINCE_CREATED * 7)).isoformat()
+            < (
+                datetime.now(timezone.utc) - timedelta(ALERTS_WEEKS_SINCE_CREATED * 7)
+            ).isoformat()
             and alert["securityVulnerability"]["advisory"]["severity"]
             in ALERTS_INCLUDED_SEVERITIES
         )

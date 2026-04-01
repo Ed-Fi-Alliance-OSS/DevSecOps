@@ -13,7 +13,7 @@ time-to-first-response, and more.
 
 import logging
 from datetime import datetime, timezone
-from typing import Dict, List, Optional
+from typing import Any, Dict, List, Optional
 
 from edfi_repo_auditor.github_client import GitHubClient
 
@@ -46,7 +46,9 @@ def _parse_datetime(dt_str: Optional[str]) -> Optional[datetime]:
         return None
 
 
-def _avg_days_between(prs: List[Dict], start_field: str, end_field: str) -> Optional[float]:
+def _avg_days_between(
+    prs: List[Dict], start_field: str, end_field: str
+) -> Optional[float]:
     """Return the average number of days between two timestamp fields across a list of PRs.
 
     PRs where either field is missing or unparseable are skipped.
@@ -78,7 +80,11 @@ def audit_pr_duration(merged_prs: List[Dict]) -> Dict[str, object]:
         Dictionary with:
         - Avg PR Duration (days): Average duration in days (float or None if no merged PRs)
     """
-    return {AVG_PR_DURATION_DAYS_KEY: _avg_days_between(merged_prs, "created_at", "closed_at")}
+    return {
+        AVG_PR_DURATION_DAYS_KEY: _avg_days_between(
+            merged_prs, "created_at", "closed_at"
+        )
+    }
 
 
 def audit_lead_time_for_change(merged_prs: List[Dict]) -> Dict[str, object]:
@@ -95,10 +101,12 @@ def audit_lead_time_for_change(merged_prs: List[Dict]) -> Dict[str, object]:
         Dictionary with:
         - Avg Lead Time (days): Average lead time in days (float or None if no merged PRs)
     """
-    return {AVG_LEAD_TIME_DAYS_KEY: _avg_days_between(merged_prs, "created_at", "merged_at")}
+    return {
+        AVG_LEAD_TIME_DAYS_KEY: _avg_days_between(merged_prs, "created_at", "merged_at")
+    }
 
 
-def audit_pr_review_cycle(reviews: Dict[int, List[Dict]]) -> Dict[str, object]:
+def audit_pr_review_cycle(reviews: Dict[int, List[Any]]) -> Dict[str, object]:
     """
     Compute PR review cycle metrics.
 
@@ -168,7 +176,9 @@ def audit_pr_review_cycle(reviews: Dict[int, List[Dict]]) -> Dict[str, object]:
 
         first_approval_time = min(approval_times)
         if first_approval_time >= pr_created_at:
-            hours = (first_approval_time - pr_created_at).total_seconds() / SECONDS_IN_HOUR
+            hours = (
+                first_approval_time - pr_created_at
+            ).total_seconds() / SECONDS_IN_HOUR
             times_to_first_approval.append(hours)
 
     def _average(values: List[float]) -> Optional[float]:
@@ -183,7 +193,7 @@ def audit_pr_review_cycle(reviews: Dict[int, List[Dict]]) -> Dict[str, object]:
     }
 
 
-def audit_reviewer_load_balance(reviews: Dict[int, List[Dict]]) -> Dict[str, object]:
+def audit_reviewer_load_balance(reviews: Dict[int, List[Any]]) -> Dict[str, object]:
     """
     Compute reviewer load balance metrics
 

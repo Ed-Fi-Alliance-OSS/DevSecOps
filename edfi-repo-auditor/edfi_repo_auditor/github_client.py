@@ -163,7 +163,9 @@ class GitHubClient:
             msg = f"Query for {description}."
             raise http_error(msg, response)
 
-    def _execute_graphql(self, description: str, query: str, variables: dict = {}) -> dict:
+    def _execute_graphql(
+        self, description: str, query: str, variables: dict = {}
+    ) -> dict:
         payload = dumps({"query": query, "variables": variables})
 
         body = self._execute_api_call(
@@ -404,11 +406,13 @@ class GitHubClient:
                 break
 
             for review in page_reviews:
-                all_reviews.append({
-                    "user": review.get("user", {}).get("login"),
-                    "state": review.get("state"),
-                    "submitted_at": review.get("submitted_at"),
-                })
+                all_reviews.append(
+                    {
+                        "user": review.get("user", {}).get("login"),
+                        "state": review.get("state"),
+                        "submitted_at": review.get("submitted_at"),
+                    }
+                )
 
             if len(page_reviews) < per_page:
                 break
@@ -474,17 +478,19 @@ class GitHubClient:
                     }
                     for r in review_data.get("nodes", [])
                 ]
-                all_prs.append({
-                    "number": node["number"],
-                    "created_at": node.get("createdAt"),
-                    "closed_at": node.get("closedAt"),
-                    "merged_at": node.get("mergedAt"),
-                    "user": (node.get("author") or {}).get("login"),
-                    "additions": node.get("additions"),
-                    "deletions": node.get("deletions"),
-                    "changed_files": node.get("changedFiles"),
-                    "reviews": reviews,
-                })
+                all_prs.append(
+                    {
+                        "number": node["number"],
+                        "created_at": node.get("createdAt"),
+                        "closed_at": node.get("closedAt"),
+                        "merged_at": node.get("mergedAt"),
+                        "user": (node.get("author") or {}).get("login"),
+                        "additions": node.get("additions"),
+                        "deletions": node.get("deletions"),
+                        "changed_files": node.get("changedFiles"),
+                        "reviews": reviews,
+                    }
+                )
 
             page_info = pull_requests["pageInfo"]
             if not page_info["hasNextPage"]:
