@@ -249,30 +249,25 @@ def get_pr_metrics(
     """
     logger.info(f"Computing PR metrics for {owner}/{repository}")
 
-    prs: List[Dict] = client.get_pull_requests(owner, repository, state="closed")
-
     now_utc = datetime.now(timezone.utc)
-    merged_prs: List[Dict] = []
-    for pr in prs:
-        merged_at_str = pr.get("merged_at")
-        merged_at = _parse_datetime(merged_at_str)
-        if merged_at is None:
-            continue
-        if (now_utc - merged_at).days <= LAST_N_DAYS:
-            merged_prs.append(pr)
+    prs_with_reviews = client.get_merged_prs_with_reviews(owner, repository)
 
+    merged_prs: List[Dict] = []
     reviews: Dict[int, List[Dict]] = {}
-    for pr in merged_prs:
+
+    for pr in prs_with_reviews:
+        merged_at = _parse_datetime(pr.get("merged_at"))
+        if merged_at is None or (now_utc - merged_at).days > LAST_N_DAYS:
+            continue
+
+        merged_prs.append(pr)
+
         pr_number = int(pr.get("number", 0))
-        try:
-            reviews[pr_number] = client.get_pull_request_reviews(
-                owner, repository, pr_number
-            )
-            for review in reviews[pr_number]:
-                if "created_at" not in review or review["created_at"] is None:
-                    review["created_at"] = pr.get("created_at")
-        except RuntimeError as e:
-            logger.warning(f"Failed to fetch reviews for PR #{pr_number}: {e}")
+        pr_reviews = pr.get("reviews", [])
+        for review in pr_reviews:
+            if "created_at" not in review or review["created_at"] is None:
+                review["created_at"] = pr.get("created_at")
+        reviews[pr_number] = pr_reviews
 
     duration = audit_pr_duration(merged_prs)
     review_cycle = audit_pr_review_cycle(reviews)
