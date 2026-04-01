@@ -329,15 +329,16 @@ class GitHubClient:
         }
 
     def get_pull_request_reviews(
-        self, owner: str, repository: str, pr_number: int
+        self, owner: str, repository: str, pr_number: int, per_page: int = 100
     ) -> List[dict]:
         """
-        Get reviews for a specific pull request.
+        Get reviews for a specific pull request with full pagination.
 
         Args:
             owner: Repository owner
             repository: Repository name
             pr_number: Pull request number
+            per_page: Results per page (max 100)
 
         Returns:
             List of review records with user, state, submitted_at
@@ -347,18 +348,37 @@ class GitHubClient:
         if len(repository.strip()) == 0:
             raise ValueError("repository cannot be blank")
 
-        url = f"{API_URL}/repos/{owner}/{repository}/pulls/{pr_number}/reviews"
-        reviews = self._execute_api_call(
-            f"Getting reviews for PR #{pr_number} in {owner}/{repository}",
-            "GET",
-            url,
-        )
+        all_reviews: List[dict] = []
+        page = 1
 
-        return [
-            {
-                "user": review.get("user", {}).get("login"),
-                "state": review.get("state"),
-                "submitted_at": review.get("submitted_at"),
-            }
-            for review in reviews
-        ]
+        while True:
+            logger.info(
+                f"Getting reviews for PR #{pr_number} in {owner}/{repository}, page {page}"
+            )
+            url = (
+                f"{API_URL}/repos/{owner}/{repository}/pulls/{pr_number}/reviews"
+                f"?per_page={per_page}&page={page}"
+            )
+
+            page_reviews = self._execute_api_call(
+                f"Getting reviews for PR #{pr_number} in {owner}/{repository}",
+                "GET",
+                url,
+            )
+
+            if not page_reviews:
+                break
+
+            for review in page_reviews:
+                all_reviews.append({
+                    "user": review.get("user", {}).get("login"),
+                    "state": review.get("state"),
+                    "submitted_at": review.get("submitted_at"),
+                })
+
+            if len(page_reviews) < per_page:
+                break
+
+            page += 1
+
+        return all_reviews
