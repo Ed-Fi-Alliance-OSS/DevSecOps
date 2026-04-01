@@ -18,14 +18,15 @@ poetry run python edfi_repo_auditor -p {TOKEN} -s True -o {ORGANIZATION} -r {REP
 
 Parameters:
 
-| Parameter          | Description          | Required?                                                                          |
-| ------------------ | -------------------- | ---------------------------------------------------------------------------------- |
-| --access_token  -p | GitHub Access Token  | To call private repos and get branch protection info                               |
-| --organization -o  | Organization Name    | Yes                                                                                |
-| --repositories -r  | Repositories         | No. If not specified, will get all repos for the organization.                     |
-| --log_level -r     | Log level            | No. Default: INFO. Can be: ERROR, WARNING, INFO, DEBUG                             |
-| --save_results -s  | Save results to file | No. Default: console. If specified, will save the  results to a file               |
-| --file_name -f     | Filename             | No. Default: `audit-results`. If specified, will save the results with given name. |
+| Parameter          | Description          | Required?                                                                             |
+| ------------------ | -------------------- | ------------------------------------------------------------------------------------- |
+| --access_token  -p | GitHub Access Token  | To call private repos and get branch protection info                                  |
+| --organization -o  | Organization Name    | Yes                                                                                   |
+| --repositories -r  | Repositories         | No. If not specified, will get all repos for the organization.                        |
+| --log_level -l     | Log level            | No. Default: INFO. Can be: ERROR, WARNING, INFO, DEBUG                                |
+| --save_results -s  | Save results to file | No. Default: console. If specified, will save the  results to a file                  |
+| --file_name -f     | Filename             | No. Default: `audit-results`. If specified, will save the results with given name.    |
+| --no_verify_ssl    | Do not verify certs  | No. Default: False. If specified, will not verify SSL certificates (not recommended). |
 
 Alternatively, you can copy `.env.example` to `.env`, add your GitHub API token,
 and skip all of the arguments: `poetry run python edfi_repo_auditor`.
@@ -33,32 +34,66 @@ and skip all of the arguments: `poetry run python edfi_repo_auditor`.
 Look in the `reports` directory for the output file and an HTML file summarizing
 the scoring results.
 
-## Test
+## Dev Tools
 
-Run `poetry run pytest` to execute unit tests
+| Command              | Purpose     |
+| -------------------- | ----------- |
+| `poetry run pytest`  | unit tests  |
+| `poetry run mypy .`  | type checks |
+| `poetry run black .` | re-format   |
+| `poetry run flake8`  | linter      |
 
 ## Detailed Guidance
+
+### Standard files
+
+* **Has SECURITY**: There is a SECURITY.md file.
+* **Has CONTRIBUTORS.md**: There is a CONTRIBUTORS.md file.
+* **Has NOTICES**: There is a NOTICES.md file.
+* **Has LICENSE**: There is either a LICENSE file.
+* **Has AGENT.md**: There is an AGENTS.md file.
+
+### Standard Actions Usage
 
 * **Has Actions**: There is at least one Action in the repository.
 * **Uses CodeQL**: The repository runs CodeQL; detected by looking for "uses: github/codeql-action/analyze" in an Actions yml file.
 * **Uses only approved GitHub Actions**: The repository only uses approved GitHub Actions; detected by looking for "repository-scanner.yml" in an Actions yml file.
 * **Uses Test Reporter**: Unit tests results are uploaded directly into GitHub Actions; detected by looking for "uses: dorny/test-reporter" in an Actions yml file.
-* **Has README**: There is a README.md file.
-* **Has CONTRIBUTORS**: There is a CONTRIBUTORS.md file.
-* **Has NOTICES**: There is a NOTICES.md file.
-* **Has LICENSE**: There is either a LICENSE or LICENSE.md file.
-* **Requires Signed commits**: Branch protection for `main` requires signed commits.
-* **Requires Code review**: Branch protection for `main` requires code reviews.
-* **Requires PR**: Branch protection for `main` requires a pull request.
+* **Has Unit Tests**: There is at least one unit test; detected by looking for "test" in the name of an Actions yml file.
+
+### Branch Rules
+
+* **Requires PR**: Branch protection for `main` requires a pull request, which also implies requiring a code review.
 * **Admin cannot bypass PR**: Branch protection for `main` cannot be bypassed by an admin.
+* **Restricts creation**: Branch protection for `main` restricts who can create branches.
+* **Restricts deletion**: Branch protection for `main` restricts who can delete branches
+* **Requires linear history**: Branch protection for `main` requires a linear history, which implies no merge commits.
+* **Admin cannot bypass PR**: Branch protection for `main` does not allow admins to push directly to the branch.
+
+### Repository Features
+
 * **Wiki Disabled**: Wikis are disabled.
-* **Issues Disabled**: Issues are disabled.
+* **Issues Enabled**: Issues are enabled.
 * **Projects Disabled**: Projects are disabled.
-* **Discussions Disabled**: Discussions are disabled.
-* **Has Unit Tests**: There is an action step with "unit test" in the name.
-* **Has Linter**: There is an action step with "lint" / "linter" / "linting" in the name.
 * **Deletes head branch**: Automatically deletes head branches on merge.
 * **Uses Squash Merge**: Squash merge is the default.
 * **License Information**: The repo settings specify a license (this is different than the license file).
-* **Dependabot Enabled**: DependaBot is enabled.
+
+### Security
+
+* **Dependabot Enabled**: Dependabot is enabled.
 * **Dependabot Alerts**: There are no _critical_ or _high_ severity DependaBot alerts that have remained open for greater than three weeks.
+* **OSSF Score**: the repository score calculated by the OSSF Scorecard.
+
+### Pull Request Metrics
+
+* **Number of Merged PRs (last 30 days)**: The total number of pull requests merged in the last 30 days, just informational.
+* **Avg Reviews per PR**: The average number of reviews received per pull request, just informational.
+* **Avg Approvals per PR**: The average number of approvals received per pull request, just informational.
+* **Avg Lead Time (days)**: The average lead time in days (time from PR creation to merge). Monitoring for trends, no baseline requirement _yet_.
+* **Avg PR Duration (days)**: The average PR duration in days (time from PR creation to close). Monitoring for trends, no baseline requirement _yet_.
+* **Avg Time to First Approval (hours)**: The average time to first approval in hours. Monitoring for trends, no baseline requirement _yet_.
+* **Top 3 Reviewers**: The three most frequent reviewers by number of reviews. Just informational.
+* **Top Reviewer Share (%)**: The percentage of reviews performed by the top reviewer. Monitor to make sure the burden is not falling primarily on one person.
+* **Total Reviewers**: The total number of reviewers who have participated in the repository. Just informational.
+* **Unique Reviewers**: The total number of unique reviewers who have participated in the repository. Just informational.

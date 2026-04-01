@@ -3,6 +3,12 @@
 # The Ed-Fi Alliance licenses this file to you under the Apache License, Version 2.0.
 # See the LICENSE and NOTICES files in the project root for more information.
 
+"""
+Entry point for GitHub Actions auditor.
+This version is designed to run on a single repository and output
+results to GitHub Actions job output instead of generating HTML files.
+"""
+
 import sys
 import logging
 
@@ -11,6 +17,7 @@ from errorhandler import ErrorHandler
 
 from edfi_repo_auditor.config import Configuration, load_configuration
 from edfi_repo_auditor.auditor import run_audit
+from edfi_repo_auditor.disable_tls import no_ssl_verification
 
 
 def _configure_logging(config: Configuration) -> None:
@@ -31,9 +38,17 @@ def _main():
     error_tracker = ErrorHandler()
 
     try:
-        run_audit(config)
+        if config.verify_ssl:
+            run_audit(config)
+        else:
+            logging.getLogger(__name__).warning(
+                "SSL certificate verification is disabled. "
+                "This should only be used in trusted network environments."
+            )
+            with no_ssl_verification():
+                run_audit(config)
     except Exception as e:
-        logging.getLogger(__name__).error(e)
+        logging.getLogger(__name__).error(e, exc_info=True)
 
     if error_tracker.fired:
         print(

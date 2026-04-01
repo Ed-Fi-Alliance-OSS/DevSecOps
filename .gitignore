@@ -9,3 +9,6 @@ edfi-repo-auditor/reports/*
 
 **/*junit.xml
 **/.ipynb_checkpoints/*
+
+
+**/.claude/settings.local.json
