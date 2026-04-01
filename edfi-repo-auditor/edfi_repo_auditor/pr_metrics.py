@@ -46,6 +46,24 @@ def _parse_datetime(dt_str: Optional[object]) -> Optional[datetime]:
         return None
 
 
+def _avg_days_between(prs: List[Dict], start_field: str, end_field: str) -> Optional[float]:
+    """Return the average number of days between two timestamp fields across a list of PRs.
+
+    PRs where either field is missing or unparseable are skipped.
+    Returns None when no valid pairs exist.
+    """
+    deltas = []
+    for pr in prs:
+        start = _parse_datetime(pr.get(start_field))
+        end = _parse_datetime(pr.get(end_field))
+        if start is not None and end is not None:
+            deltas.append((end - start).total_seconds() / SECONDS_IN_DAY)
+
+    if not deltas:
+        return None
+    return round(sum(deltas) / len(deltas), 2)
+
+
 def audit_pr_duration(merged_prs: List[Dict]) -> Dict[str, object]:
     """
     Compute average PR duration for merged PRs only.
@@ -60,28 +78,7 @@ def audit_pr_duration(merged_prs: List[Dict]) -> Dict[str, object]:
         Dictionary with:
         - Avg PR Duration (days): Average duration in days (float or None if no merged PRs)
     """
-
-    if len(merged_prs) == 0:
-        return {AVG_PR_DURATION_DAYS_KEY: None}
-
-    durations = []
-    for pr in merged_prs:
-        created_at = _parse_datetime(pr.get("created_at"))
-        closed_at = _parse_datetime(pr.get("closed_at"))
-
-        if created_at is not None and closed_at is not None:
-            duration = (closed_at - created_at).total_seconds() / SECONDS_IN_DAY  # in days
-            durations.append(duration)
-
-    if not durations:
-        return {
-            AVG_PR_DURATION_DAYS_KEY: None,
-            MERGED_PR_COUNT_KEY: len(merged_prs),
-        }
-
-    avg_duration = sum(durations) / len(durations)
-
-    return {AVG_PR_DURATION_DAYS_KEY: round(avg_duration, 2)}
+    return {AVG_PR_DURATION_DAYS_KEY: _avg_days_between(merged_prs, "created_at", "closed_at")}
 
 
 def audit_lead_time_for_change(merged_prs: List[Dict]) -> Dict[str, object]:
@@ -98,25 +95,7 @@ def audit_lead_time_for_change(merged_prs: List[Dict]) -> Dict[str, object]:
         Dictionary with:
         - Avg Lead Time (days): Average lead time in days (float or None if no merged PRs)
     """
-
-    if len(merged_prs) == 0:
-        return {AVG_LEAD_TIME_DAYS_KEY: None}
-
-    lead_times = []
-    for pr in merged_prs:
-        created_at = _parse_datetime(pr.get("created_at"))
-        merged_at = _parse_datetime(pr.get("merged_at"))
-
-        if created_at is not None and merged_at is not None:
-            lead_time = (merged_at - created_at).total_seconds() / SECONDS_IN_DAY  # in days
-            lead_times.append(lead_time)
-
-    if not lead_times:
-        return {AVG_LEAD_TIME_DAYS_KEY: None}
-
-    avg_lead_time = sum(lead_times) / len(lead_times)
-
-    return {AVG_LEAD_TIME_DAYS_KEY: round(avg_lead_time, 2)}
+    return {AVG_LEAD_TIME_DAYS_KEY: _avg_days_between(merged_prs, "created_at", "merged_at")}
 
 
 def audit_pr_review_cycle(reviews: Dict[int, List[Dict]]) -> Dict[str, object]:
