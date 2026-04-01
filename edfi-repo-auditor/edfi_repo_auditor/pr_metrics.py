@@ -31,7 +31,6 @@ AVG_TIME_TO_FIRST_APPROVAL_HOURS_KEY = "Avg Time to First Approval (hours)"
 AVG_REVIEWS_PER_PR_KEY = "Avg Reviews per PR"
 AVG_APPROVALS_PER_PR_KEY = "Avg Approvals per PR"
 TOP_REVIEWER_SHARE_PERCENT_KEY = "Top Reviewer Share (%)"
-TOP_THREE_REVIEWERS_SHARE_PERCENT_KEY = "Top 3 Reviewers Share (%)"
 TOTAL_REVIEWS_KEY = "Total Reviews"
 UNIQUE_REVIEWERS_KEY = "Unique Reviewers"
 MERGED_PRS_LAST_30_DAYS_KEY = "Number of Merged PRs (last 30 days)"
@@ -215,14 +214,12 @@ def audit_reviewer_load_balance(reviews: Dict[int, List[Dict]]) -> Dict[str, obj
     Returns:
         Dictionary with:
         - Top Reviewer Share (%): Percentage of reviews done by top reviewer
-        - Top 3 Reviewers Share (%): Percentage of reviews done by top 3 reviewers
         - Total Reviews: Total number of reviews
         - Unique Reviewers: Number of unique reviewers
     """
     if len(reviews) == 0:
         return {
             TOP_REVIEWER_SHARE_PERCENT_KEY: None,
-            TOP_THREE_REVIEWERS_SHARE_PERCENT_KEY: None,
             TOTAL_REVIEWS_KEY: 0,
             UNIQUE_REVIEWERS_KEY: 0,
         }
@@ -239,20 +236,15 @@ def audit_reviewer_load_balance(reviews: Dict[int, List[Dict]]) -> Dict[str, obj
     if total_reviewers == 0:
         return {
             TOP_REVIEWER_SHARE_PERCENT_KEY: None,
-            TOP_THREE_REVIEWERS_SHARE_PERCENT_KEY: None,
             TOTAL_REVIEWS_KEY: 0,
             UNIQUE_REVIEWERS_KEY: 0,
         }
 
     sorted_reviewers = sorted(reviewer_counts.values(), reverse=True)
-
     top_reviewer_share = (sorted_reviewers[0] / total_reviewers) * 100
-    top_3_sum = sum(sorted_reviewers[:3])
-    top_3_share = (top_3_sum / total_reviewers) * 100
 
     return {
         TOP_REVIEWER_SHARE_PERCENT_KEY: round(top_reviewer_share, 2),
-        TOP_THREE_REVIEWERS_SHARE_PERCENT_KEY: round(top_3_share, 2),
         TOTAL_REVIEWS_KEY: total_reviewers,
         UNIQUE_REVIEWERS_KEY: len(reviewer_counts),
     }
