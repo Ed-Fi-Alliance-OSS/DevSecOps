@@ -83,6 +83,29 @@ def describe_audit_pr_review_cycle() -> None:
 
             assert result[AVG_TIME_TO_FIRST_APPROVAL_HOURS_KEY] == 2.0
 
+    def describe_given_list_with_non_dict_items() -> None:
+        def it_filters_out_non_dict_entries() -> None:
+            # Line 161: `normalized_reviews = [r for r in pr_data if isinstance(r, dict)]`
+            # Non-dict items (None, strings) in the list must be silently skipped.
+            pr_review_data = {
+                1: [
+                    None,
+                    "unexpected string",
+                    {
+                        "state": "APPROVED",
+                        "submitted_at": "2024-01-01T14:00:00Z",
+                        "created_at": "2024-01-01T12:00:00Z",
+                    },
+                    None,
+                ],
+            }
+
+            result = audit_pr_review_cycle(pr_review_data)
+
+            assert result[AVG_REVIEWS_PER_PR_KEY] == 1.0
+            assert result[AVG_APPROVALS_PER_PR_KEY] == 1.0
+            assert result[AVG_TIME_TO_FIRST_APPROVAL_HOURS_KEY] == 2.0
+
     def describe_given_no_reviews() -> None:
         def it_returns_none_metrics() -> None:
             result = audit_pr_review_cycle({})
