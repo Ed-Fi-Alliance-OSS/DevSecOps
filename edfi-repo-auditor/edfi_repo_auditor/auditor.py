@@ -12,7 +12,7 @@ import logging
 import os
 import re
 from typing import List
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
 
 import pandas as pd
 
@@ -240,7 +240,7 @@ def audit_alerts(
         for alert in alerts
         if (
             alert["createdAt"]
-            < (datetime.now() - timedelta(ALERTS_WEEKS_SINCE_CREATED * 7)).isoformat()
+            < (datetime.now(timezone.utc) - timedelta(ALERTS_WEEKS_SINCE_CREATED * 7)).isoformat()
             and alert["securityVulnerability"]["advisory"]["severity"]
             in ALERTS_INCLUDED_SEVERITIES
         )

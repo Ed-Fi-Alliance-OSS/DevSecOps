@@ -21,6 +21,8 @@ from edfi_repo_auditor.github_client import GitHubClient
 logger: logging.Logger = logging.getLogger(__name__)
 
 LAST_N_DAYS = 30
+SECONDS_IN_DAY = 86400
+SECONDS_IN_HOUR = 3600
 
 AVG_PR_DURATION_DAYS_KEY = "Avg PR Duration (days)"
 MERGED_PR_COUNT_KEY = "Merged PR Count"
@@ -69,7 +71,7 @@ def audit_pr_duration(merged_prs: List[Dict]) -> Dict[str, object]:
         closed_at = _parse_datetime(pr.get("closed_at"))
 
         if created_at is not None and closed_at is not None:
-            duration = (closed_at - created_at).total_seconds() / 86400  # in days
+            duration = (closed_at - created_at).total_seconds() / SECONDS_IN_DAY  # in days
             durations.append(duration)
 
     if not durations:
@@ -107,7 +109,7 @@ def audit_lead_time_for_change(merged_prs: List[Dict]) -> Dict[str, object]:
         merged_at = _parse_datetime(pr.get("merged_at"))
 
         if created_at is not None and merged_at is not None:
-            lead_time = (merged_at - created_at).total_seconds() / 86400  # in days
+            lead_time = (merged_at - created_at).total_seconds() / SECONDS_IN_DAY  # in days
             lead_times.append(lead_time)
 
     if not lead_times:
@@ -188,7 +190,7 @@ def audit_pr_review_cycle(reviews: Dict[int, List[Dict]]) -> Dict[str, object]:
 
         first_approval_time = min(approval_times)
         if first_approval_time >= pr_created_at:
-            hours = (first_approval_time - pr_created_at).total_seconds() / 3600
+            hours = (first_approval_time - pr_created_at).total_seconds() / SECONDS_IN_HOUR
             times_to_first_approval.append(hours)
 
     def _average(values: List[float]) -> Optional[float]:
@@ -230,7 +232,7 @@ def audit_reviewer_load_balance(reviews: Dict[int, List[Dict]]) -> Dict[str, obj
     for pr_reviews in reviews.values():
         for review in pr_reviews:
             reviewer = review.get("user")
-            if reviewer:
+            if reviewer is not None:
                 reviewer_counts[reviewer] = reviewer_counts.get(reviewer, 0) + 1
 
     total_reviewers = sum(reviewer_counts.values())
