@@ -274,10 +274,11 @@ def review_files(client: GitHubClient, organization: str, repository: str) -> di
     ]
 
     for file in files_to_review:
-        file_found = (
-            client.get_file_content(organization, repository, file["filename"])
-            is not None
-        )
+        file_found = client.get_file_content(organization, repository, file["filename"]) is not None
+        if not file_found and "alternate_filename" in file:
+            file_found = (
+                client.get_file_content(organization, repository, file["alternate_filename"]) is not None
+            )
 
         file_audit[file["description"]] = get_message(file, file_found)
 

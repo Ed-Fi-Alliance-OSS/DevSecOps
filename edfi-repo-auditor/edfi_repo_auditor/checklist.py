@@ -106,6 +106,7 @@ CHECKLIST = checklist(
     AGENTS={
         "description": "Has AGENTS.md",
         "filename": "AGENTS.md",
+        "alternate_filename": "CLAUDE.md",
         "fail": "⚠️ WARNING: File not found",
     },
     REQUIRES_PULL_REQUEST={
