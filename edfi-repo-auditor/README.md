@@ -96,7 +96,5 @@ Look in the `reports` directory for the output file.
 - **Avg Lead Time (days)**: The average lead time in days (time from PR creation to merge). Monitoring for trends, no baseline requirement _yet_.
 - **Avg PR Duration (days)**: The average PR duration in days (time from PR creation to close). Monitoring for trends, no baseline requirement _yet_.
 - **Avg Time to First Approval (hours)**: The average time to first approval in hours. Monitoring for trends, no baseline requirement _yet_.
-- **Top 3 Reviewers**: The three most frequent reviewers by number of reviews. Just informational.
 - **Top Reviewer Share (%)**: The percentage of reviews performed by the top reviewer. Monitor to make sure the burden is not falling primarily on one person.
-- **Total Reviewers**: The total number of reviewers who have participated in the repository. Just informational.
 - **Unique Reviewers**: The total number of unique reviewers who have participated in the repository. Just informational.
