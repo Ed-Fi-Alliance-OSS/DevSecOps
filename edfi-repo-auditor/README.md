@@ -60,7 +60,7 @@ the scoring results.
 - **Has CONTRIBUTORS.md**: There is a CONTRIBUTORS.md file.
 - **Has NOTICES**: There is a NOTICES.md file.
 - **Has LICENSE**: There is either a LICENSE file.
-- **Has AGENT.md**: There is an AGENTS.md file.
+- **Has AGENTS.md**: There is an AGENTS.md file.
 
 ### Standard Actions Usage
 
