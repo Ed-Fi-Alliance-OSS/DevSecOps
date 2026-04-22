@@ -235,14 +235,12 @@ def audit_alerts(
     client: GitHubClient, organization: str, repository: str, alerts: List[dict]
 ) -> dict:
     """Audit dependabot alerts."""
+    cutoff = datetime.now(timezone.utc) - timedelta(ALERTS_WEEKS_SINCE_CREATED * 7)
     vulnerabilities = [
         alert
         for alert in alerts
         if (
-            alert["createdAt"]
-            < (
-                datetime.now(timezone.utc) - timedelta(ALERTS_WEEKS_SINCE_CREATED * 7)
-            ).isoformat()
+            datetime.fromisoformat(alert["createdAt"]) < cutoff
             and alert["securityVulnerability"]["advisory"]["severity"]
             in ALERTS_INCLUDED_SEVERITIES
         )
