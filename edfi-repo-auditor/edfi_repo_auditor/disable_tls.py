@@ -7,6 +7,8 @@
 # https://stackoverflow.com/a/15445989/30384
 
 import contextlib
+from collections.abc import Generator, MutableMapping
+from typing import Any, Optional
 import warnings
 
 import requests
@@ -16,7 +18,7 @@ _old_merge_environment_settings = requests.Session.merge_environment_settings
 
 
 @contextlib.contextmanager
-def no_ssl_verification():
+def no_ssl_verification() -> Generator[None, None, None]:
     """
     Context manager that disables SSL certificate verification for all
     requests made via the ``requests`` library within the block.
@@ -27,15 +29,22 @@ def no_ssl_verification():
     """
     opened_adapters: set = set()
 
-    def merge_environment_settings(self, url, proxies, stream, verify, cert):  # type: ignore[override]
-        opened_adapters.add(self.get_adapter(url))
+    def merge_environment_settings(  # type: ignore[override]
+        self: requests.Session,
+        url: str | bytes | None,
+        proxies: Optional[MutableMapping[str, str]],
+        stream: Optional[bool],
+        verify: Optional[bool | str],
+        cert: Optional[str | tuple[str, str]],
+    ) -> Any:
+        opened_adapters.add(self.get_adapter(url))  # type: ignore[arg-type]
         settings = _old_merge_environment_settings(
             self, url, proxies, stream, verify, cert
         )
         settings["verify"] = False
         return settings
 
-    requests.Session.merge_environment_settings = merge_environment_settings  # type: ignore[method-assign]
+    requests.Session.merge_environment_settings = merge_environment_settings  # type: ignore[method-assign, assignment]
 
     try:
         with warnings.catch_warnings():
