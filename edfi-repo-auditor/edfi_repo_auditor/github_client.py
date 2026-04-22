@@ -164,9 +164,10 @@ class GitHubClient:
             raise http_error(msg, response)
 
     def _execute_graphql(
-        self, description: str, query: str, variables: dict = {}
+        self, description: str, query: str, variables: dict | None = None
     ) -> dict:
-        payload = dumps({"query": query, "variables": variables})
+        payload_variables = {} if variables is None else variables
+        payload = dumps({"query": query, "variables": payload_variables})
 
         body = self._execute_api_call(
             f"Querying for {description}", "POST", f"{GRAPHQL_ENDPOINT}", payload
