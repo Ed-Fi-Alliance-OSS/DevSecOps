@@ -19,6 +19,10 @@ def describe_when_reviewing_files() -> None:
         FILES = {
             CHECKLIST.NOTICES["description"]: CHECKLIST_DEFAULT_SUCCESS_MESSAGE,
             CHECKLIST.CODE_OF_CONDUCT["description"]: CHECKLIST_DEFAULT_SUCCESS_MESSAGE,
+            CHECKLIST.LICENSE["description"]: CHECKLIST_DEFAULT_SUCCESS_MESSAGE,
+            CHECKLIST.CONTRIBUTORS["description"]: CHECKLIST_DEFAULT_SUCCESS_MESSAGE,
+            CHECKLIST.SECURITY["description"]: CHECKLIST_DEFAULT_SUCCESS_MESSAGE,
+            CHECKLIST.AGENTS["description"]: CHECKLIST_DEFAULT_SUCCESS_MESSAGE,
         }
 
         @pytest.fixture
@@ -34,6 +38,10 @@ def describe_when_reviewing_files() -> None:
         FILES = {
             CHECKLIST.NOTICES["description"]: CHECKLIST.NOTICES["fail"],
             CHECKLIST.CODE_OF_CONDUCT["description"]: CHECKLIST.CODE_OF_CONDUCT["fail"],
+            CHECKLIST.LICENSE["description"]: CHECKLIST.LICENSE["fail"],
+            CHECKLIST.CONTRIBUTORS["description"]: CHECKLIST.CONTRIBUTORS["fail"],
+            CHECKLIST.SECURITY["description"]: CHECKLIST.SECURITY["fail"],
+            CHECKLIST.AGENTS["description"]: CHECKLIST.AGENTS["fail"],
         }
 
         @pytest.fixture

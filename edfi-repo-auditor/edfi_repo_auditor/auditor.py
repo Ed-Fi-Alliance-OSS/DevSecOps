@@ -267,6 +267,10 @@ def review_files(client: GitHubClient, organization: str, repository: str) -> di
     files_to_review = [
         CHECKLIST.NOTICES,
         CHECKLIST.CODE_OF_CONDUCT,
+        CHECKLIST.LICENSE,
+        CHECKLIST.CONTRIBUTORS,
+        CHECKLIST.SECURITY,
+        CHECKLIST.AGENTS,
     ]
 
     for file in files_to_review:
