@@ -1,16 +1,11 @@
 # Ed-Fi Repo Auditor
 
-Python script to report on compliance with Ed-Fi repository guidance. The file
-[scoring.json](./scoring.json) provides the guidelines to be followed; see below
-for a detailed description in plain text. The property names are in the same
-format that the code will follow to assign a value. This file provides a value
-for each property, this file can be modified accordingly. Additionally, the
-`threshold` property specifies the limit that will be tolerated to indicate if
-the repository needs to make adjustments according to the scoring.
+Python script to report on compliance with Ed-Fi repository guidance. See below
+for a detailed description of each check in plain text.
 
 ## Run from GitHub Actions
 
-Find the "Run Single Audit" workflow in the Actions tab, and click "Run workflow". Unless testing code updates in a branch, leave the branch selection as "main". Then, provide the required parameters and click "Run workflow". Look for the workflow run in the list of runs, and click into it. Click on the "Run Ed-Fi Repo Auditor" step to see the console output from the script, including the scoring results.
+Find the "Run Single Audit" workflow in the Actions tab, and click "Run workflow". Unless testing code updates in a branch, leave the branch selection as "main". Then, provide the required parameters and click "Run workflow". Look for the workflow run in the list of runs, and click into it. Click on the "Run Ed-Fi Repo Auditor" step to see the console output from the script.
 
 Required parameters:
 
@@ -40,8 +35,7 @@ Parameters:
 Alternatively, you can copy `.env.example` to `.env`, add your GitHub API token,
 and skip all of the arguments: `poetry run python edfi_repo_auditor`.
 
-Look in the `reports` directory for the output file and an HTML file summarizing
-the scoring results.
+Look in the `reports` directory for the output file.
 
 ## Dev Tools
 
