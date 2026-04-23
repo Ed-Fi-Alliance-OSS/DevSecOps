@@ -97,7 +97,7 @@ query($owner: String!, $repo: String!, $cursor: String) {
     pullRequests(
       first: 20
       states: [MERGED]
-      orderBy: {field: CREATED_AT, direction: DESC}
+      orderBy: {field: UPDATED_AT, direction: DESC}
       after: $cursor
     ) {
       nodes {
@@ -432,7 +432,7 @@ class GitHubClient:
         Args:
             owner: Repository owner
             repository: Repository name
-            since_days: Used to compute a creation-date cutoff for early
+            since_days: Used to compute a merge-date cutoff for early
                         pagination exit (since_days * 3). Caller is responsible
                         for filtering results to the desired window.
 
@@ -497,17 +497,16 @@ class GitHubClient:
             if not page_info["hasNextPage"]:
                 break
 
-            # Early exit: stop paginating once the oldest PR on this page was
-            # created far enough back that subsequent pages can't be in window
-            oldest_created_str = min(
-                (n["createdAt"] for n in nodes if n.get("createdAt")),
+            # Early exit: stop paginating once the most recently merged PR on
+            # this page was merged far enough back that subsequent pages
+            # (ordered by UPDATED_AT DESC) cannot fall within the window.
+            oldest_merged_str = min(
+                (n["mergedAt"] for n in nodes if n.get("mergedAt")),
                 default=None,
             )
-            if oldest_created_str:
+            if oldest_merged_str:
                 try:
-                    oldest_dt = datetime.fromisoformat(
-                        oldest_created_str.replace("Z", "+00:00")
-                    )
+                    oldest_dt = datetime.fromisoformat(oldest_merged_str)
                     if (now_utc - oldest_dt).days > page_cutoff_days:
                         break
                 except (ValueError, AttributeError):
