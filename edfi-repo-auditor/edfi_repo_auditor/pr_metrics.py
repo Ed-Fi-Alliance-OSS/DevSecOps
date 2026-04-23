@@ -17,7 +17,6 @@ from typing import Any, Dict, List, Optional
 
 from edfi_repo_auditor.github_client import GitHubClient
 
-
 logger: logging.Logger = logging.getLogger(__name__)
 
 LAST_N_DAYS = 30

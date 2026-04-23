@@ -8,7 +8,6 @@ from typing import List
 
 from configargparse import ArgParser
 
-
 DEFAULT_LOG_LEVEL = "INFO"
 
 

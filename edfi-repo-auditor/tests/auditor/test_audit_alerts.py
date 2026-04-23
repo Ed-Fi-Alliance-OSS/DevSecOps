@@ -73,7 +73,8 @@ def describe_when_auditing_alerts() -> None:
             ALERTS = [
                 {
                     "createdAt": (
-                        real_datetime.now(timezone.utc) - timedelta((ALERTS_WEEKS_SINCE_CREATED - 1) * 7)
+                        real_datetime.now(timezone.utc)
+                        - timedelta((ALERTS_WEEKS_SINCE_CREATED - 1) * 7)
                     ).isoformat(),
                     "securityVulnerability": {
                         "package": {"name": "minimist"},
@@ -98,7 +99,8 @@ def describe_when_auditing_alerts() -> None:
             ALERTS = [
                 {
                     "createdAt": (
-                        real_datetime.now(timezone.utc) - timedelta((ALERTS_WEEKS_SINCE_CREATED + 1) * 7)
+                        real_datetime.now(timezone.utc)
+                        - timedelta((ALERTS_WEEKS_SINCE_CREATED + 1) * 7)
                     ).isoformat(),
                     "securityVulnerability": {
                         "package": {"name": "minimist"},
@@ -107,7 +109,8 @@ def describe_when_auditing_alerts() -> None:
                 },
                 {
                     "createdAt": (
-                        real_datetime.now(timezone.utc) - timedelta((ALERTS_WEEKS_SINCE_CREATED - 1) * 7)
+                        real_datetime.now(timezone.utc)
+                        - timedelta((ALERTS_WEEKS_SINCE_CREATED - 1) * 7)
                     ).isoformat(),
                     "securityVulnerability": {
                         "package": {"name": "minimist"},
@@ -132,7 +135,8 @@ def describe_when_auditing_alerts() -> None:
             ALERTS = [
                 {
                     "createdAt": (
-                        real_datetime.now(timezone.utc) - timedelta((ALERTS_WEEKS_SINCE_CREATED - 1) * 7)
+                        real_datetime.now(timezone.utc)
+                        - timedelta((ALERTS_WEEKS_SINCE_CREATED - 1) * 7)
                     ).isoformat(),
                     "securityVulnerability": {
                         "package": {"name": "minimist"},
@@ -157,7 +161,8 @@ def describe_when_auditing_alerts() -> None:
             ALERTS = [
                 {
                     "createdAt": (
-                        real_datetime.now(timezone.utc) - timedelta((ALERTS_WEEKS_SINCE_CREATED + 1) * 7)
+                        real_datetime.now(timezone.utc)
+                        - timedelta((ALERTS_WEEKS_SINCE_CREATED + 1) * 7)
                     ).isoformat(),
                     "securityVulnerability": {
                         "package": {"name": "minimist"},
@@ -182,7 +187,8 @@ def describe_when_auditing_alerts() -> None:
             ALERTS = [
                 {
                     "createdAt": (
-                        real_datetime.now(timezone.utc) - timedelta((ALERTS_WEEKS_SINCE_CREATED + 1) * 7)
+                        real_datetime.now(timezone.utc)
+                        - timedelta((ALERTS_WEEKS_SINCE_CREATED + 1) * 7)
                     ).isoformat(),
                     "securityVulnerability": {
                         "package": {"name": "minimist"},
@@ -208,8 +214,12 @@ def describe_when_auditing_alerts() -> None:
         # "2026-04-01T12:00:00.500000+00:00". Lexicographically, "Z" (ASCII 90) > "." (ASCII 46),
         # so string comparison treats a Z-format timestamp at the cutoff second as newer than the
         # cutoff, silently dropping alerts that should be flagged.
-        def describe_given_old_critical_alert_with_Z_format_at_cutoff_second_boundary() -> None:
-            FIXED_NOW = real_datetime(2026, 4, 22, 12, 0, 0, 500000, tzinfo=timezone.utc)
+        def describe_given_old_critical_alert_with_Z_format_at_cutoff_second_boundary() -> (
+            None
+        ):
+            FIXED_NOW = real_datetime(
+                2026, 4, 22, 12, 0, 0, 500000, tzinfo=timezone.utc
+            )
             CUTOFF = FIXED_NOW - timedelta(ALERTS_WEEKS_SINCE_CREATED * 7)
             # Alert created at the cutoff second without microseconds and with Z suffix —
             # 0.5 s before the actual cutoff, so it should be flagged.

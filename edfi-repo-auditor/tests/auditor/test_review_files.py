@@ -65,4 +65,7 @@ def describe_when_reviewing_files() -> None:
             return review_files(mock_client, OWNER, REPO)
 
         def it_passes_agents_check(results: dict) -> None:
-            assert results[CHECKLIST.AGENTS["description"]] == CHECKLIST_DEFAULT_SUCCESS_MESSAGE
+            assert (
+                results[CHECKLIST.AGENTS["description"]]
+                == CHECKLIST_DEFAULT_SUCCESS_MESSAGE
+            )

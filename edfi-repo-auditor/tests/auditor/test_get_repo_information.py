@@ -44,14 +44,28 @@ def describe_when_getting_repo_info() -> None:
                     CHECKLIST.WIKI["description"]: OK,
                     CHECKLIST.ISSUES["description"]: CHECKLIST.ISSUES["fail"],
                     CHECKLIST.PROJECTS["description"]: OK,
-                    CHECKLIST.DELETES_HEAD["description"]: CHECKLIST.DELETES_HEAD["fail"],
+                    CHECKLIST.DELETES_HEAD["description"]: CHECKLIST.DELETES_HEAD[
+                        "fail"
+                    ],
                     CHECKLIST.USES_SQUASH["description"]: OK,
-                    CHECKLIST.LICENSE_INFORMATION["description"]: CHECKLIST.LICENSE_INFORMATION["fail"],
-                    CHECKLIST.REQUIRES_PULL_REQUEST["description"]: CHECKLIST.REQUIRES_PULL_REQUEST["fail"],
-                    CHECKLIST.ADMIN_CANNOT_BYPASS["description"]: CHECKLIST.ADMIN_CANNOT_BYPASS["fail"],
-                    CHECKLIST.RESTRICTS_CREATION["description"]: CHECKLIST.RESTRICTS_CREATION["fail"],
-                    CHECKLIST.RESTRICTS_DELETION["description"]: CHECKLIST.RESTRICTS_DELETION["fail"],
-                    CHECKLIST.REQUIRES_LINEAR_HISTORY["description"]: CHECKLIST.REQUIRES_LINEAR_HISTORY["fail"],
+                    CHECKLIST.LICENSE_INFORMATION[
+                        "description"
+                    ]: CHECKLIST.LICENSE_INFORMATION["fail"],
+                    CHECKLIST.REQUIRES_PULL_REQUEST[
+                        "description"
+                    ]: CHECKLIST.REQUIRES_PULL_REQUEST["fail"],
+                    CHECKLIST.ADMIN_CANNOT_BYPASS[
+                        "description"
+                    ]: CHECKLIST.ADMIN_CANNOT_BYPASS["fail"],
+                    CHECKLIST.RESTRICTS_CREATION[
+                        "description"
+                    ]: CHECKLIST.RESTRICTS_CREATION["fail"],
+                    CHECKLIST.RESTRICTS_DELETION[
+                        "description"
+                    ]: CHECKLIST.RESTRICTS_DELETION["fail"],
+                    CHECKLIST.REQUIRES_LINEAR_HISTORY[
+                        "description"
+                    ]: CHECKLIST.REQUIRES_LINEAR_HISTORY["fail"],
                 }
 
         def describe_given_there_are_active_rulesets_for_main_branch() -> None:
@@ -87,14 +101,26 @@ def describe_when_getting_repo_info() -> None:
                     CHECKLIST.WIKI["description"]: OK,
                     CHECKLIST.ISSUES["description"]: OK,
                     CHECKLIST.PROJECTS["description"]: OK,
-                    CHECKLIST.DELETES_HEAD["description"]: CHECKLIST.DELETES_HEAD["fail"],
+                    CHECKLIST.DELETES_HEAD["description"]: CHECKLIST.DELETES_HEAD[
+                        "fail"
+                    ],
                     CHECKLIST.USES_SQUASH["description"]: OK,
-                    CHECKLIST.LICENSE_INFORMATION["description"]: CHECKLIST.LICENSE_INFORMATION["fail"],
-                    CHECKLIST.REQUIRES_PULL_REQUEST["description"]: CHECKLIST.REQUIRES_PULL_REQUEST["fail"],
+                    CHECKLIST.LICENSE_INFORMATION[
+                        "description"
+                    ]: CHECKLIST.LICENSE_INFORMATION["fail"],
+                    CHECKLIST.REQUIRES_PULL_REQUEST[
+                        "description"
+                    ]: CHECKLIST.REQUIRES_PULL_REQUEST["fail"],
                     CHECKLIST.ADMIN_CANNOT_BYPASS["description"]: OK,
-                    CHECKLIST.RESTRICTS_CREATION["description"]: CHECKLIST.RESTRICTS_CREATION["fail"],
-                    CHECKLIST.RESTRICTS_DELETION["description"]: CHECKLIST.RESTRICTS_DELETION["fail"],
-                    CHECKLIST.REQUIRES_LINEAR_HISTORY["description"]: CHECKLIST.REQUIRES_LINEAR_HISTORY["fail"],
+                    CHECKLIST.RESTRICTS_CREATION[
+                        "description"
+                    ]: CHECKLIST.RESTRICTS_CREATION["fail"],
+                    CHECKLIST.RESTRICTS_DELETION[
+                        "description"
+                    ]: CHECKLIST.RESTRICTS_DELETION["fail"],
+                    CHECKLIST.REQUIRES_LINEAR_HISTORY[
+                        "description"
+                    ]: CHECKLIST.REQUIRES_LINEAR_HISTORY["fail"],
                 }
 
         def describe_given_there_are_active_rulesets_for_other_branch() -> None:
@@ -130,14 +156,26 @@ def describe_when_getting_repo_info() -> None:
                     CHECKLIST.WIKI["description"]: OK,
                     CHECKLIST.ISSUES["description"]: OK,
                     CHECKLIST.PROJECTS["description"]: OK,
-                    CHECKLIST.DELETES_HEAD["description"]: CHECKLIST.DELETES_HEAD["fail"],
+                    CHECKLIST.DELETES_HEAD["description"]: CHECKLIST.DELETES_HEAD[
+                        "fail"
+                    ],
                     CHECKLIST.USES_SQUASH["description"]: OK,
                     CHECKLIST.LICENSE_INFORMATION["description"]: OK,
-                    CHECKLIST.REQUIRES_PULL_REQUEST["description"]: CHECKLIST.REQUIRES_PULL_REQUEST["fail"],
-                    CHECKLIST.ADMIN_CANNOT_BYPASS["description"]: CHECKLIST.ADMIN_CANNOT_BYPASS["fail"],
-                    CHECKLIST.RESTRICTS_CREATION["description"]: CHECKLIST.RESTRICTS_CREATION["fail"],
-                    CHECKLIST.RESTRICTS_DELETION["description"]: CHECKLIST.RESTRICTS_DELETION["fail"],
-                    CHECKLIST.REQUIRES_LINEAR_HISTORY["description"]: CHECKLIST.REQUIRES_LINEAR_HISTORY["fail"],
+                    CHECKLIST.REQUIRES_PULL_REQUEST[
+                        "description"
+                    ]: CHECKLIST.REQUIRES_PULL_REQUEST["fail"],
+                    CHECKLIST.ADMIN_CANNOT_BYPASS[
+                        "description"
+                    ]: CHECKLIST.ADMIN_CANNOT_BYPASS["fail"],
+                    CHECKLIST.RESTRICTS_CREATION[
+                        "description"
+                    ]: CHECKLIST.RESTRICTS_CREATION["fail"],
+                    CHECKLIST.RESTRICTS_DELETION[
+                        "description"
+                    ]: CHECKLIST.RESTRICTS_DELETION["fail"],
+                    CHECKLIST.REQUIRES_LINEAR_HISTORY[
+                        "description"
+                    ]: CHECKLIST.REQUIRES_LINEAR_HISTORY["fail"],
                 }
 
         def describe_given_there_are_active_rulesets_with_all_required_branch_rules() -> (

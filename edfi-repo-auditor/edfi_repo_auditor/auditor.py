@@ -25,7 +25,6 @@ from edfi_repo_auditor.github_client import GitHubClient
 from edfi_repo_auditor.ossf_score import get_ossf_score
 from edfi_repo_auditor.pr_metrics import get_pr_metrics
 
-
 logger: logging.Logger = logging.getLogger(__name__)
 
 # Parameters to evaluate dependabot alerts
@@ -272,10 +271,16 @@ def review_files(client: GitHubClient, organization: str, repository: str) -> di
     ]
 
     for file in files_to_review:
-        file_found = client.get_file_content(organization, repository, file["filename"]) is not None
+        file_found = (
+            client.get_file_content(organization, repository, file["filename"])
+            is not None
+        )
         if not file_found and "alternate_filename" in file:
             file_found = (
-                client.get_file_content(organization, repository, file["alternate_filename"]) is not None
+                client.get_file_content(
+                    organization, repository, file["alternate_filename"]
+                )
+                is not None
             )
 
         file_audit[file["description"]] = get_message(file, file_found)
