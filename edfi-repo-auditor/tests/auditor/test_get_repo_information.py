@@ -7,10 +7,13 @@ import pytest
 
 from unittest.mock import patch
 from edfi_repo_auditor.auditor import get_repo_information
+from edfi_repo_auditor.checklist import CHECKLIST, CHECKLIST_DEFAULT_SUCCESS_MESSAGE
 
 ACCESS_TOKEN = "asd09uasdfu09asdfj;iolkasdfklj"
 OWNER = "Ed-Fi-Alliance-OSS"
 REPO = "Ed-Fi-ODS"
+
+OK = CHECKLIST_DEFAULT_SUCCESS_MESSAGE
 
 
 def describe_when_getting_repo_info() -> None:
@@ -37,10 +40,19 @@ def describe_when_getting_repo_info() -> None:
                 return get_repo_information(mock_client, OWNER, REPO)
 
             def it_returns_no_rules(results: dict) -> None:
-                assert (
-                    str(results)
-                    == "{'Wiki Disabled': '✅ OK', 'Issues Enabled': '⚠️ WARNING: Issues are not enabled', 'Projects Disabled': '✅ OK', 'Deletes head branch': '❌ FAILED: Branch should be deleted on merge', 'Uses Squash Merge': '✅ OK', 'License Information': '❌ FAILED: License not found', 'Requires pull request': '❌ FAILED: Branch does not require a pull request', 'Admin cannot bypass PR': '❌ FAILED: Admins can bypass branch protection', 'Restricts branch creation': '❌ FAILED: Branch creation is not restricted', 'Restricts deletion': '❌ FAILED: Branch deletion is not restricted', 'Requires linear history': '❌ FAILED: Linear history is not required'}"
-                )
+                assert results == {
+                    CHECKLIST.WIKI["description"]: OK,
+                    CHECKLIST.ISSUES["description"]: CHECKLIST.ISSUES["fail"],
+                    CHECKLIST.PROJECTS["description"]: OK,
+                    CHECKLIST.DELETES_HEAD["description"]: CHECKLIST.DELETES_HEAD["fail"],
+                    CHECKLIST.USES_SQUASH["description"]: OK,
+                    CHECKLIST.LICENSE_INFORMATION["description"]: CHECKLIST.LICENSE_INFORMATION["fail"],
+                    CHECKLIST.REQUIRES_PULL_REQUEST["description"]: CHECKLIST.REQUIRES_PULL_REQUEST["fail"],
+                    CHECKLIST.ADMIN_CANNOT_BYPASS["description"]: CHECKLIST.ADMIN_CANNOT_BYPASS["fail"],
+                    CHECKLIST.RESTRICTS_CREATION["description"]: CHECKLIST.RESTRICTS_CREATION["fail"],
+                    CHECKLIST.RESTRICTS_DELETION["description"]: CHECKLIST.RESTRICTS_DELETION["fail"],
+                    CHECKLIST.REQUIRES_LINEAR_HISTORY["description"]: CHECKLIST.REQUIRES_LINEAR_HISTORY["fail"],
+                }
 
         def describe_given_there_are_active_rulesets_for_main_branch() -> None:
             RESPONSE = {
@@ -71,10 +83,19 @@ def describe_when_getting_repo_info() -> None:
                 return get_repo_information(mock_client, OWNER, REPO)
 
             def it_returns_rules_for_main(results: dict) -> None:
-                assert (
-                    str(results)
-                    == "{'Wiki Disabled': '✅ OK', 'Issues Enabled': '✅ OK', 'Projects Disabled': '✅ OK', 'Deletes head branch': '❌ FAILED: Branch should be deleted on merge', 'Uses Squash Merge': '✅ OK', 'License Information': '❌ FAILED: License not found', 'Requires pull request': '❌ FAILED: Branch does not require a pull request', 'Admin cannot bypass PR': '✅ OK', 'Restricts branch creation': '❌ FAILED: Branch creation is not restricted', 'Restricts deletion': '❌ FAILED: Branch deletion is not restricted', 'Requires linear history': '❌ FAILED: Linear history is not required'}"
-                )
+                assert results == {
+                    CHECKLIST.WIKI["description"]: OK,
+                    CHECKLIST.ISSUES["description"]: OK,
+                    CHECKLIST.PROJECTS["description"]: OK,
+                    CHECKLIST.DELETES_HEAD["description"]: CHECKLIST.DELETES_HEAD["fail"],
+                    CHECKLIST.USES_SQUASH["description"]: OK,
+                    CHECKLIST.LICENSE_INFORMATION["description"]: CHECKLIST.LICENSE_INFORMATION["fail"],
+                    CHECKLIST.REQUIRES_PULL_REQUEST["description"]: CHECKLIST.REQUIRES_PULL_REQUEST["fail"],
+                    CHECKLIST.ADMIN_CANNOT_BYPASS["description"]: OK,
+                    CHECKLIST.RESTRICTS_CREATION["description"]: CHECKLIST.RESTRICTS_CREATION["fail"],
+                    CHECKLIST.RESTRICTS_DELETION["description"]: CHECKLIST.RESTRICTS_DELETION["fail"],
+                    CHECKLIST.REQUIRES_LINEAR_HISTORY["description"]: CHECKLIST.REQUIRES_LINEAR_HISTORY["fail"],
+                }
 
         def describe_given_there_are_active_rulesets_for_other_branch() -> None:
             RESPONSE = {
@@ -105,10 +126,19 @@ def describe_when_getting_repo_info() -> None:
                 return get_repo_information(mock_client, OWNER, REPO)
 
             def it_returns_rules_for_main(results: dict) -> None:
-                assert (
-                    str(results)
-                    == "{'Wiki Disabled': '✅ OK', 'Issues Enabled': '✅ OK', 'Projects Disabled': '✅ OK', 'Deletes head branch': '❌ FAILED: Branch should be deleted on merge', 'Uses Squash Merge': '✅ OK', 'License Information': '✅ OK', 'Requires pull request': '❌ FAILED: Branch does not require a pull request', 'Admin cannot bypass PR': '❌ FAILED: Admins can bypass branch protection', 'Restricts branch creation': '❌ FAILED: Branch creation is not restricted', 'Restricts deletion': '❌ FAILED: Branch deletion is not restricted', 'Requires linear history': '❌ FAILED: Linear history is not required'}"
-                )
+                assert results == {
+                    CHECKLIST.WIKI["description"]: OK,
+                    CHECKLIST.ISSUES["description"]: OK,
+                    CHECKLIST.PROJECTS["description"]: OK,
+                    CHECKLIST.DELETES_HEAD["description"]: CHECKLIST.DELETES_HEAD["fail"],
+                    CHECKLIST.USES_SQUASH["description"]: OK,
+                    CHECKLIST.LICENSE_INFORMATION["description"]: OK,
+                    CHECKLIST.REQUIRES_PULL_REQUEST["description"]: CHECKLIST.REQUIRES_PULL_REQUEST["fail"],
+                    CHECKLIST.ADMIN_CANNOT_BYPASS["description"]: CHECKLIST.ADMIN_CANNOT_BYPASS["fail"],
+                    CHECKLIST.RESTRICTS_CREATION["description"]: CHECKLIST.RESTRICTS_CREATION["fail"],
+                    CHECKLIST.RESTRICTS_DELETION["description"]: CHECKLIST.RESTRICTS_DELETION["fail"],
+                    CHECKLIST.REQUIRES_LINEAR_HISTORY["description"]: CHECKLIST.REQUIRES_LINEAR_HISTORY["fail"],
+                }
 
         def describe_given_there_are_active_rulesets_with_all_required_branch_rules() -> (
             None
@@ -157,7 +187,16 @@ def describe_when_getting_repo_info() -> None:
                 return get_repo_information(mock_client, OWNER, REPO)
 
             def it_passes_all_branch_rule_checks(results: dict) -> None:
-                assert (
-                    str(results)
-                    == "{'Wiki Disabled': '✅ OK', 'Issues Enabled': '✅ OK', 'Projects Disabled': '✅ OK', 'Deletes head branch': '✅ OK', 'Uses Squash Merge': '✅ OK', 'License Information': '✅ OK', 'Requires pull request': '✅ OK', 'Admin cannot bypass PR': '✅ OK', 'Restricts branch creation': '✅ OK', 'Restricts deletion': '✅ OK', 'Requires linear history': '✅ OK'}"
-                )
+                assert results == {
+                    CHECKLIST.WIKI["description"]: OK,
+                    CHECKLIST.ISSUES["description"]: OK,
+                    CHECKLIST.PROJECTS["description"]: OK,
+                    CHECKLIST.DELETES_HEAD["description"]: OK,
+                    CHECKLIST.USES_SQUASH["description"]: OK,
+                    CHECKLIST.LICENSE_INFORMATION["description"]: OK,
+                    CHECKLIST.REQUIRES_PULL_REQUEST["description"]: OK,
+                    CHECKLIST.ADMIN_CANNOT_BYPASS["description"]: OK,
+                    CHECKLIST.RESTRICTS_CREATION["description"]: OK,
+                    CHECKLIST.RESTRICTS_DELETION["description"]: OK,
+                    CHECKLIST.REQUIRES_LINEAR_HISTORY["description"]: OK,
+                }
