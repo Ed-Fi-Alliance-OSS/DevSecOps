@@ -19,6 +19,10 @@ def describe_when_reviewing_files() -> None:
         FILES = {
             CHECKLIST.NOTICES["description"]: CHECKLIST_DEFAULT_SUCCESS_MESSAGE,
             CHECKLIST.CODE_OF_CONDUCT["description"]: CHECKLIST_DEFAULT_SUCCESS_MESSAGE,
+            CHECKLIST.LICENSE["description"]: CHECKLIST_DEFAULT_SUCCESS_MESSAGE,
+            CHECKLIST.CONTRIBUTORS["description"]: CHECKLIST_DEFAULT_SUCCESS_MESSAGE,
+            CHECKLIST.SECURITY["description"]: CHECKLIST_DEFAULT_SUCCESS_MESSAGE,
+            CHECKLIST.AGENTS["description"]: CHECKLIST_DEFAULT_SUCCESS_MESSAGE,
         }
 
         @pytest.fixture
@@ -34,6 +38,10 @@ def describe_when_reviewing_files() -> None:
         FILES = {
             CHECKLIST.NOTICES["description"]: CHECKLIST.NOTICES["fail"],
             CHECKLIST.CODE_OF_CONDUCT["description"]: CHECKLIST.CODE_OF_CONDUCT["fail"],
+            CHECKLIST.LICENSE["description"]: CHECKLIST.LICENSE["fail"],
+            CHECKLIST.CONTRIBUTORS["description"]: CHECKLIST.CONTRIBUTORS["fail"],
+            CHECKLIST.SECURITY["description"]: CHECKLIST.SECURITY["fail"],
+            CHECKLIST.AGENTS["description"]: CHECKLIST.AGENTS["fail"],
         }
 
         @pytest.fixture
@@ -45,3 +53,19 @@ def describe_when_reviewing_files() -> None:
         def it_returns_fail_message(results: dict) -> None:
             print(results)
             assert results == FILES
+
+    def describe_given_only_claude_md_found() -> None:
+        @pytest.fixture
+        @patch("edfi_repo_auditor.github_client.GitHubClient")
+        def results(mock_client) -> dict:
+            def get_file_content(org, repo, path):
+                return "Found" if path == "CLAUDE.md" else None
+
+            mock_client.get_file_content.side_effect = get_file_content
+            return review_files(mock_client, OWNER, REPO)
+
+        def it_passes_agents_check(results: dict) -> None:
+            assert (
+                results[CHECKLIST.AGENTS["description"]]
+                == CHECKLIST_DEFAULT_SUCCESS_MESSAGE
+            )

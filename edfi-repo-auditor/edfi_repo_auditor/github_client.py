@@ -4,6 +4,7 @@
 # See the LICENSE and NOTICES files in the project root for more information.
 
 import logging
+from datetime import datetime, timezone
 from typing import List, Optional
 from json import dumps
 
@@ -17,14 +18,11 @@ from edfi_repo_auditor.log_helper import http_error
 API_URL = "https://api.github.com"
 GRAPHQL_ENDPOINT = f"{API_URL}/graphql"
 
-REPO_TOKEN = "[REPOSITORY]"
-ORG_TOKEN = "[OWNER]"
-
 # Note that this doesn't handle paging and thus will not be sufficient if there
 # are more than 100 repositories.
 REPOSITORIES_TEMPLATE = """
-{
-  organization(login: "[OWNER]") {
+query($owner: String!) {
+  organization(login: $owner) {
     id
     repositories(first: 100) {
       totalCount
@@ -39,8 +37,8 @@ REPOSITORIES_TEMPLATE = """
 # Note that this doesn't handle paging and thus will not be sufficient if there
 # are more than 100 alerts.
 REPOSITORY_INFORMATION_TEMPLATE = """
-{
-  repository(name: "[REPOSITORY]", owner: "[OWNER]") {
+query($owner: String!, $repository: String!) {
+  repository(name: $repository, owner: $owner) {
     vulnerabilityAlerts(first: 100, states: [OPEN]) {
       nodes {
         createdAt
@@ -84,13 +82,43 @@ REPOSITORY_INFORMATION_TEMPLATE = """
     hasWikiEnabled
     hasIssuesEnabled
     hasProjectsEnabled
-    discussions {
-      totalCount
-    }
     deleteBranchOnMerge
     squashMergeAllowed
     licenseInfo {
       key
+    }
+  }
+}
+""".strip()
+
+PULL_REQUESTS_WITH_REVIEWS_TEMPLATE = """
+query($owner: String!, $repo: String!, $cursor: String) {
+  repository(owner: $owner, name: $repo) {
+    pullRequests(
+      first: 20
+      states: [MERGED]
+      orderBy: {field: UPDATED_AT, direction: DESC}
+      after: $cursor
+    ) {
+      nodes {
+        number
+        createdAt
+        closedAt
+        mergedAt
+        author { login }
+        additions
+        deletions
+        changedFiles
+        reviews(first: 100) {
+          pageInfo { hasNextPage }
+          nodes {
+            author { login }
+            state
+            submittedAt
+          }
+        }
+      }
+      pageInfo { hasNextPage endCursor }
     }
   }
 }
@@ -135,8 +163,11 @@ class GitHubClient:
             msg = f"Query for {description}."
             raise http_error(msg, response)
 
-    def _execute_graphql(self, description: str, query: str) -> dict:
-        payload = dumps({"query": query, "variables": {}})
+    def _execute_graphql(
+        self, description: str, query: str, variables: dict | None = None
+    ) -> dict:
+        payload_variables = {} if variables is None else variables
+        payload = dumps({"query": query, "variables": payload_variables})
 
         body = self._execute_api_call(
             f"Querying for {description}", "POST", f"{GRAPHQL_ENDPOINT}", payload
@@ -149,8 +180,11 @@ class GitHubClient:
         if len(owner.strip()) == 0:
             raise ValueError("owner cannot be blank")
 
-        query = REPOSITORIES_TEMPLATE.replace(ORG_TOKEN, owner)
-        body = self._execute_graphql(f"repositories for {owner}", query)
+        body = self._execute_graphql(
+            f"repositories for {owner}",
+            REPOSITORIES_TEMPLATE,
+            {"owner": owner},
+        )
 
         total_repos = body["data"]["organization"]["repositories"]["totalCount"]
         if total_repos > 100:
@@ -180,12 +214,10 @@ class GitHubClient:
         if len(repository.strip()) == 0:
             raise ValueError("repository cannot be blank")
 
-        query = REPOSITORY_INFORMATION_TEMPLATE.replace(ORG_TOKEN, owner).replace(
-            REPO_TOKEN, repository
-        )
-
         body = self._execute_graphql(
-            f"protection rules for {owner}/{repository}", query
+            f"protection rules for {owner}/{repository}",
+            REPOSITORY_INFORMATION_TEMPLATE,
+            {"owner": owner, "repository": repository},
         )
 
         return body["data"]["repository"]
@@ -199,12 +231,15 @@ class GitHubClient:
         has_dependabot = False
         try:
             dependabot = self._execute_api_call(
-                f"Getting actions for {owner}/{repository}",
+                f"Detecting if Dependabot is enabled for {owner}/{repository}",
                 "GET",
                 f"{API_URL}/repos/{owner}/{repository}/vulnerability-alerts",
             )
             has_dependabot = dependabot["status_code"] == requests.codes.no_content
-        except RuntimeError:
+        except RuntimeError as e:
+            logger.warning(
+                f"Failed to detect Dependabot status for {owner}/{repository}: {e}"
+            )
             has_dependabot = False
 
         return has_dependabot
@@ -224,8 +259,8 @@ class GitHubClient:
                 "GET",
                 f"{API_URL}/repos/{owner}/{repository}/contents/{path}",
             )
-        except RuntimeError:
-            pass
+        except RuntimeError as e:
+            logger.warning(f"Failed to get file {path} for {owner}/{repository}: {e}")
 
         return (
             base64.b64decode(file_result["content"]).decode("UTF-8")
@@ -258,9 +293,7 @@ class GitHubClient:
         page = 1
 
         while True:
-            logger.info(
-                f"Getting pull requests for {owner}/{repository}, page {page}"
-            )
+            logger.info(f"Getting pull requests for {owner}/{repository}, page {page}")
             url = (
                 f"{API_URL}/repos/{owner}/{repository}/pulls"
                 f"?state={state}&per_page={per_page}&page={page}"
@@ -333,15 +366,16 @@ class GitHubClient:
         }
 
     def get_pull_request_reviews(
-        self, owner: str, repository: str, pr_number: int
+        self, owner: str, repository: str, pr_number: int, per_page: int = 100
     ) -> List[dict]:
         """
-        Get reviews for a specific pull request.
+        Get reviews for a specific pull request with full pagination.
 
         Args:
             owner: Repository owner
             repository: Repository name
             pr_number: Pull request number
+            per_page: Results per page (max 100)
 
         Returns:
             List of review records with user, state, submitted_at
@@ -351,52 +385,133 @@ class GitHubClient:
         if len(repository.strip()) == 0:
             raise ValueError("repository cannot be blank")
 
-        url = f"{API_URL}/repos/{owner}/{repository}/pulls/{pr_number}/reviews"
-        reviews = self._execute_api_call(
-            f"Getting reviews for PR #{pr_number} in {owner}/{repository}",
-            "GET",
-            url,
-        )
+        all_reviews: List[dict] = []
+        page = 1
 
-        return [
-            {
-                "user": review.get("user", {}).get("login"),
-                "state": review.get("state"),
-                "submitted_at": review.get("submitted_at"),
-            }
-            for review in reviews
-        ]
+        while True:
+            logger.info(
+                f"Getting reviews for PR #{pr_number} in {owner}/{repository}, page {page}"
+            )
+            url = (
+                f"{API_URL}/repos/{owner}/{repository}/pulls/{pr_number}/reviews"
+                f"?per_page={per_page}&page={page}"
+            )
 
-    def get_pull_request_comments(
-        self, owner: str, repository: str, pr_number: int
+            page_reviews = self._execute_api_call(
+                f"Getting reviews for PR #{pr_number} in {owner}/{repository}",
+                "GET",
+                url,
+            )
+
+            if not page_reviews:
+                break
+
+            for review in page_reviews:
+                all_reviews.append(
+                    {
+                        "user": review.get("user", {}).get("login"),
+                        "state": review.get("state"),
+                        "submitted_at": review.get("submitted_at"),
+                    }
+                )
+
+            if len(page_reviews) < per_page:
+                break
+
+            page += 1
+
+        return all_reviews
+
+    def get_merged_prs_with_reviews(
+        self, owner: str, repository: str, since_days: int = 30
     ) -> List[dict]:
         """
-        Get comments for a specific pull request (issue comments).
+        Fetch merged PRs and their reviews in a single paginated GraphQL query,
+        replacing the N+1 REST call pattern.
 
         Args:
             owner: Repository owner
             repository: Repository name
-            pr_number: Pull request number
+            since_days: Used to compute a merge-date cutoff for early
+                        pagination exit (since_days * 3). Caller is responsible
+                        for filtering results to the desired window.
 
         Returns:
-            List of comment records with user, created_at
+            List of PR dicts with standard PR fields plus an embedded "reviews"
+            list. Each review has "user", "state", and "submitted_at" keys.
         """
         if len(owner.strip()) == 0:
             raise ValueError("owner cannot be blank")
         if len(repository.strip()) == 0:
             raise ValueError("repository cannot be blank")
 
-        url = f"{API_URL}/repos/{owner}/{repository}/issues/{pr_number}/comments"
-        comments = self._execute_api_call(
-            f"Getting comments for PR #{pr_number} in {owner}/{repository}",
-            "GET",
-            url,
-        )
+        page_cutoff_days = since_days * 3
+        now_utc = datetime.now(timezone.utc)
 
-        return [
-            {
-                "user": comment.get("user", {}).get("login"),
-                "created_at": comment.get("created_at"),
-            }
-            for comment in comments
-        ]
+        all_prs: List[dict] = []
+        cursor: Optional[str] = None
+
+        while True:
+            variables: dict = {"owner": owner, "repo": repository, "cursor": cursor}
+            body = self._execute_graphql(
+                f"PRs with reviews for {owner}/{repository}",
+                PULL_REQUESTS_WITH_REVIEWS_TEMPLATE,
+                variables,
+            )
+
+            pull_requests = body["data"]["repository"]["pullRequests"]
+            nodes = pull_requests["nodes"]
+
+            if not nodes:
+                break
+
+            for node in nodes:
+                review_data = node.get("reviews") or {}
+                if review_data.get("pageInfo", {}).get("hasNextPage"):
+                    logger.warning(
+                        f"PR #{node['number']} has >100 reviews; only first 100 fetched"
+                    )
+                reviews = [
+                    {
+                        "user": (r.get("author") or {}).get("login"),
+                        "state": r.get("state"),
+                        "submitted_at": r.get("submittedAt"),
+                    }
+                    for r in review_data.get("nodes", [])
+                ]
+                all_prs.append(
+                    {
+                        "number": node["number"],
+                        "created_at": node.get("createdAt"),
+                        "closed_at": node.get("closedAt"),
+                        "merged_at": node.get("mergedAt"),
+                        "user": (node.get("author") or {}).get("login"),
+                        "additions": node.get("additions"),
+                        "deletions": node.get("deletions"),
+                        "changed_files": node.get("changedFiles"),
+                        "reviews": reviews,
+                    }
+                )
+
+            page_info = pull_requests["pageInfo"]
+            if not page_info["hasNextPage"]:
+                break
+
+            # Early exit: stop paginating once the most recently merged PR on
+            # this page was merged far enough back that subsequent pages
+            # (ordered by UPDATED_AT DESC) cannot fall within the window.
+            oldest_merged_str = min(
+                (n["mergedAt"] for n in nodes if n.get("mergedAt")),
+                default=None,
+            )
+            if oldest_merged_str:
+                try:
+                    oldest_dt = datetime.fromisoformat(oldest_merged_str)
+                    if (now_utc - oldest_dt).days > page_cutoff_days:
+                        break
+                except (ValueError, AttributeError):
+                    pass
+
+            cursor = page_info["endCursor"]
+
+        return all_prs

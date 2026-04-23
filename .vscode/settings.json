@@ -80,7 +80,7 @@
             "style": "underscore"
         },
         "ul-style": {
-            "style": "asterisk"
+            "style": "consistent"
         }
     },
     "[markdown]": {
@@ -92,5 +92,6 @@
         "source.fixAll.markdownlint": "explicit"
     },
     "cSpell.words": [
-    ]
+    ],
+    "python.analysis.typeCheckingMode": "strict"
 }
