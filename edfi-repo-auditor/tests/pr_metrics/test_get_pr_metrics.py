@@ -3,6 +3,7 @@
 # The Ed-Fi Alliance licenses this file to you under the Apache License, Version 2.0.
 # See the LICENSE and NOTICES files in the project root for more information.
 
+from datetime import datetime, timedelta, timezone
 from unittest.mock import MagicMock
 
 from edfi_repo_auditor.pr_metrics import (
@@ -13,13 +14,23 @@ from edfi_repo_auditor.pr_metrics import (
     get_pr_metrics,
 )
 
+_now = datetime.now(timezone.utc)
+_created = (_now - timedelta(days=6)).replace(hour=10, minute=0, second=0, microsecond=0)
+
 # A merged_at within the last 30 days
-RECENT_MERGED_AT = "2026-03-25T10:00:00Z"
-CREATED_AT = "2026-03-24T10:00:00Z"
-CLOSED_AT = "2026-03-25T10:00:00Z"
+RECENT_MERGED_AT = (_now - timedelta(days=5)).replace(hour=10, minute=0, second=0, microsecond=0).strftime(
+    "%Y-%m-%dT%H:%M:%SZ"
+)
+CREATED_AT = _created.strftime("%Y-%m-%dT%H:%M:%SZ")
+CLOSED_AT = RECENT_MERGED_AT
+
+# Review timestamps: 2 h and 3 h after CREATED_AT, and 1 h after for review's own created_at
+SUBMITTED_AT_PLUS_2H = (_created + timedelta(hours=2)).strftime("%Y-%m-%dT%H:%M:%SZ")
+SUBMITTED_AT_PLUS_3H = (_created + timedelta(hours=3)).strftime("%Y-%m-%dT%H:%M:%SZ")
+REVIEW_CREATED_AT_PLUS_1H = (_created + timedelta(hours=1)).strftime("%Y-%m-%dT%H:%M:%SZ")
 
 # A merged_at older than 30 days
-OLD_MERGED_AT = "2025-01-01T10:00:00Z"
+OLD_MERGED_AT = (_now - timedelta(days=60)).strftime("%Y-%m-%dT%H:%M:%SZ")
 
 
 def _make_pr(
@@ -101,7 +112,7 @@ def describe_get_pr_metrics() -> None:
                         {
                             "user": "alice",
                             "state": "APPROVED",
-                            "submitted_at": "2026-03-24T12:00:00Z",
+                            "submitted_at": SUBMITTED_AT_PLUS_2H,
                         }
                     ],
                 )
@@ -109,7 +120,7 @@ def describe_get_pr_metrics() -> None:
 
             result = get_pr_metrics(client, "owner", "repo")
 
-            # created_at injected from PR (10:00); submitted_at is 12:00 → 2 hours
+            # created_at injected from PR (+0h); submitted_at is +2h → 2 hours
             assert result[AVG_TIME_TO_FIRST_APPROVAL_HOURS_KEY] == 2.0
 
         def it_does_not_overwrite_created_at_already_present_on_review() -> None:
@@ -123,8 +134,8 @@ def describe_get_pr_metrics() -> None:
                         {
                             "user": "bob",
                             "state": "APPROVED",
-                            "submitted_at": "2026-03-24T13:00:00Z",
-                            "created_at": "2026-03-24T11:00:00Z",  # 2 hours before submittal
+                            "submitted_at": SUBMITTED_AT_PLUS_3H,
+                            "created_at": REVIEW_CREATED_AT_PLUS_1H,  # 2 hours before submittal
                         }
                     ],
                 )
@@ -132,5 +143,5 @@ def describe_get_pr_metrics() -> None:
 
             result = get_pr_metrics(client, "owner", "repo")
 
-            # 13:00 - 11:00 = 2 hours (not 13:00 - 10:00 = 3 hours)
+            # submitted (+3h) - review created_at (+1h) = 2 hours (not submitted - pr created = 3 hours)
             assert result[AVG_TIME_TO_FIRST_APPROVAL_HOURS_KEY] == 2.0
