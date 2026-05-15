@@ -76,3 +76,5 @@ def test_repo_only_in_current_has_nan_previous_score(tmp_path):
     result_df, _, _ = compare_with_previous_scores(current, str(tmp_path))
     row = result_df[result_df["Repository"] == "org/repo-a"].iloc[0]
     assert math.isnan(row["Previous Score"])
+    removed_row = result_df[result_df["Repository"] == "org/repo-b"].iloc[0]
+    assert math.isnan(removed_row["Current Score"])
