@@ -48,12 +48,11 @@ def fetch_repositories(organization):
         return []
 
 
-def compare_with_previous_scores(current_scores):
+def compare_with_previous_scores(current_scores, data_dir: str = "./data/ossf-scores/"):
     current_df = pd.DataFrame(
         list(current_scores.items()), columns=["Repository", "Current Score"]
     )
 
-    data_dir = "./data/ossf-scores/"
     today = datetime.now().strftime("%Y-%m-%d")
     csv_files = [
         f for f in os.listdir(data_dir) if f.endswith(".csv") and f != f"{today}.csv"
