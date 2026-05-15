@@ -8,12 +8,13 @@ import math as Math
 import os
 import pandas as pd
 from datetime import datetime
+from typing import Optional
 
 CA_FILE = r"c:\msdfrootca.cer"
 
 
 # Function to fetch OSSF score
-def get_ossf_score(organization, repository):
+def get_ossf_score(organization: str, repository: str) -> Optional[float]:
     url = f"https://api.securityscorecards.dev/projects/github.com/{organization}/{repository}"
     response = requests.get(url, verify=False)
     if response.status_code == 200:
@@ -24,7 +25,7 @@ def get_ossf_score(organization, repository):
 
 
 # Function to report OSSF scores for multiple repositories
-def report_ossf_scores(repositories):
+def report_ossf_scores(repositories: list[str]) -> dict[str, float]:
     scores = {}
     for repo in repositories:
         organization, repository = repo.split("/")
@@ -37,7 +38,7 @@ def report_ossf_scores(repositories):
 
 
 # Function to fetch repositories for an organization
-def fetch_repositories(organization):
+def fetch_repositories(organization: str) -> list[str]:
     url = f"https://api.github.com/orgs/{organization}/repos?per_page=100"
     response = requests.get(url, verify=False)
     if response.status_code == 200:
@@ -48,7 +49,9 @@ def fetch_repositories(organization):
         return []
 
 
-def compare_with_previous_scores(current_scores, data_dir: str = "./data/ossf-scores/"):
+def compare_with_previous_scores(
+    current_scores: dict[str, float], data_dir: str = "./data/ossf-scores/"
+) -> tuple[pd.DataFrame, list[str], list[str]]:
     current_df = pd.DataFrame(
         list(current_scores.items()), columns=["Repository", "Current Score"]
     )
