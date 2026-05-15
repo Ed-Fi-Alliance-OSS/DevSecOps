@@ -2167,7 +2167,7 @@ version = "2.4.0"
 description = "Fundamental package for array computing in Python"
 optional = false
 python-versions = ">=3.11"
-groups = ["main"]
+groups = ["main", "dev"]
 files = [
     {file = "numpy-2.4.0-cp311-cp311-macosx_10_9_x86_64.whl", hash = "sha256:316b2f2584682318539f0bcaca5a496ce9ca78c88066579ebd11fd06f8e4741e"},
     {file = "numpy-2.4.0-cp311-cp311-macosx_11_0_arm64.whl", hash = "sha256:a2718c1de8504121714234b6f8241d0019450353276c88b9453c9c3d92e101db"},
@@ -2367,6 +2367,21 @@ spss = ["pyreadstat (>=1.2.0)"]
 sql-other = ["SQLAlchemy (>=2.0.0)", "adbc-driver-postgresql (>=0.8.0)", "adbc-driver-sqlite (>=0.8.0)"]
 test = ["hypothesis (>=6.46.1)", "pytest (>=7.3.2)", "pytest-xdist (>=2.2.0)"]
 xml = ["lxml (>=4.9.2)"]
+
+[[package]]
+name = "pandas-stubs"
+version = "3.0.0.260204"
+description = "Type annotations for pandas"
+optional = false
+python-versions = ">=3.11"
+groups = ["dev"]
+files = [
+    {file = "pandas_stubs-3.0.0.260204-py3-none-any.whl", hash = "sha256:5ab9e4d55a6e2752e9720828564af40d48c4f709e6a2c69b743014a6fcb6c241"},
+    {file = "pandas_stubs-3.0.0.260204.tar.gz", hash = "sha256:bf9294b76352effcffa9cb85edf0bed1339a7ec0c30b8e1ac3d66b4228f1fbc3"},
+]
+
+[package.dependencies]
+numpy = ">=1.23.5"
 
 [[package]]
 name = "pandocfilters"
@@ -3835,4 +3850,4 @@ files = [
 [metadata]
 lock-version = "2.1"
 python-versions = "^3.12"
-content-hash = "b5cc5a12d626aa9f81e37147fdb80fb016a9e4e93316ea1a852cd607d31f7d0e"
+content-hash = "90db22d396abc6135c4bb1392a277ae82fd7ff214335757795ee79aff4e06e32"

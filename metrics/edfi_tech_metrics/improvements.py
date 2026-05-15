@@ -8,7 +8,7 @@ from os import listdir, path
 import pandas as pd
 
 
-def calculate_improvements(base_dir: str, projects: List[str]) -> None:
+def calculate_improvements(base_dir: str, projects: List[str]) -> pd.DataFrame:
     files = [path.join(base_dir, f) for f in listdir(base_dir) if f.endswith(".csv")]
 
     file_frames = []

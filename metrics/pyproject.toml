@@ -24,6 +24,7 @@ black = "^26.3.1"
 mypy = "^1.20.0"
 pytest = "^8.0"
 types-requests = "^2.33.0.20260327"
+pandas-stubs = "^3.0.0.260204"
 
 [build-system]
 requires = ["poetry-core"]
