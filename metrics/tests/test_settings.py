@@ -8,49 +8,49 @@ import pytest
 from edfi_tech_metrics.settings import Configuration, load_configuration
 
 
-def test_info_prints_at_info_level(capsys):
+def test_info_prints_at_info_level(capsys: pytest.CaptureFixture[str]) -> None:
     conf = Configuration("u", "t", "http://x", "INFO", 100)
     conf.info("hello-info")
     captured = capsys.readouterr()
     assert "hello-info" in captured.out
 
 
-def test_info_prints_at_debug_level(capsys):
+def test_info_prints_at_debug_level(capsys: pytest.CaptureFixture[str]) -> None:
     conf = Configuration("u", "t", "http://x", "DEBUG", 100)
     conf.info("hello-debug")
     captured = capsys.readouterr()
     assert "hello-debug" in captured.out
 
 
-def test_info_suppressed_at_error_level(capsys):
+def test_info_suppressed_at_error_level(capsys: pytest.CaptureFixture[str]) -> None:
     conf = Configuration("u", "t", "http://x", "ERROR", 100)
     conf.info("hello-suppressed")
     captured = capsys.readouterr()
     assert captured.out == ""
 
 
-def test_debug_prints_at_debug_level(capsys):
+def test_debug_prints_at_debug_level(capsys: pytest.CaptureFixture[str]) -> None:
     conf = Configuration("u", "t", "http://x", "DEBUG", 100)
     conf.debug("dbg-msg")
     captured = capsys.readouterr()
     assert "dbg-msg" in captured.out
 
 
-def test_debug_suppressed_at_info_level(capsys):
+def test_debug_suppressed_at_info_level(capsys: pytest.CaptureFixture[str]) -> None:
     conf = Configuration("u", "t", "http://x", "INFO", 100)
     conf.debug("dbg-suppressed")
     captured = capsys.readouterr()
     assert captured.out == ""
 
 
-def test_error_always_prints(capsys):
+def test_error_always_prints(capsys: pytest.CaptureFixture[str]) -> None:
     conf = Configuration("u", "t", "http://x", "ERROR", 100)
     conf.error("err-msg")
     captured = capsys.readouterr()
     assert "err-msg" in captured.out
 
 
-def test_load_configuration_returns_correct_fields():
+def test_load_configuration_returns_correct_fields() -> None:
     args = ["-u", "testuser", "-t", "testtoken", "-b", "http://jira.example.com"]
     conf = load_configuration(args)
     assert conf.jira_user_name == "testuser"
@@ -60,7 +60,7 @@ def test_load_configuration_returns_correct_fields():
     assert conf.page_size == 100
 
 
-def test_load_configuration_invalid_log_level_raises_system_exit():
+def test_load_configuration_invalid_log_level_raises_system_exit() -> None:
     with pytest.raises(SystemExit):
         load_configuration(
             ["-u", "user", "-t", "tok", "-b", "http://x", "-l", "INVALID"]

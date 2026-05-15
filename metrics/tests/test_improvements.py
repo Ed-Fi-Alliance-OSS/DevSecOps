@@ -16,7 +16,7 @@ def _write_stats_csv(path: Path, date: str, rows: list) -> None:
     pd.DataFrame(rows).to_csv(path, index=False)
 
 
-def test_improvement_positive_delta(tmp_path):
+def test_improvement_positive_delta(tmp_path: Path) -> None:
     _write_stats_csv(tmp_path / "2024-01-01.csv", "2024-01-01",
                      [{"project": "PROJ", "mean": 30.0}])
     _write_stats_csv(tmp_path / "2024-02-01.csv", "2024-02-01",
@@ -26,7 +26,7 @@ def test_improvement_positive_delta(tmp_path):
     assert row["delta"] == pytest.approx(0.5)  # (30 - 15) / 30
 
 
-def test_regression_negative_delta(tmp_path):
+def test_regression_negative_delta(tmp_path: Path) -> None:
     _write_stats_csv(tmp_path / "2024-01-01.csv", "2024-01-01",
                      [{"project": "PROJ", "mean": 15.0}])
     _write_stats_csv(tmp_path / "2024-02-01.csv", "2024-02-01",
@@ -36,7 +36,7 @@ def test_regression_negative_delta(tmp_path):
     assert row["delta"] == pytest.approx(-1.0)  # (15 - 30) / 15
 
 
-def test_no_change_zero_delta(tmp_path):
+def test_no_change_zero_delta(tmp_path: Path) -> None:
     _write_stats_csv(tmp_path / "2024-01-01.csv", "2024-01-01",
                      [{"project": "PROJ", "mean": 20.0}])
     _write_stats_csv(tmp_path / "2024-02-01.csv", "2024-02-01",
@@ -46,7 +46,7 @@ def test_no_change_zero_delta(tmp_path):
     assert row["delta"] == pytest.approx(0.0)
 
 
-def test_multiple_projects_get_separate_deltas(tmp_path):
+def test_multiple_projects_get_separate_deltas(tmp_path: Path) -> None:
     _write_stats_csv(tmp_path / "2024-01-01.csv", "2024-01-01", [
         {"project": "PROJ-A", "mean": 40.0},
         {"project": "PROJ-B", "mean": 20.0},
@@ -60,7 +60,7 @@ def test_multiple_projects_get_separate_deltas(tmp_path):
     assert result[result["project"] == "PROJ-B"].iloc[0]["delta"] == pytest.approx(0.5)
 
 
-def test_data_spread_across_multiple_csv_files(tmp_path):
+def test_data_spread_across_multiple_csv_files(tmp_path: Path) -> None:
     # Date 1 data split across two files
     _write_stats_csv(tmp_path / "2024-01-01-part1.csv", "2024-01-01",
                      [{"project": "PROJ-A", "mean": 40.0}])
