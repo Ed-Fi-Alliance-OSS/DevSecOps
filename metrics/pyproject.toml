@@ -22,7 +22,7 @@ ipywidgets = "^8.1.8"
 flake8 = "^7.3.0"
 black = "^26.3.1"
 mypy = "^2.0"
-pytest = "^8.0"
+pytest = "^9.0"
 types-requests = "^2.33.0.20260327"
 
 [build-system]
