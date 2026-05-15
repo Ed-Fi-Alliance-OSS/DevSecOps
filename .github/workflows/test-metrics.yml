@@ -41,5 +41,13 @@ jobs:
       - name: Install dependencies
         run: poetry env use "3.12" && poetry install
 
+      - name: Lint
+        run: poetry run flake8
+
+      - name: Type Check
+        if: always()
+        run: poetry run mypy . --junit-xml mypy-junit.xml
+
       - name: Unit Tests
+        if: always()
         run: poetry run pytest --junitxml=pytest-junit.xml
