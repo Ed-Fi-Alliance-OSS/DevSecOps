@@ -9,7 +9,7 @@ import os
 import pandas as pd
 from datetime import datetime
 
-CA_FILE = "c:\msdfrootca.cer"
+CA_FILE = r"c:\msdfrootca.cer"
 
 
 # Function to fetch OSSF score

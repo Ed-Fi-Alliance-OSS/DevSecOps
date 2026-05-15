@@ -17,9 +17,6 @@ portfolio_list: List[str] = []
 
 
 def get_portfolio_health(team: str, velocity: float) -> dict:
-    global tickets_df
-    global portfolio_list
-
     total_points = tickets_df[
         tickets_df["project"].isin(portfolio_list[team])  # type: ignore
     ].points.sum()
