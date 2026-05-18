@@ -20,8 +20,7 @@ def _write_stats_file(
     stats_df = df[["project", "age"]].groupby(by="project").describe()
     stats_df.reset_index(inplace=True)
 
-    stats_df.columns = stats_df.columns.to_flat_index()
-    stats_df.columns = [
+    stats_df.columns = pd.Index([
         "project",
         "count",
         "mean",
@@ -31,7 +30,7 @@ def _write_stats_file(
         "50%",
         "75%",
         "max",
-    ]
+    ])
 
     stats_df["date"] = today
 
