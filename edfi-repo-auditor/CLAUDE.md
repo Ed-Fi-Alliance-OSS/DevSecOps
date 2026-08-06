@@ -6,6 +6,7 @@ Data flows: `config.py` → `github_client.py` → `auditor.py` → CSV / GitHub
 
 - **`github_client.py`**: Branch protection rules use GraphQL *rulesets*, not the legacy REST branch-protection API.
 - **`pr_metrics.py`**: All PR metrics are informational only — no pass/fail thresholds.
+- **`job_metrics.py`**: Computes the Job Failure Rate (overall and per-workflow) from GitHub Actions workflow runs. Informational only — no pass/fail thresholds.
 - **`ossf_score.py`**: Fetches the OSSF Scorecard score by parsing the score out of a shields.io SVG badge `<title>`.
 
 ## Test Conventions

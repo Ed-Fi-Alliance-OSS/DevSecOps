@@ -98,3 +98,9 @@ Look in the `reports` directory for the output file.
 - **Avg Time to First Approval (hours)**: The average time to first approval in hours. Monitoring for trends, no baseline requirement _yet_.
 - **Top Reviewer Share (%)**: The percentage of reviews performed by the top reviewer. Monitor to make sure the burden is not falling primarily on one person.
 - **Unique Reviewers**: The total number of unique reviewers who have participated in the repository. Just informational.
+
+### Workflow Reliability Metrics
+
+- **Job Failure Rate (%)**: The percentage of GitHub Actions workflow runs in the last 30 days that concluded as a failure (`failure`, `timed_out`, `action_required`, or `startup_failure`), out of runs that concluded as either a failure or a `success`. Runs that were `cancelled`, `skipped`, or `neutral` are excluded. Just informational, no baseline requirement _yet_.
+- **Job Failure Rate - `<workflow name>` (%)**: The same calculation broken out per workflow (e.g., a separate rate for "CI" vs. "CodeQL"), so unreliable pipelines can be identified individually.
+- **Total Workflow Runs (last 30 days)**: The count of workflow runs included in the failure-rate calculation. Just informational.

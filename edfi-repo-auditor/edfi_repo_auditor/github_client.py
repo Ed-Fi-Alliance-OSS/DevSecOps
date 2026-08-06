@@ -4,7 +4,7 @@
 # See the LICENSE and NOTICES files in the project root for more information.
 
 import logging
-from datetime import datetime, timezone
+from datetime import datetime, timedelta, timezone
 from typing import List, Optional
 from json import dumps
 
@@ -421,6 +421,70 @@ class GitHubClient:
             page += 1
 
         return all_reviews
+
+    def get_workflow_runs(
+        self, owner: str, repository: str, since_days: int = 30, per_page: int = 100
+    ) -> List[dict]:
+        """
+        Get GitHub Actions workflow runs created within the last `since_days`
+        days, with full pagination.
+
+        Args:
+            owner: Repository owner
+            repository: Repository name
+            since_days: How many days back to fetch runs for. The `created`
+                        query parameter filters server-side so pagination
+                        naturally stops once older runs are reached.
+            per_page: Results per page (max 100)
+
+        Returns:
+            List of run records with name, conclusion, created_at, path
+        """
+        if len(owner.strip()) == 0:
+            raise ValueError("owner cannot be blank")
+        if len(repository.strip()) == 0:
+            raise ValueError("repository cannot be blank")
+
+        cutoff = (datetime.now(timezone.utc) - timedelta(days=since_days)).strftime(
+            "%Y-%m-%d"
+        )
+
+        all_runs: List[dict] = []
+        page = 1
+
+        while True:
+            logger.info(f"Getting workflow runs for {owner}/{repository}, page {page}")
+            url = (
+                f"{API_URL}/repos/{owner}/{repository}/actions/runs"
+                f"?created=>={cutoff}&per_page={per_page}&page={page}"
+            )
+
+            body = self._execute_api_call(
+                f"Getting workflow runs for {owner}/{repository}",
+                "GET",
+                url,
+            )
+
+            runs = body.get("workflow_runs", [])
+            if not runs:
+                break
+
+            for run in runs:
+                all_runs.append(
+                    {
+                        "name": run.get("name"),
+                        "conclusion": run.get("conclusion"),
+                        "created_at": run.get("created_at"),
+                        "path": run.get("path"),
+                    }
+                )
+
+            if len(runs) < per_page:
+                break
+
+            page += 1
+
+        return all_runs
 
     def get_merged_prs_with_reviews(
         self, owner: str, repository: str, since_days: int = 30
