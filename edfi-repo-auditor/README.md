@@ -101,6 +101,6 @@ Look in the `reports` directory for the output file.
 
 ### Workflow Reliability Metrics
 
-- **Job Failure Rate (%)**: The percentage of GitHub Actions workflow runs in the last 30 days that concluded as a failure (`failure`, `timed_out`, `action_required`, or `startup_failure`), out of runs that concluded as either a failure or a `success`. Runs that were `cancelled`, `skipped`, or `neutral` are excluded. Just informational, no baseline requirement _yet_.
-- **Job Failure Rate - `<workflow name>` (%)**: The same calculation broken out per workflow (e.g., a separate rate for "CI" vs. "CodeQL"), so unreliable pipelines can be identified individually.
+- **Job Failure Rate (%)**: The percentage of GitHub Actions workflow runs in the last 30 days that concluded as a failure (`failure`, `timed_out`, `action_required`, or `startup_failure`), out of runs that concluded as either a failure or a `success`. Runs that were `cancelled`, `skipped`, or `neutral` are excluded. Just informational, no baseline requirement _yet_. Shows "N/A (no data)" when there are no countable runs in the window.
+- **Job Failure Rate - `<workflow name>` (%)**: The same calculation broken out per workflow (e.g., a separate rate for "CI" vs. "CodeQL"), so unreliable pipelines can be identified individually. Runs are grouped by the workflow's display name, not its file path, so renaming a workflow file mid-window — or two workflow files sharing the same display name — will merge or split history under that name. A run with a missing name is grouped under "Unknown".
 - **Total Workflow Runs (last 30 days)**: The count of workflow runs included in the failure-rate calculation. Just informational.

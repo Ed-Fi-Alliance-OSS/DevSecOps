@@ -11,7 +11,7 @@ failure over the last 30 days, both overall and broken out per workflow.
 """
 
 import logging
-from datetime import datetime, timezone
+from datetime import datetime, timedelta, timezone
 from typing import Dict, List
 
 from edfi_repo_auditor.github_client import GitHubClient
@@ -31,6 +31,12 @@ TOTAL_WORKFLOW_RUNS_KEY = "Total Workflow Runs (last 30 days)"
 
 
 def _job_failure_rate_key(workflow_name: str) -> str:
+    """
+    Note: two runs with the same display `name` are grouped under one key
+    even if they come from different workflow files (or from a workflow
+    that was renamed mid-window), since GitHub Actions run names are not
+    guaranteed unique.
+    """
     return f"Job Failure Rate - {workflow_name} (%)"
 
 
@@ -108,6 +114,10 @@ def get_job_failure_metrics(
     now_utc = datetime.now(timezone.utc)
     runs = client.get_workflow_runs(owner, repository, since_days=LAST_N_DAYS)
 
+    # get_workflow_runs already filters server-side via the `created` query
+    # parameter, but that cutoff has only day-level granularity, so it can
+    # return runs up to ~24h older than the true window. Re-filter here with
+    # an exact timedelta comparison to enforce the precise boundary.
     recent_runs: List[Dict] = []
     for run in runs:
         created_at_str = run.get("created_at")
@@ -119,7 +129,7 @@ def get_job_failure_metrics(
             )
         except (ValueError, AttributeError):
             continue
-        if (now_utc - created_at).days > LAST_N_DAYS:
+        if now_utc - created_at > timedelta(days=LAST_N_DAYS):
             continue
         recent_runs.append(run)
 

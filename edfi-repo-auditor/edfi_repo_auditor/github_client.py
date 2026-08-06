@@ -444,6 +444,8 @@ class GitHubClient:
             raise ValueError("owner cannot be blank")
         if len(repository.strip()) == 0:
             raise ValueError("repository cannot be blank")
+        if not 1 <= per_page <= 100:
+            raise ValueError("per_page must be between 1 and 100")
 
         cutoff = (datetime.now(timezone.utc) - timedelta(days=since_days)).strftime(
             "%Y-%m-%d"

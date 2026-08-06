@@ -65,7 +65,14 @@ def run_audit(config: Configuration) -> None:
         logger.debug(f"Files: {file_review}")
         pr_metrics = get_pr_metrics(client, config.organization, repository)
         logger.debug(f"PR Metrics: {pr_metrics}")
-        job_metrics = get_job_failure_metrics(client, organization, repository)
+        try:
+            job_metrics = get_job_failure_metrics(client, organization, repository)
+        except RuntimeError as e:
+            logger.warning(
+                f"Failed to compute job failure rate metrics for "
+                f"{organization}/{repository}: {e}"
+            )
+            job_metrics = {}
         logger.debug(f"Job Failure Rate Metrics: {job_metrics}")
         ossf_score = get_ossf_score(organization, repository)
         logger.debug(f"OpenSSF Score: {ossf_score}")
@@ -319,7 +326,8 @@ def output_to_github_actions(repository: str, results: dict) -> None:
 """
 
     for check, result in results.items():
-        summary += f"| {check} | {result} |\n"
+        display_result = "N/A (no data)" if result is None else result
+        summary += f"| {check} | {display_result} |\n"
 
     # Write to job summary
     if github_step_summary:

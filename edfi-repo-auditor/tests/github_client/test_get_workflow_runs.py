@@ -34,6 +34,19 @@ def describe_when_getting_workflow_runs() -> None:
             with pytest.raises(ValueError):
                 GitHubClient(ACCESS_TOKEN).get_workflow_runs(OWNER, "")
 
+    def describe_given_an_out_of_range_per_page() -> None:
+        def it_raises_a_ValueError_when_zero() -> None:
+            with pytest.raises(ValueError):
+                GitHubClient(ACCESS_TOKEN).get_workflow_runs(OWNER, REPO, per_page=0)
+
+        def it_raises_a_ValueError_when_negative() -> None:
+            with pytest.raises(ValueError):
+                GitHubClient(ACCESS_TOKEN).get_workflow_runs(OWNER, REPO, per_page=-1)
+
+        def it_raises_a_ValueError_when_over_100() -> None:
+            with pytest.raises(ValueError):
+                GitHubClient(ACCESS_TOKEN).get_workflow_runs(OWNER, REPO, per_page=101)
+
     def describe_given_valid_information() -> None:
         def describe_given_single_page_of_runs() -> None:
             RUNS_RESULT = """
@@ -127,6 +140,48 @@ def describe_when_getting_workflow_runs() -> None:
 
             def it_returns_all_three_runs(results: list) -> None:
                 assert len(results) == 3
+
+        def describe_given_a_final_page_exactly_equal_to_per_page() -> None:
+            FULL_PAGE_RESULT = """
+{
+    "workflow_runs": [
+        {
+            "name": "CI",
+            "conclusion": "success",
+            "created_at": "2024-01-01T10:00:00Z",
+            "path": ".github/workflows/ci.yml"
+        },
+        {
+            "name": "CI",
+            "conclusion": "failure",
+            "created_at": "2024-01-02T10:00:00Z",
+            "path": ".github/workflows/ci.yml"
+        }
+    ]
+}
+""".strip()
+
+            @pytest.fixture
+            def results() -> list:
+                with requests_mock.Mocker() as m:
+                    m.get(
+                        f"{RUNS_URL}?created=>={_cutoff()}&per_page=2&page=1",
+                        status_code=HTTPStatus.OK,
+                        text=FULL_PAGE_RESULT,
+                    )
+                    m.get(
+                        f"{RUNS_URL}?created=>={_cutoff()}&per_page=2&page=2",
+                        status_code=HTTPStatus.OK,
+                        text='{"workflow_runs": []}',
+                    )
+                    return GitHubClient(ACCESS_TOKEN).get_workflow_runs(
+                        OWNER, REPO, per_page=2
+                    )
+
+            def it_fetches_the_trailing_empty_page_and_returns_two_runs(
+                results: list,
+            ) -> None:
+                assert len(results) == 2
 
         def describe_given_empty_result() -> None:
             @pytest.fixture

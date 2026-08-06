@@ -51,6 +51,18 @@ def describe_audit_job_failure_rate() -> None:
             assert result[JOB_FAILURE_RATE_KEY] == 25.0
             assert result[TOTAL_WORKFLOW_RUNS_KEY] == 4
 
+        def it_rounds_a_repeating_decimal_to_two_places() -> None:
+            runs: List[Dict] = [
+                _run("CI", "failure"),
+                _run("CI", "success"),
+                _run("CI", "success"),
+            ]
+
+            result = audit_job_failure_rate(runs)
+
+            assert result[JOB_FAILURE_RATE_KEY] == 33.33
+            assert result[TOTAL_WORKFLOW_RUNS_KEY] == 3
+
         def it_excludes_cancelled_skipped_and_neutral_from_denominator() -> None:
             runs: List[Dict] = [
                 _run("CI", "success"),
