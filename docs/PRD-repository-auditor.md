@@ -45,10 +45,11 @@ The `edfi-repo-auditor` is a Python CLI tool that programmatically audits one or
 33. As an Ed-Fi engineering manager, I want the tool to report average number of reviews and approvals per PR, so that I can assess review thoroughness.
 34. As an Ed-Fi engineering manager, I want the tool to report the share of reviews performed by the single most-active reviewer, so that I can detect unhealthy reviewer concentration.
 35. As an Ed-Fi engineering manager, I want the tool to report total and unique reviewer counts, so that I can understand the breadth of code-review participation.
-36. As a developer running the tool locally, I want to provide credentials and target configuration via environment variables, so that I do not need to repeat command-line arguments.
-37. As a developer running the tool locally, I want to disable SSL certificate verification for outbound requests, so that the tool works in environments with SSL inspection proxies.
-38. As a CI/CD pipeline operator, I want the audit summary written to the GitHub Actions job summary, so that results are visible directly in the workflow run UI.
-39. As a CI/CD pipeline operator, I want a non-zero exit code when a fatal error occurs, so that the workflow is marked failed and does not silently swallow errors.
+36. As an Ed-Fi engineering manager, I want the tool to report the Job Failure Rate for each repository's GitHub Actions workflows over the last 30 days, broken out per workflow, so that I can identify unreliable or flaky CI/CD pipelines.
+37. As a developer running the tool locally, I want to provide credentials and target configuration via environment variables, so that I do not need to repeat command-line arguments.
+38. As a developer running the tool locally, I want to disable SSL certificate verification for outbound requests, so that the tool works in environments with SSL inspection proxies.
+39. As a CI/CD pipeline operator, I want the audit summary written to the GitHub Actions job summary, so that results are visible directly in the workflow run UI.
+40. As a CI/CD pipeline operator, I want a non-zero exit code when a fatal error occurs, so that the workflow is marked failed and does not silently swallow errors.
 
 ## Implementation Decisions
 
@@ -58,6 +59,7 @@ The `edfi-repo-auditor` is a Python CLI tool that programmatically audits one or
 - **`github_client.py`** — Thin wrapper around the GitHub REST and GraphQL APIs. Handles authentication, error translation, GraphQL variable injection, and REST pagination. Branch-protection data is read from GraphQL *rulesets* (not the deprecated REST branch-protection endpoint).
 - **`auditor.py`** — Orchestration layer: calls all audit functions, merges their result dicts, invokes output helpers. Contains `audit_actions()`, `get_repo_information()`, `audit_alerts()`, `review_files()`, and `output_to_github_actions()`.
 - **`pr_metrics.py`** — Standalone module that computes all PR-related metrics. Receives pre-fetched PR data and returns plain dicts. Currently all metrics are informational (no pass/fail threshold).
+- **`job_metrics.py`** — Standalone module that computes the Job Failure Rate metric. Receives pre-fetched workflow-run data and returns plain dicts. Informational only (no pass/fail threshold).
 - **`ossf_score.py`** — Fetches the OpenSSF Scorecard score via the shields.io SVG badge endpoint, parses the score from the SVG `<title>` element using a regular expression.
 - **`checklist.py`** — Single source of truth for check names and failure messages, implemented as a named-tuple of dicts.
 - **`disable_tls.py`** — Context manager that monkey-patches `requests.Session` to skip TLS verification for all outbound calls within the block.
@@ -70,12 +72,14 @@ The `edfi-repo-auditor` is a Python CLI tool that programmatically audits one or
 - Dependabot alerts: GraphQL (included in the repository information query).
 - Pull requests and reviews: GraphQL (`PULL_REQUESTS_WITH_REVIEWS_TEMPLATE`) — single paginated query that fetches PRs and their embedded reviews in one call.
 - OSSF score: shields.io SVG badge (`img.shields.io/ossf-scorecard/github.com/{org}/{repo}`).
+- Workflow runs (for Job Failure Rate): REST (`/repos/{owner}/{repo}/actions/runs`), filtered server-side with the `created` query parameter to limit results to the last 30 days.
 
 ### Pagination Boundaries
 
 - Repositories per organization: up to 100 (no cursor pagination yet; a warning is logged if the count exceeds 100).
 - Vulnerability alerts per repository: up to 100 (same limitation).
 - Pull requests with reviews: fully paginated with cursor; pagination exits early when the oldest PR on a page predates a 3× lookback window (default: 90 days back when `since_days=30`).
+- Workflow runs: fully paginated via REST `page`/`per_page`, bounded by the `created` filter (last 30 days) rather than a fixed page-count cap.
 
 ### Output
 
@@ -86,6 +90,14 @@ The `edfi-repo-auditor` is a Python CLI tool that programmatically audits one or
 ### Scoring
 
 - `scoring.json` defines point values per checklist item and a passing threshold (currently 15 pts). This file is present in the repository but is **not yet wired into the runtime output**.
+
+### Job Failure Rate Metric
+
+- **Definition**: For each repository, the percentage of GitHub Actions workflow runs created in the last 30 days that concluded as a failure, computed per workflow (e.g., separately for "CI", "CodeQL", etc.) and also as an overall repository aggregate.
+- **Numerator**: runs with conclusion `failure`, `timed_out`, `action_required`, or `startup_failure`.
+- **Denominator**: numerator plus runs with conclusion `success`. Runs with conclusion `cancelled`, `skipped`, or `neutral` (and in-progress runs with no conclusion yet) are excluded from both numerator and denominator.
+- **Output keys**: `Job Failure Rate (%)` (overall), `Job Failure Rate - <workflow name> (%)` (per workflow), and `Total Workflow Runs (last 30 days)` (informational count).
+- **Scope**: informational only, consistent with PR metrics — no pass/fail threshold is applied.
 
 ## Testing Decisions
 
@@ -102,13 +114,14 @@ The `edfi-repo-auditor` is a Python CLI tool that programmatically audits one or
 - **`auditor.py`** audit functions: covered by `tests/auditor/` — one file per function (`test_audit_actions.py`, `test_audit_alerts.py`, `test_get_repo_information.py`, `test_review_files.py`).
 - **`ossf_score.py`**: covered by `tests/auditor/test_ossf_score.py` — tests for valid response, missing title, HTTP 404, HTTP 500.
 - **`pr_metrics.py`**: covered by `tests/pr_metrics/` — separate files for duration, review cycle, reviewer load balance, and the top-level `get_pr_metrics()` aggregator.
+- **`job_metrics.py`**: covered by `tests/job_metrics/` — tests for overall and per-workflow failure-rate calculation, conclusion filtering, and the top-level `get_job_failure_metrics()` aggregator.
 
 ## Out of Scope
 
 - **Scoring/thresholds for PR metrics**: all PR metrics are currently informational only; no pass/fail evaluation is performed.
 - **Repository pagination beyond 100**: organizations with more than 100 repositories will produce an incomplete audit and a log warning.
 - **Vulnerability-alert pagination beyond 100**: repositories with more than 100 open vulnerability alerts may produce incomplete results.
-- **CI health per PR** (pass rate, rerun count, average duration): not implemented.
+- **CI health per PR** (pass rate, rerun count, average duration, tied to a specific PR's commits): not implemented. The Job Failure Rate metric is repository/workflow-level, not linked to individual PRs.
 - **PR size indicators** (median additions/deletions/changed files): not implemented.
 - **Time-to-first-response** (first comment or review from non-author): not implemented.
 - **Security posture per PR** (PRs touching sensitive files, CodeQL-flagged PRs): not implemented.
