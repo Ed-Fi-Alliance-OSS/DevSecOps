@@ -35,12 +35,19 @@ def _graphql_response(nodes, has_next_page=False, end_cursor=None):
 
 def _make_node(
     number,
-    created_at="2026-03-20T10:00:00Z",
-    merged_at="2026-03-21T10:00:00Z",
-    closed_at="2026-03-21T10:00:00Z",
+    created_at=None,
+    merged_at=None,
+    closed_at=None,
     author_login="alice",
     reviews=None,
 ):
+    now = datetime.now(timezone.utc)
+    if created_at is None:
+        created_at = (now - timedelta(days=1)).strftime(_ISO)
+    if merged_at is None:
+        merged_at = now.strftime(_ISO)
+    if closed_at is None:
+        closed_at = now.strftime(_ISO)
     return {
         "number": number,
         "createdAt": created_at,
@@ -92,7 +99,17 @@ def describe_get_merged_prs_with_reviews() -> None:
             with requests_mock_module.Mocker() as m:
                 m.post(
                     GRAPHQL_ENDPOINT,
-                    json=_graphql_response([_make_node(42, reviews=[REVIEW_NODE])]),
+                    json=_graphql_response(
+                        [
+                            _make_node(
+                                42,
+                                created_at="2026-03-20T10:00:00Z",
+                                merged_at="2026-03-21T10:00:00Z",
+                                closed_at="2026-03-21T10:00:00Z",
+                                reviews=[REVIEW_NODE],
+                            )
+                        ]
+                    ),
                 )
                 return GitHubClient(ACCESS_TOKEN).get_merged_prs_with_reviews(
                     OWNER, REPO
@@ -126,13 +143,28 @@ def describe_get_merged_prs_with_reviews() -> None:
             assert results[0]["reviews"][0]["submitted_at"] == "2026-03-21T09:00:00Z"
 
     def describe_given_multiple_pages() -> None:
+        now = datetime.now(timezone.utc)
         PAGE1 = _graphql_response(
-            [_make_node(2, created_at="2026-03-25T10:00:00Z")],
+            [
+                _make_node(
+                    2,
+                    created_at=(now - timedelta(days=2)).strftime(_ISO),
+                    merged_at=(now - timedelta(days=1)).strftime(_ISO),
+                    closed_at=(now - timedelta(days=1)).strftime(_ISO),
+                )
+            ],
             has_next_page=True,
             end_cursor="cursor_abc",
         )
         PAGE2 = _graphql_response(
-            [_make_node(1, created_at="2026-03-20T10:00:00Z")],
+            [
+                _make_node(
+                    1,
+                    created_at=(now - timedelta(days=3)).strftime(_ISO),
+                    merged_at=(now - timedelta(days=2)).strftime(_ISO),
+                    closed_at=(now - timedelta(days=2)).strftime(_ISO),
+                )
+            ],
             has_next_page=False,
         )
 
