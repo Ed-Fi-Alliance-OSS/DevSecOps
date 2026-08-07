@@ -207,3 +207,76 @@ def describe_when_getting_workflow_runs() -> None:
                     )
                     with pytest.raises(RuntimeError):
                         GitHubClient(ACCESS_TOKEN).get_workflow_runs(OWNER, REPO)
+
+        def describe_given_total_count_exceeds_the_1000_result_pagination_cap() -> None:
+            # GitHub's actions/runs endpoint silently stops returning results
+            # once page * per_page exceeds 1000, even when total_count says
+            # more runs exist. When that's detected, the client re-fetches one
+            # calendar day at a time instead of trusting the windowed query.
+            def it_falls_back_to_per_day_fetching() -> None:
+                today = datetime.now(timezone.utc).date()
+                yesterday_str = (today - timedelta(days=1)).strftime("%Y-%m-%d")
+                today_str = today.strftime("%Y-%m-%d")
+
+                WINDOWED_RESULT = """
+{
+    "total_count": 1500,
+    "workflow_runs": [
+        {
+            "name": "CI",
+            "conclusion": "success",
+            "created_at": "2024-01-01T10:00:00Z",
+            "path": ".github/workflows/ci.yml"
+        }
+    ]
+}
+""".strip()
+
+                DAY1_RESULT = f"""
+{{
+    "workflow_runs": [
+        {{
+            "name": "CI",
+            "conclusion": "failure",
+            "created_at": "{yesterday_str}T09:00:00Z",
+            "path": ".github/workflows/ci.yml"
+        }}
+    ]
+}}
+""".strip()
+
+                DAY2_RESULT = f"""
+{{
+    "workflow_runs": [
+        {{
+            "name": "CI",
+            "conclusion": "success",
+            "created_at": "{today_str}T09:00:00Z",
+            "path": ".github/workflows/ci.yml"
+        }}
+    ]
+}}
+""".strip()
+
+                with requests_mock.Mocker() as m:
+                    m.get(
+                        f"{RUNS_URL}?created=>={_cutoff(1)}&per_page=100&page=1",
+                        status_code=HTTPStatus.OK,
+                        text=WINDOWED_RESULT,
+                    )
+                    m.get(
+                        f"{RUNS_URL}?created={yesterday_str}&per_page=100&page=1",
+                        status_code=HTTPStatus.OK,
+                        text=DAY1_RESULT,
+                    )
+                    m.get(
+                        f"{RUNS_URL}?created={today_str}&per_page=100&page=1",
+                        status_code=HTTPStatus.OK,
+                        text=DAY2_RESULT,
+                    )
+                    results = GitHubClient(ACCESS_TOKEN).get_workflow_runs(
+                        OWNER, REPO, since_days=1
+                    )
+
+                assert len(results) == 2
+                assert {r["conclusion"] for r in results} == {"failure", "success"}

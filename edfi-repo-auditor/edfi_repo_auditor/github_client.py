@@ -5,7 +5,7 @@
 
 import logging
 from datetime import datetime, timedelta, timezone
-from typing import List, Optional
+from typing import List, Optional, Tuple
 from json import dumps
 
 import base64
@@ -451,14 +451,51 @@ class GitHubClient:
             "%Y-%m-%d"
         )
 
+        runs, total_count = self._fetch_workflow_run_pages(
+            owner, repository, f">={cutoff}", per_page
+        )
+
+        # The actions/runs endpoint caps combined pagination (page * per_page)
+        # at 1000 results and silently stops returning runs beyond that, even
+        # though `total_count` reports the true (larger) total. When that
+        # happens, the single windowed query above has silently dropped the
+        # oldest runs in the window, so re-fetch one calendar day at a time
+        # instead -- each day's result set stays comfortably under the cap.
+        if total_count is not None and total_count > 1000:
+            logger.warning(
+                f"{owner}/{repository} has {total_count} workflow runs in the "
+                f"last {since_days} days, which exceeds the GitHub API's "
+                "pagination limit; re-fetching one day at a time"
+            )
+            today = datetime.now(timezone.utc).date()
+            runs = []
+            for days_ago in range(since_days, -1, -1):
+                day = (today - timedelta(days=days_ago)).strftime("%Y-%m-%d")
+                day_runs, _ = self._fetch_workflow_run_pages(
+                    owner, repository, day, per_page
+                )
+                runs.extend(day_runs)
+
+        return runs
+
+    def _fetch_workflow_run_pages(
+        self, owner: str, repository: str, created_filter: str, per_page: int
+    ) -> Tuple[List[dict], Optional[int]]:
+        """
+        Fetch all pages of workflow runs matching a `created` query filter.
+
+        Returns a tuple of (runs, total_count), where total_count is the
+        value reported on the first page (or None if the API omitted it).
+        """
         all_runs: List[dict] = []
+        total_count: Optional[int] = None
         page = 1
 
         while True:
             logger.info(f"Getting workflow runs for {owner}/{repository}, page {page}")
             url = (
                 f"{API_URL}/repos/{owner}/{repository}/actions/runs"
-                f"?created=>={cutoff}&per_page={per_page}&page={page}"
+                f"?created={created_filter}&per_page={per_page}&page={page}"
             )
 
             body = self._execute_api_call(
@@ -466,6 +503,9 @@ class GitHubClient:
                 "GET",
                 url,
             )
+
+            if page == 1:
+                total_count = body.get("total_count")
 
             runs = body.get("workflow_runs", [])
             if not runs:
@@ -486,7 +526,7 @@ class GitHubClient:
 
             page += 1
 
-        return all_runs
+        return all_runs, total_count
 
     def get_merged_prs_with_reviews(
         self, owner: str, repository: str, since_days: int = 30

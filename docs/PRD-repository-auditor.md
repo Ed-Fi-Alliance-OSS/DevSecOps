@@ -79,7 +79,7 @@ The `edfi-repo-auditor` is a Python CLI tool that programmatically audits one or
 - Repositories per organization: up to 100 (no cursor pagination yet; a warning is logged if the count exceeds 100).
 - Vulnerability alerts per repository: up to 100 (same limitation).
 - Pull requests with reviews: fully paginated with cursor; pagination exits early when the oldest PR on a page predates a 3× lookback window (default: 90 days back when `since_days=30`).
-- Workflow runs: fully paginated via REST `page`/`per_page`, bounded by the `created` filter (last 30 days) rather than a fixed page-count cap.
+- Workflow runs: fully paginated via REST `page`/`per_page`, bounded by the `created` filter (last 30 days) rather than a fixed page-count cap. The `actions/runs` endpoint itself caps combined pagination (`page * per_page`) at 1000 results and silently stops returning runs beyond that, even when `total_count` reports more — this would otherwise silently drop the oldest (and typically successful) runs for very active repositories, inflating the Job Failure Rate. When `total_count` exceeds 1000, `get_workflow_runs` re-fetches one calendar day at a time instead, since a single day's run count is expected to stay well under the cap.
 
 ### Output
 
