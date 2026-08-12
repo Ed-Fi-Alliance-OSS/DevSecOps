@@ -22,6 +22,7 @@ from edfi_repo_auditor.checklist import (
 )
 from edfi_repo_auditor.config import Configuration
 from edfi_repo_auditor.github_client import GitHubClient
+from edfi_repo_auditor.job_metrics import get_job_failure_metrics
 from edfi_repo_auditor.ossf_score import get_ossf_score
 from edfi_repo_auditor.pr_metrics import get_pr_metrics
 
@@ -64,10 +65,26 @@ def run_audit(config: Configuration) -> None:
         logger.debug(f"Files: {file_review}")
         pr_metrics = get_pr_metrics(client, config.organization, repository)
         logger.debug(f"PR Metrics: {pr_metrics}")
+        try:
+            job_metrics = get_job_failure_metrics(client, organization, repository)
+        except RuntimeError as e:
+            logger.warning(
+                f"Failed to compute job failure rate metrics for "
+                f"{organization}/{repository}: {e}"
+            )
+            job_metrics = {}
+        logger.debug(f"Job Failure Rate Metrics: {job_metrics}")
         ossf_score = get_ossf_score(organization, repository)
         logger.debug(f"OpenSSF Score: {ossf_score}")
 
-        results = {**ossf_score, **actions, **file_review, **repo_config, **pr_metrics}
+        results = {
+            **ossf_score,
+            **actions,
+            **file_review,
+            **repo_config,
+            **pr_metrics,
+            **job_metrics,
+        }
 
         output_to_github_actions(repository, results)
 
@@ -309,7 +326,8 @@ def output_to_github_actions(repository: str, results: dict) -> None:
 """
 
     for check, result in results.items():
-        summary += f"| {check} | {result} |\n"
+        display_result = "N/A (no data)" if result is None else result
+        summary += f"| {check} | {display_result} |\n"
 
     # Write to job summary
     if github_step_summary:

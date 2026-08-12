@@ -1,0 +1,282 @@
+# SPDX-License-Identifier: Apache-2.0
+# Licensed to the Ed-Fi Alliance under one or more agreements.
+# The Ed-Fi Alliance licenses this file to you under the Apache License, Version 2.0.
+# See the LICENSE and NOTICES files in the project root for more information.
+
+from datetime import datetime, timedelta, timezone
+from http import HTTPStatus
+
+import pytest
+import requests_mock
+
+from edfi_repo_auditor.github_client import GitHubClient, API_URL
+
+ACCESS_TOKEN = "asd09uasdfu09asdfj;iolkasdfklj"
+OWNER = "Ed-Fi-Alliance-OSS"
+REPO = "Ed-Fi-ODS"
+RUNS_URL = f"{API_URL}/repos/{OWNER}/{REPO}/actions/runs"
+
+
+def _cutoff(since_days: int = 30) -> str:
+    return (datetime.now(timezone.utc) - timedelta(days=since_days)).strftime(
+        "%Y-%m-%d"
+    )
+
+
+def describe_when_getting_workflow_runs() -> None:
+    def describe_given_blank_owner() -> None:
+        def it_raises_a_ValueError() -> None:
+            with pytest.raises(ValueError):
+                GitHubClient(ACCESS_TOKEN).get_workflow_runs("", REPO)
+
+    def describe_given_blank_repository() -> None:
+        def it_raises_a_ValueError() -> None:
+            with pytest.raises(ValueError):
+                GitHubClient(ACCESS_TOKEN).get_workflow_runs(OWNER, "")
+
+    def describe_given_an_out_of_range_per_page() -> None:
+        def it_raises_a_ValueError_when_zero() -> None:
+            with pytest.raises(ValueError):
+                GitHubClient(ACCESS_TOKEN).get_workflow_runs(OWNER, REPO, per_page=0)
+
+        def it_raises_a_ValueError_when_negative() -> None:
+            with pytest.raises(ValueError):
+                GitHubClient(ACCESS_TOKEN).get_workflow_runs(OWNER, REPO, per_page=-1)
+
+        def it_raises_a_ValueError_when_over_100() -> None:
+            with pytest.raises(ValueError):
+                GitHubClient(ACCESS_TOKEN).get_workflow_runs(OWNER, REPO, per_page=101)
+
+    def describe_given_valid_information() -> None:
+        def describe_given_single_page_of_runs() -> None:
+            RUNS_RESULT = """
+{
+    "workflow_runs": [
+        {
+            "name": "CI",
+            "conclusion": "success",
+            "created_at": "2024-01-01T10:00:00Z",
+            "path": ".github/workflows/ci.yml"
+        },
+        {
+            "name": "CodeQL",
+            "conclusion": "failure",
+            "created_at": "2024-01-02T10:00:00Z",
+            "path": ".github/workflows/codeql.yml"
+        }
+    ]
+}
+""".strip()
+
+            @pytest.fixture
+            def results() -> list:
+                with requests_mock.Mocker() as m:
+                    m.get(
+                        f"{RUNS_URL}?created=>={_cutoff()}&per_page=100&page=1",
+                        status_code=HTTPStatus.OK,
+                        text=RUNS_RESULT,
+                    )
+                    return GitHubClient(ACCESS_TOKEN).get_workflow_runs(OWNER, REPO)
+
+            def it_returns_two_runs(results: list) -> None:
+                assert len(results) == 2
+
+            def it_returns_correct_first_run_name(results: list) -> None:
+                assert results[0]["name"] == "CI"
+
+            def it_returns_correct_conclusion(results: list) -> None:
+                assert results[0]["conclusion"] == "success"
+                assert results[1]["conclusion"] == "failure"
+
+        def describe_given_multiple_pages_of_runs() -> None:
+            PAGE1_RESULT = """
+{
+    "workflow_runs": [
+        {
+            "name": "CI",
+            "conclusion": "success",
+            "created_at": "2024-01-01T10:00:00Z",
+            "path": ".github/workflows/ci.yml"
+        },
+        {
+            "name": "CI",
+            "conclusion": "failure",
+            "created_at": "2024-01-02T10:00:00Z",
+            "path": ".github/workflows/ci.yml"
+        }
+    ]
+}
+""".strip()
+
+            PAGE2_RESULT = """
+{
+    "workflow_runs": [
+        {
+            "name": "CI",
+            "conclusion": "success",
+            "created_at": "2024-01-03T10:00:00Z",
+            "path": ".github/workflows/ci.yml"
+        }
+    ]
+}
+""".strip()
+
+            @pytest.fixture
+            def results() -> list:
+                with requests_mock.Mocker() as m:
+                    m.get(
+                        f"{RUNS_URL}?created=>={_cutoff()}&per_page=2&page=1",
+                        status_code=HTTPStatus.OK,
+                        text=PAGE1_RESULT,
+                    )
+                    m.get(
+                        f"{RUNS_URL}?created=>={_cutoff()}&per_page=2&page=2",
+                        status_code=HTTPStatus.OK,
+                        text=PAGE2_RESULT,
+                    )
+                    return GitHubClient(ACCESS_TOKEN).get_workflow_runs(
+                        OWNER, REPO, per_page=2
+                    )
+
+            def it_returns_all_three_runs(results: list) -> None:
+                assert len(results) == 3
+
+        def describe_given_a_final_page_exactly_equal_to_per_page() -> None:
+            FULL_PAGE_RESULT = """
+{
+    "workflow_runs": [
+        {
+            "name": "CI",
+            "conclusion": "success",
+            "created_at": "2024-01-01T10:00:00Z",
+            "path": ".github/workflows/ci.yml"
+        },
+        {
+            "name": "CI",
+            "conclusion": "failure",
+            "created_at": "2024-01-02T10:00:00Z",
+            "path": ".github/workflows/ci.yml"
+        }
+    ]
+}
+""".strip()
+
+            @pytest.fixture
+            def results() -> list:
+                with requests_mock.Mocker() as m:
+                    m.get(
+                        f"{RUNS_URL}?created=>={_cutoff()}&per_page=2&page=1",
+                        status_code=HTTPStatus.OK,
+                        text=FULL_PAGE_RESULT,
+                    )
+                    m.get(
+                        f"{RUNS_URL}?created=>={_cutoff()}&per_page=2&page=2",
+                        status_code=HTTPStatus.OK,
+                        text='{"workflow_runs": []}',
+                    )
+                    return GitHubClient(ACCESS_TOKEN).get_workflow_runs(
+                        OWNER, REPO, per_page=2
+                    )
+
+            def it_fetches_the_trailing_empty_page_and_returns_two_runs(
+                results: list,
+            ) -> None:
+                assert len(results) == 2
+
+        def describe_given_empty_result() -> None:
+            @pytest.fixture
+            def results() -> list:
+                with requests_mock.Mocker() as m:
+                    m.get(
+                        f"{RUNS_URL}?created=>={_cutoff()}&per_page=100&page=1",
+                        status_code=HTTPStatus.OK,
+                        text='{"workflow_runs": []}',
+                    )
+                    return GitHubClient(ACCESS_TOKEN).get_workflow_runs(OWNER, REPO)
+
+            def it_returns_empty_list(results: list) -> None:
+                assert results == []
+
+        def describe_given_internal_server_error() -> None:
+            def it_raises_a_RuntimeError() -> None:
+                with requests_mock.Mocker() as m:
+                    m.get(
+                        f"{RUNS_URL}?created=>={_cutoff()}&per_page=100&page=1",
+                        status_code=HTTPStatus.INTERNAL_SERVER_ERROR,
+                        text="{}",
+                    )
+                    with pytest.raises(RuntimeError):
+                        GitHubClient(ACCESS_TOKEN).get_workflow_runs(OWNER, REPO)
+
+        def describe_given_total_count_exceeds_the_1000_result_pagination_cap() -> None:
+            # GitHub's actions/runs endpoint silently stops returning results
+            # once page * per_page exceeds 1000, even when total_count says
+            # more runs exist. When that's detected, the client re-fetches one
+            # calendar day at a time instead of trusting the windowed query.
+            def it_falls_back_to_per_day_fetching() -> None:
+                today = datetime.now(timezone.utc).date()
+                yesterday_str = (today - timedelta(days=1)).strftime("%Y-%m-%d")
+                today_str = today.strftime("%Y-%m-%d")
+
+                WINDOWED_RESULT = """
+{
+    "total_count": 1500,
+    "workflow_runs": [
+        {
+            "name": "CI",
+            "conclusion": "success",
+            "created_at": "2024-01-01T10:00:00Z",
+            "path": ".github/workflows/ci.yml"
+        }
+    ]
+}
+""".strip()
+
+                DAY1_RESULT = f"""
+{{
+    "workflow_runs": [
+        {{
+            "name": "CI",
+            "conclusion": "failure",
+            "created_at": "{yesterday_str}T09:00:00Z",
+            "path": ".github/workflows/ci.yml"
+        }}
+    ]
+}}
+""".strip()
+
+                DAY2_RESULT = f"""
+{{
+    "workflow_runs": [
+        {{
+            "name": "CI",
+            "conclusion": "success",
+            "created_at": "{today_str}T09:00:00Z",
+            "path": ".github/workflows/ci.yml"
+        }}
+    ]
+}}
+""".strip()
+
+                with requests_mock.Mocker() as m:
+                    m.get(
+                        f"{RUNS_URL}?created=>={_cutoff(1)}&per_page=100&page=1",
+                        status_code=HTTPStatus.OK,
+                        text=WINDOWED_RESULT,
+                    )
+                    m.get(
+                        f"{RUNS_URL}?created={yesterday_str}&per_page=100&page=1",
+                        status_code=HTTPStatus.OK,
+                        text=DAY1_RESULT,
+                    )
+                    m.get(
+                        f"{RUNS_URL}?created={today_str}&per_page=100&page=1",
+                        status_code=HTTPStatus.OK,
+                        text=DAY2_RESULT,
+                    )
+                    results = GitHubClient(ACCESS_TOKEN).get_workflow_runs(
+                        OWNER, REPO, since_days=1
+                    )
+
+                assert len(results) == 2
+                assert {r["conclusion"] for r in results} == {"failure", "success"}
